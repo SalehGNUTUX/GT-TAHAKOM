@@ -15,7 +15,7 @@
 
     <!-- تعلّم ريموت يدوياً -->
     <string name="learn_title">تعلّم ريموت</string>
-    <string name="learn_hint">للأجهزة غير المدرجة: أدخل كود Pronto لكل زر (تجده أونلاين لطرازك، أو استورده عبر ملف ‎.tahakom‎ مشترَك). اترك ما لا تحتاجه فارغاً.</string>
+    <string name="learn_hint">للأجهزة غير المدرجة: أدخل كود Pronto لكل زر. الكود يبدأ بـ 0000 (كلمات hex). تجده في remotecentral.com أو irdb، أو استورده عبر ملف ‎.tahakom‎ مشترَك. اترك ما لا تحتاجه فارغاً — يكفي كود صالح واحد للحفظ.</string>
     <string name="learn_device_name">اسم الجهاز (مثل Unionaire)</string>
     <string name="learn_codes_label">أكواد Pronto (hex، تبدأ بـ 0000)</string>
     <string name="learn_save">حفظ الجهاز</string>

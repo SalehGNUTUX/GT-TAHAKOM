@@ -15,7 +15,7 @@
 
     <!-- تعلّم ريموت يدوياً -->
     <string name="learn_title">Learn a remote</string>
-    <string name="learn_hint">For unlisted devices: enter the Pronto IR code for each button (find it online for your model, or import via a shared .tahakom file). Leave blank what you don\'t need.</string>
+    <string name="learn_hint">For unlisted devices: enter the Pronto IR code for each button. Codes start with 0000 (hex words). Find them at remotecentral.com or irdb, or import a shared .tahakom file. Leave unneeded buttons blank — one valid code is enough to save.</string>
     <string name="learn_device_name">Device name (e.g. Unionaire)</string>
     <string name="learn_codes_label">Pronto codes (hex, starting with 0000)</string>
     <string name="learn_save">Save device</string>
