@@ -8,27 +8,28 @@
     <string name="devices_scanning">Scanning… (tap to stop)</string>
     <string name="devices_scanning_hint">Looking for devices on your WiFi network…</string>
     <string name="devices_add_manual">Add by name / model</string>
+    <string name="devices_my">My devices</string>
+    <string name="devices_discovered">Discovered on network</string>
+    <string name="device_delete">Delete</string>
 
-    <!-- إضافة جهاز بالاسم/الطراز -->
+    <!-- إضافة جهاز بالاسم/الطراز (قاعدة IR الحقيقية) -->
     <string name="add_device_title">Add by name / model</string>
-    <string name="add_device_ip_hint">Enter the device IP address on your WiFi network.</string>
-    <string name="add_device_ip_label">IP address (e.g. 192.168.1.20)</string>
-    <string name="add_device_ir_note">IR brands require an IR blaster or a WiFi-IR bridge (coming in milestone 4).</string>
-    <string name="add_device_open_remote">Open remote</string>
+    <string name="add_device_search_ir">Search brand / model (Samsung, LG, Sony…)</string>
+    <string name="add_device_buttons_count">%1$d buttons</string>
+    <string name="cat_tv">Televisions</string>
+    <string name="cat_cable">Cable / Satellite boxes</string>
+    <string name="cat_audio">Audio devices</string>
+    <string name="ir_pick_other">Choose another brand</string>
 
     <!-- ضبط جهاز IR شبه الآلي -->
     <string name="ir_setup_title">Set up IR device</string>
     <string name="ir_no_emitter">This phone has no IR blaster. Use a WiFi-IR bridge (coming soon) or a network device instead.</string>
-    <string name="ir_pick_category">Choose device category</string>
-    <string name="ir_brand_progress">Brand %1$d of %2$d</string>
     <string name="ir_power_question">Is your device currently ON or OFF? Pick the matching test below.</string>
     <string name="ir_test_power">Device is OFF — send Power</string>
     <string name="ir_test_volume">Device is ON — send Volume/Channel</string>
     <string name="ir_sent_signal">Sent test signal: %1$s</string>
     <string name="ir_responded_question">Did the device respond?</string>
-    <string name="ir_yes_responded">Yes — use this brand</string>
-    <string name="ir_next_brand">Next brand</string>
-    <string name="ir_prev_brand">Previous</string>
+    <string name="ir_yes_responded">Yes — use this device</string>
 
     <!-- الإعدادات واللغة -->
     <string name="settings_title">Settings</string>

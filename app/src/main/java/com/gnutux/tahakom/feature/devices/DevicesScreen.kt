@@ -3,6 +3,7 @@ package com.gnutux.tahakom.feature.devices
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,8 +12,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SettingsRemote
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
@@ -35,20 +38,24 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gnutux.tahakom.R
 import com.gnutux.tahakom.core.discovery.DiscoveredDevice
+import com.gnutux.tahakom.core.model.Device
 
 /**
- * شاشة الأجهزة — تعرض نتائج المسح الحيّ (mDNS/SSDP) أو الحالة الفارغة.
- * المسح أوفلاين بالكامل عبر [DiscoveryViewModel].
+ * الشاشة الرئيسية: قائمة الأجهزة **المحفوظة** (اعتمدها المستخدم) مع فتح/حذف/مشاركة،
+ * + قسم المسح الحيّ لاكتشاف أجهزة جديدة على الشبكة.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DevicesScreen(
     onOpenSettings: () -> Unit = {},
     onAddManual: () -> Unit = {},
-    onDeviceClick: (DiscoveredDevice) -> Unit = {},
-    viewModel: DiscoveryViewModel = hiltViewModel(),
+    onOpenDevice: (Device) -> Unit = {},
+    onAdoptDiscovered: (DiscoveredDevice) -> Unit = {},
+    onShareDevice: (Device) -> Unit = {},
+    viewModel: DevicesViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val saved by viewModel.savedDevices.collectAsStateWithLifecycle()
+    val discovery by viewModel.discovery.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -63,19 +70,56 @@ fun DevicesScreen(
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
-            ScanControls(
-                isScanning = state.isScanning,
-                onScan = viewModel::startScan,
-                onStop = viewModel::stopScan,
-                onAddManual = onAddManual,
-            )
+            // أزرار البحث والإضافة
+            Button(
+                onClick = if (discovery.isScanning) viewModel::stopScan else viewModel::startScan,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                if (discovery.isScanning) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.padding(end = 8.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                    Text(stringResource(R.string.devices_scanning))
+                } else {
+                    Icon(Icons.Filled.Search, contentDescription = null)
+                    Text(stringResource(R.string.devices_scan), modifier = Modifier.padding(start = 8.dp))
+                }
+            }
+            OutlinedButton(onClick = onAddManual, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                Icon(Icons.Outlined.Add, contentDescription = null)
+                Text(stringResource(R.string.devices_add_manual), modifier = Modifier.padding(start = 8.dp))
+            }
 
-            if (state.devices.isEmpty()) {
-                EmptyState(isScanning = state.isScanning, modifier = Modifier.fillMaxSize())
+            if (saved.isEmpty() && discovery.discovered.isEmpty()) {
+                EmptyState(isScanning = discovery.isScanning, modifier = Modifier.fillMaxSize())
             } else {
                 LazyColumn(Modifier.fillMaxSize().padding(top = 12.dp)) {
-                    items(state.devices, key = { it.host + it.transport.name }) { device ->
-                        DeviceRow(device, onClick = { onDeviceClick(device) })
+                    // الأجهزة المحفوظة
+                    if (saved.isNotEmpty()) {
+                        item(key = "h-saved") {
+                            SectionHeader(stringResource(R.string.devices_my))
+                        }
+                        items(saved, key = { "s-${it.id}" }) { device ->
+                            SavedDeviceRow(
+                                device = device,
+                                onOpen = { onOpenDevice(device) },
+                                onShare = { onShareDevice(device) },
+                                onDelete = { viewModel.remove(device.id) },
+                            )
+                        }
+                    }
+                    // المكتشَفة حديثاً (غير المحفوظة)
+                    val savedIds = saved.map { it.id }.toSet()
+                    val fresh = discovery.discovered.filter { "${it.host}:${it.port}" !in savedIds }
+                    if (fresh.isNotEmpty()) {
+                        item(key = "h-disc") {
+                            SectionHeader(stringResource(R.string.devices_discovered))
+                        }
+                        items(fresh, key = { "d-${it.host}-${it.transport.name}" }) { device ->
+                            DiscoveredRow(device, onClick = { onAdoptDiscovered(device) })
+                        }
                     }
                 }
             }
@@ -84,48 +128,61 @@ fun DevicesScreen(
 }
 
 @Composable
-private fun ScanControls(
-    isScanning: Boolean,
-    onScan: () -> Unit,
-    onStop: () -> Unit,
-    onAddManual: () -> Unit,
+private fun SectionHeader(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+    )
+}
+
+@Composable
+private fun SavedDeviceRow(
+    device: Device,
+    onOpen: () -> Unit,
+    onShare: () -> Unit,
+    onDelete: () -> Unit,
 ) {
-    Button(
-        onClick = if (isScanning) onStop else onScan,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        if (isScanning) {
-            CircularProgressIndicator(
-                modifier = Modifier.padding(end = 8.dp),
-                strokeWidth = 2.dp,
-                color = MaterialTheme.colorScheme.onPrimary,
-            )
-            Text(stringResource(R.string.devices_scanning))
-        } else {
-            Icon(Icons.Filled.Search, contentDescription = null)
-            Text(stringResource(R.string.devices_scan), modifier = Modifier.padding(start = 8.dp))
+    ElevatedCard(Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable(onClick = onOpen)) {
+        Row(
+            Modifier.fillMaxWidth().padding(start = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f).padding(vertical = 16.dp)) {
+                Text(device.name, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "${device.metadata["brand"] ?: device.transport.name}" +
+                        (device.address?.let { " · $it" } ?: ""),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            IconButton(onClick = onShare) {
+                Icon(
+                    Icons.Outlined.Share,
+                    contentDescription = stringResource(R.string.share_pack),
+                )
+            }
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Outlined.Delete, contentDescription = stringResource(R.string.device_delete))
+            }
         }
-    }
-    OutlinedButton(onClick = onAddManual, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-        Icon(Icons.Outlined.Add, contentDescription = null)
-        Text(stringResource(R.string.devices_add_manual), modifier = Modifier.padding(start = 8.dp))
     }
 }
 
 @Composable
-private fun DeviceRow(device: DiscoveredDevice, onClick: () -> Unit) {
+private fun DiscoveredRow(device: DiscoveredDevice, onClick: () -> Unit) {
     ElevatedCard(Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable(onClick = onClick)) {
         Column(Modifier.padding(16.dp)) {
-            Text(text = device.name, style = MaterialTheme.typography.titleMedium)
+            Text(device.name, style = MaterialTheme.typography.titleMedium)
             val subtitle = buildString {
-                device.brand?.let { append(it) }
-                device.model?.let { append(" · ").append(it) }
-                if (isNotEmpty()) append(" · ")
+                device.brand?.let { append(it).append(" · ") }
                 append(device.host)
             }
-            Text(text = subtitle, style = MaterialTheme.typography.bodySmall)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall)
             Text(
-                text = "${device.transport.name} · ${device.source.name}",
+                "${device.transport.name} · ${device.source.name}",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.primary,
             )

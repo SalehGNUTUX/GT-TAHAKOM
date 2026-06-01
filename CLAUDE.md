@@ -35,8 +35,10 @@ Android SDK: `/home/gnutux/Android/Sdk` (مضبوط في `local.properties`).
 ## الحالة والخطة
 - **م0 (التأسيس): ✅ منجز** — Transport/Registry، النموذج، IrTransport، Hilt، أيقونة، توثيق، Gradle wrapper.
 - **م1 (الاكتشاف): ✅ منجز** — MdnsDiscovery (NsdManager) + SsdpDiscovery (UDP multicast) + DiscoveryManager + MulticastLockHolder + DiscoveryViewModel + شاشة أجهزة حيّة. اكتشاف أوفلاين بالكامل.
-- **م2 (التحكّم الفعلي): 🔄 جارٍ** — RokuTransport (ECP/HTTP، إرسال حقيقي) + RemoteScreen (أزرار تعمل: طاقة/تنقّل/صوت/قنوات/وسائط) + RemoteViewModel + BrandCatalog + AddDeviceScreen (اختيار علامة + IP) + تنقّل في MainActivity (Devices/Settings/AddDevice/Remote). النقر على جهاز مكتشَف أو إضافته يدوياً يفتح ريموته.
-- **التالي ضمن م2:** AndroidTvTransport (Remote v2 + إقران TLS)، ثم توسيع نطاق الأجهزة (محاكاة IRRemote: م4 IR بقاعدة assets) حسب طلب المستخدم.
+- **م2 (التحكّم الفعلي): ✅** — RokuTransport (ECP) + RemoteScreen + RemoteViewModel.
+- **م4 (IR): ✅ القاعدة + الإرسال** — قاعدة محلية 44 جهازاً (assets/irdb) + IrTransport (Pronto) + ضبط شبه آلي بمنطق الطاقة/الصوت.
+- **إصلاحات حرجة (v0.4.0):** ريموت IR يرسل فعلياً الآن (RemoteViewModel يحمّل IrDevice ويترجم ButtonId→Pronto؛ كان يرسل Command.Key لـ IrTransport فيفشل بـ UNSUPPORTED_COMMAND). شاشة الإضافة تعرض قاعدة الـ44 الحقيقية مصنّفة وقابلة للبحث (حُذف BrandCatalog الوهمي). قائمة أجهزة محفوظة (SavedDevicesRepository/DataStore) بحفظ/حذف/مشاركة. الريموت يُظهر الأزرار المدعومة فقط.
+- **التالي:** اعتماد تصميم GT-TAHAKOM-DESIGN في Compose (مهمة #12، بصرية كبيرة). ثم توسيع قاعدة IR بأجهزة أكثر. ثم AndroidTv/Samsung/LG/Sony.
 - بقية المراحل (م3–م5) في docs/ARCHITECTURE.md.
 
 ## مبدأ قاعدة البيانات (موثّق في docs/DATABASE.md)

@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.gnutux.tahakom.core.irdb.IrCommandResolver
 import com.gnutux.tahakom.core.irdb.IrDatabase
 import com.gnutux.tahakom.core.irdb.IrDevice
-import com.gnutux.tahakom.core.irdb.IrDeviceEntry
 import com.gnutux.tahakom.core.model.ButtonId
 import com.gnutux.tahakom.core.model.Device
+import com.gnutux.tahakom.core.model.DeviceType
 import com.gnutux.tahakom.core.transport.TransportRegistry
 import com.gnutux.tahakom.core.transport.TransportType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,23 +23,18 @@ enum class PowerState { OFF, ON }
 
 data class IrSetupUiState(
     val irAvailable: Boolean = true,
-    val categories: List<String> = emptyList(),
-    val devices: List<IrDeviceEntry> = emptyList(),
-    val category: String? = null,
-    /** مؤشّر الجهاز الحالي الجاري اختباره ضمن [devices]. */
-    val testIndex: Int = 0,
-    val testingBrand: String? = null,
-    /** الإشارة التي تُرسَل للاختبار حسب حالة الطاقة. */
+    val brand: String? = null,
     val testButtonLabel: String? = null,
+    val ready: Boolean = false,
 )
 
 /**
- * اكتشاف جهاز IR شبه آلي (إذ يستحيل الاكتشاف التلقائي — الـ IR أحادي الاتجاه).
+ * ضبط جهاز IR محدّد (اختاره المستخدم من القاعدة). يطبّق منطق حالة الطاقة:
+ * - مطفأ  → يرسل [ButtonId.POWER].
+ * - مشغّل → يرسل [ButtonId.VOL_UP] أو [ButtonId.CH_UP] (تغيّر ملحوظ بلا إطفاء).
+ * عند تأكيد المستخدم أن الجهاز استجاب، يُبنى [Device] جاهز يحمل مسار ملف القاعدة.
  *
- * المنطق المعتمد عملياً: نسأل المستخدم **هل الجهاز مشغّل؟**
- * - مطفأ  → نرسل [ButtonId.POWER] (يراقب: هل اشتغل؟).
- * - مشغّل → نرسل [ButtonId.VOL_UP] أو [ButtonId.CH_UP] (تغيّر ملحوظ بلا إطفاء).
- * يتنقّل المستخدم بين العلامات حتى يستجيب جهازه، فتُحفظ العلامة الصحيحة.
+ * الاكتشاف التلقائي لـ IR مستحيل فيزيائياً (أحادي الاتجاه) — لذا التأكيد بصري.
  */
 @HiltViewModel
 class IrSetupViewModel @Inject constructor(
@@ -51,48 +46,27 @@ class IrSetupViewModel @Inject constructor(
     val uiState: StateFlow<IrSetupUiState> = _uiState.asStateFlow()
 
     private var loadedDevice: IrDevice? = null
+    private var file: String? = null
 
-    init {
+    /** يُحمّل الجهاز المختار من القاعدة عبر مسار ملفه. */
+    fun load(irFile: String) {
+        if (file == irFile) return
+        file = irFile
         viewModelScope.launch {
             val ir = registry.forType(TransportType.IR)?.isAvailable() ?: false
-            _uiState.update { it.copy(irAvailable = ir, categories = db.categories()) }
-        }
-    }
-
-    fun selectCategory(category: String) {
-        viewModelScope.launch {
-            val devices = db.devicesIn(category)
-            _uiState.update {
-                it.copy(category = category, devices = devices, testIndex = 0)
+            val entry = db.index().firstOrNull { it.file == irFile }
+            if (entry == null) {
+                _uiState.update { it.copy(irAvailable = ir, ready = true) }
+                return@launch
             }
-            prepareTest(0)
-        }
-    }
-
-    fun nextBrand() {
-        val s = _uiState.value
-        if (s.testIndex + 1 < s.devices.size) prepareTest(s.testIndex + 1)
-    }
-
-    fun previousBrand() {
-        val s = _uiState.value
-        if (s.testIndex > 0) prepareTest(s.testIndex - 1)
-    }
-
-    private fun prepareTest(index: Int) {
-        val entry = _uiState.value.devices.getOrNull(index) ?: return
-        viewModelScope.launch {
             loadedDevice = db.loadDevice(entry)
             _uiState.update {
-                it.copy(testIndex = index, testingBrand = entry.brand)
+                it.copy(irAvailable = ir, brand = entry.brand, ready = true)
             }
         }
     }
 
-    /**
-     * يرسل إشارة الاختبار حسب حالة الطاقة:
-     * مطفأ → POWER، مشغّل → VOL_UP (أو CH_UP إن لم يدعم الصوت).
-     */
+    /** يرسل إشارة الاختبار حسب حالة الطاقة (مطفأ=POWER، مشغّل=VOL/CH). */
     fun sendTest(power: PowerState) {
         val device = loadedDevice ?: return
         val transport = registry.forType(TransportType.IR) ?: return
@@ -112,15 +86,16 @@ class IrSetupViewModel @Inject constructor(
         }
     }
 
-    /** يثبّت العلامة الحالية كجهاز قابل للاستخدام (بعد أن استجاب). */
+    /** يثبّت الجهاز كجاهز للاستخدام (بعد أن استجاب). */
     fun confirmDevice(): Device? = loadedDevice?.let { buildDevice(it) }
 
     private fun buildDevice(d: IrDevice): Device = Device(
         id = "ir-${d.category}-${d.brand}",
         name = d.brand,
-        type = com.gnutux.tahakom.core.model.DeviceType.TV,
+        type = DeviceType.TV,
         transport = TransportType.IR,
         address = null,
-        metadata = mapOf("brand" to d.brand, "category" to d.category, "irFile" to d.model),
+        // irFile = مسار ملف الجهاز في القاعدة (يطابق entry.file) ليعيد RemoteViewModel تحميله.
+        metadata = mapOf("brand" to d.brand, "category" to d.category, "irFile" to (file ?: "")),
     )
 }

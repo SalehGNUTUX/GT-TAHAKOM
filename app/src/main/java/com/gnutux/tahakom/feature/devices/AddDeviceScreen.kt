@@ -2,13 +2,13 @@ package com.gnutux.tahakom.feature.devices
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,28 +20,27 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gnutux.tahakom.R
-import com.gnutux.tahakom.core.catalog.BrandCatalog
-import com.gnutux.tahakom.core.model.Device
+import com.gnutux.tahakom.core.irdb.IrDeviceEntry
 
 /**
- * شاشة "إضافة بالاسم/الطراز": يختار المستخدم علامة من الكتالوج،
- * ويُدخل عنوان IP للأجهزة الشبكية، فيُنشأ [Device] ويُفتح ريموته.
+ * شاشة "إضافة بالاسم/الطراز" — تعرض أجهزة IR الحقيقية من القاعدة (44 جهازاً)،
+ * مجمّعة حسب الفئة (TV/Cable/Audio) وقابلة للبحث. النقر على جهاز ينقل لضبطه
+ * (اختبار الطاقة/الصوت لتأكيد العلامة). الأجهزة الشبكية تُكتشف تلقائياً في الشاشة الرئيسية.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddDeviceScreen(
     onBack: () -> Unit,
-    onDeviceReady: (Device) -> Unit,
-    onChooseIr: () -> Unit = {},
+    onPickIrDevice: (IrDeviceEntry) -> Unit,
+    viewModel: AddDeviceViewModel = hiltViewModel(),
 ) {
-    var selected by remember { mutableStateOf<BrandCatalog.Brand?>(null) }
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -55,89 +54,51 @@ fun AddDeviceScreen(
             )
         },
     ) { padding ->
-        val current = selected
-        if (current == null) {
-            LazyColumn(Modifier.padding(padding).padding(16.dp)) {
-                items(BrandCatalog.brands, key = { it.name }) { brand ->
-                    ElevatedCard(
-                        Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable {
-                            // علامات IR (بلا عنوان) → تدفّق الضبط شبه الآلي (هل الجهاز مشغّل؟)
-                            if (!brand.needsAddress) onChooseIr() else selected = brand
-                        },
-                    ) {
-                        Column(Modifier.padding(16.dp)) {
-                            Text(brand.name, style = MaterialTheme.typography.titleMedium)
-                            Text(
-                                brand.transport.name,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
+        Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
+            OutlinedTextField(
+                value = state.query,
+                onValueChange = viewModel::onQueryChange,
+                label = { Text(stringResource(R.string.add_device_search_ir)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+            )
+
+            LazyColumn(Modifier.fillMaxSize()) {
+                state.irByCategory.forEach { (category, devices) ->
+                    item(key = "cat-$category") {
+                        Text(
+                            text = localizedCategory(category),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                        )
+                    }
+                    items(devices, key = { it.file }) { entry ->
+                        ElevatedCard(
+                            Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                                .clickable { onPickIrDevice(entry) },
+                        ) {
+                            Column(Modifier.padding(16.dp)) {
+                                Text(entry.brand, style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    stringResource(R.string.add_device_buttons_count, entry.buttons),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
                     }
                 }
             }
-        } else {
-            BrandDetail(
-                brand = current,
-                modifier = Modifier.padding(padding).padding(16.dp),
-                onBack = { selected = null },
-                onDeviceReady = onDeviceReady,
-            )
         }
     }
 }
 
+/** اسم الفئة المعرَّب. */
 @Composable
-private fun BrandDetail(
-    brand: BrandCatalog.Brand,
-    modifier: Modifier,
-    onBack: () -> Unit,
-    onDeviceReady: (Device) -> Unit,
-) {
-    var address by remember { mutableStateOf("") }
-    Column(modifier) {
-        Text(brand.name, style = MaterialTheme.typography.headlineSmall)
-        if (brand.needsAddress) {
-            Text(
-                stringResource(R.string.add_device_ip_hint),
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(vertical = 8.dp),
-            )
-            OutlinedTextField(
-                value = address,
-                onValueChange = { address = it },
-                label = { Text(stringResource(R.string.add_device_ip_label)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        } else {
-            Text(
-                stringResource(R.string.add_device_ir_note),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(vertical = 8.dp),
-            )
-        }
-
-        Button(
-            onClick = {
-                onDeviceReady(
-                    Device(
-                        id = "${brand.name}-${address.ifBlank { "ir" }}",
-                        name = brand.name,
-                        type = brand.type,
-                        transport = brand.transport,
-                        address = address.ifBlank { null },
-                        metadata = mapOf("brand" to brand.name),
-                    ),
-                )
-            },
-            enabled = !brand.needsAddress || address.isNotBlank(),
-            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-        ) {
-            Text(stringResource(R.string.add_device_open_remote))
-        }
-        Button(onClick = onBack, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-            Text(stringResource(R.string.action_cancel))
-        }
-    }
+private fun localizedCategory(category: String): String = when (category) {
+    "TV" -> stringResource(R.string.cat_tv)
+    "Cable" -> stringResource(R.string.cat_cable)
+    "Audio" -> stringResource(R.string.cat_audio)
+    else -> category
 }

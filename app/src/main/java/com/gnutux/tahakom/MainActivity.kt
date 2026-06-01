@@ -1,5 +1,6 @@
 package com.gnutux.tahakom
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -8,10 +9,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.gnutux.tahakom.core.discovery.toDevice
 import com.gnutux.tahakom.core.model.Device
+import com.gnutux.tahakom.core.share.PackScope
+import com.gnutux.tahakom.core.share.RemotePack
+import com.gnutux.tahakom.core.share.RemotePackSharing
 import com.gnutux.tahakom.feature.devices.AddDeviceScreen
 import com.gnutux.tahakom.feature.devices.DevicesScreen
+import com.gnutux.tahakom.feature.devices.DevicesViewModel
 import com.gnutux.tahakom.feature.irsetup.IrSetupScreen
 import com.gnutux.tahakom.feature.remote.RemoteScreen
 import com.gnutux.tahakom.feature.settings.SettingsScreen
@@ -23,7 +30,7 @@ private sealed interface Screen {
     data object Devices : Screen
     data object Settings : Screen
     data object AddDevice : Screen
-    data object IrSetup : Screen
+    data class IrSetup(val irFile: String) : Screen
     data class Remote(val device: Device) : Screen
 }
 
@@ -38,22 +45,47 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContent {
             TahakomTheme {
+                val context = LocalContext.current
+                // ViewModel مشترك على مستوى الشاشة الرئيسية للحفظ/المشاركة.
+                val devicesVm: DevicesViewModel = hiltViewModel()
                 var screen by remember { mutableStateOf<Screen>(Screen.Devices) }
+
+                // يعتمد جهازاً: يحفظه في القائمة ثم يفتح ريموته.
+                fun adopt(device: Device) {
+                    devicesVm.save(device)
+                    screen = Screen.Remote(device)
+                }
+
+                fun shareDevice(device: Device) {
+                    val pack = RemotePack(
+                        scope = PackScope.MODEL,
+                        brand = device.metadata["brand"] ?: device.name,
+                        model = device.name,
+                        description = device.name,
+                        author = "GT-TAHAKOM",
+                    )
+                    val intent = RemotePackSharing.exportToShareIntent(context, pack)
+                    context.startActivity(Intent.createChooser(intent, device.name))
+                }
+
                 when (val s = screen) {
                     Screen.Devices -> DevicesScreen(
                         onOpenSettings = { screen = Screen.Settings },
                         onAddManual = { screen = Screen.AddDevice },
-                        onDeviceClick = { screen = Screen.Remote(it.toDevice()) },
+                        onOpenDevice = { screen = Screen.Remote(it) },
+                        onAdoptDiscovered = { adopt(it.toDevice()) },
+                        onShareDevice = { shareDevice(it) },
+                        viewModel = devicesVm,
                     )
                     Screen.Settings -> SettingsScreen(onBack = { screen = Screen.Devices })
                     Screen.AddDevice -> AddDeviceScreen(
                         onBack = { screen = Screen.Devices },
-                        onDeviceReady = { screen = Screen.Remote(it) },
-                        onChooseIr = { screen = Screen.IrSetup },
+                        onPickIrDevice = { screen = Screen.IrSetup(it.file) },
                     )
-                    Screen.IrSetup -> IrSetupScreen(
+                    is Screen.IrSetup -> IrSetupScreen(
+                        irFile = s.irFile,
                         onBack = { screen = Screen.AddDevice },
-                        onDeviceReady = { screen = Screen.Remote(it) },
+                        onDeviceReady = { adopt(it) },
                     )
                     is Screen.Remote -> RemoteScreen(
                         device = s.device,

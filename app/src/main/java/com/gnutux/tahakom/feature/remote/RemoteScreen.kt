@@ -9,8 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -23,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,12 +33,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gnutux.tahakom.core.model.ButtonId
-import com.gnutux.tahakom.core.model.Command
 import com.gnutux.tahakom.core.model.Device
 
 /**
- * شاشة الريموت — أزرار تعمل فعلاً وترسل أوامر للجهاز عبر [RemoteViewModel].
- * تخطيط تلفاز قياسي (طاقة، تنقّل، صوت، قنوات، وسائط) على غرار IRRemote.
+ * شاشة الريموت — أزرار تعمل فعلاً. تُظهر فقط الأزرار التي يدعمها الجهاز
+ * (مهم لأجهزة IR: لا كل جهاز يملك كل الأزرار). تستدعي [RemoteViewModel.bind]
+ * لتحميل أكواد IR وترجمة الأزرار الدلالية إلى Pronto.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,8 +48,10 @@ fun RemoteScreen(
     viewModel: RemoteViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    fun key(button: ButtonId, label: String) =
-        viewModel.send(device, Command.Key(button), label)
+    LaunchedEffect(device.id) { viewModel.bind(device) }
+
+    fun key(button: ButtonId, label: String) = viewModel.send(device, button, label)
+    val has = { b: ButtonId -> b in state.supported }
 
     Scaffold(
         topBar = {
@@ -62,61 +66,66 @@ fun RemoteScreen(
         },
     ) { padding ->
         Column(
-            Modifier.fillMaxSize().padding(padding).padding(16.dp),
+            Modifier.fillMaxSize().padding(padding).padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // صف الطاقة + الرئيسية + الرجوع
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                RoundKey("⏻") { key(ButtonId.POWER, "Power") }
-                RoundKey("⌂") { key(ButtonId.HOME, "Home") }
-                RoundKey("↩") { key(ButtonId.BACK, "Back") }
+            // صف الطاقة + الرئيسية + الرجوع (أظهر المتاح فقط)
+            RowOf {
+                if (has(ButtonId.POWER)) RoundKey("⏻", accent = true) { key(ButtonId.POWER, "Power") }
+                if (has(ButtonId.HOME)) RoundKey("⌂") { key(ButtonId.HOME, "Home") }
+                if (has(ButtonId.BACK)) RoundKey("↩") { key(ButtonId.BACK, "Back") }
             }
 
-            // لوحة الاتجاهات
-            DPad(
-                onUp = { key(ButtonId.NAV_UP, "Up") },
-                onDown = { key(ButtonId.NAV_DOWN, "Down") },
-                onLeft = { key(ButtonId.NAV_LEFT, "Left") },
-                onRight = { key(ButtonId.NAV_RIGHT, "Right") },
-                onOk = { key(ButtonId.NAV_OK, "OK") },
-            )
+            // لوحة الاتجاهات (تظهر إن دُعم أي اتجاه)
+            if (listOf(ButtonId.NAV_UP, ButtonId.NAV_DOWN, ButtonId.NAV_LEFT, ButtonId.NAV_RIGHT, ButtonId.NAV_OK).any(has)) {
+                DPad(
+                    has = has,
+                    onUp = { key(ButtonId.NAV_UP, "Up") },
+                    onDown = { key(ButtonId.NAV_DOWN, "Down") },
+                    onLeft = { key(ButtonId.NAV_LEFT, "Left") },
+                    onRight = { key(ButtonId.NAV_RIGHT, "Right") },
+                    onOk = { key(ButtonId.NAV_OK, "OK") },
+                )
+            }
 
-            // الصوت + القنوات
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("VOL", style = MaterialTheme.typography.labelSmall)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        RoundKey("−") { key(ButtonId.VOL_DOWN, "Vol−") }
-                        RoundKey("+") { key(ButtonId.VOL_UP, "Vol+") }
-                    }
+            // الصوت + الكتم + القنوات
+            RowOf {
+                if (has(ButtonId.VOL_DOWN) || has(ButtonId.VOL_UP)) {
+                    LabeledPair(
+                        "VOL",
+                        left = if (has(ButtonId.VOL_DOWN)) ("−" to { key(ButtonId.VOL_DOWN, "Vol−") }) else null,
+                        right = if (has(ButtonId.VOL_UP)) ("+" to { key(ButtonId.VOL_UP, "Vol+") }) else null,
+                    )
                 }
-                RoundKey("🔇") { key(ButtonId.MUTE, "Mute") }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("CH", style = MaterialTheme.typography.labelSmall)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        RoundKey("−") { key(ButtonId.CH_DOWN, "Ch−") }
-                        RoundKey("+") { key(ButtonId.CH_UP, "Ch+") }
-                    }
+                if (has(ButtonId.MUTE)) RoundKey("🔇") { key(ButtonId.MUTE, "Mute") }
+                if (has(ButtonId.CH_DOWN) || has(ButtonId.CH_UP)) {
+                    LabeledPair(
+                        "CH",
+                        left = if (has(ButtonId.CH_DOWN)) ("−" to { key(ButtonId.CH_DOWN, "Ch−") }) else null,
+                        right = if (has(ButtonId.CH_UP)) ("+" to { key(ButtonId.CH_UP, "Ch+") }) else null,
+                    )
                 }
             }
 
             // الوسائط
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                RoundKey("⏪") { key(ButtonId.RWD, "Rwd") }
-                RoundKey("⏯") { key(ButtonId.PLAY, "Play") }
-                RoundKey("⏩") { key(ButtonId.FFWD, "Ffwd") }
+            if (listOf(ButtonId.RWD, ButtonId.PLAY, ButtonId.PAUSE, ButtonId.FFWD).any(has)) {
+                RowOf {
+                    if (has(ButtonId.RWD)) RoundKey("⏪") { key(ButtonId.RWD, "Rwd") }
+                    if (has(ButtonId.PLAY)) RoundKey("⏯") { key(ButtonId.PLAY, "Play") }
+                    if (has(ButtonId.FFWD)) RoundKey("⏩") { key(ButtonId.FFWD, "Ffwd") }
+                }
             }
 
             // أزرار إضافية
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                FilledTonalButton(onClick = { key(ButtonId.INFO, "Info") }) { Text("ℹ") }
-                FilledTonalButton(onClick = { key(ButtonId.MENU, "Menu") }) { Text("☰") }
-                FilledTonalButton(onClick = { key(ButtonId.SOURCE, "Source") }) { Text("⮂") }
+            RowOf {
+                if (has(ButtonId.INFO)) FilledTonalButton(onClick = { key(ButtonId.INFO, "Info") }) { Text("ℹ") }
+                if (has(ButtonId.MENU)) FilledTonalButton(onClick = { key(ButtonId.MENU, "Menu") }) { Text("☰") }
+                if (has(ButtonId.SOURCE)) FilledTonalButton(onClick = { key(ButtonId.SOURCE, "Source") }) { Text("⮂") }
             }
 
             Spacer(Modifier.height(8.dp))
-            // تغذية راجعة
             when {
                 state.lastError != null -> Text(
                     "⚠ ${state.lastError}",
@@ -133,7 +142,29 @@ fun RemoteScreen(
 }
 
 @Composable
-private fun RoundKey(label: String, onClick: () -> Unit) {
+private fun RowOf(content: @Composable () -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
+        content()
+    }
+}
+
+@Composable
+private fun LabeledPair(
+    label: String,
+    left: Pair<String, () -> Unit>?,
+    right: Pair<String, () -> Unit>?,
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(label, style = MaterialTheme.typography.labelSmall)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            left?.let { RoundKey(it.first, onClick = it.second) }
+            right?.let { RoundKey(it.first, onClick = it.second) }
+        }
+    }
+}
+
+@Composable
+private fun RoundKey(label: String, accent: Boolean = false, onClick: () -> Unit) {
     Button(onClick = onClick, shape = CircleShape, modifier = Modifier.size(64.dp)) {
         Text(label, style = MaterialTheme.typography.titleMedium)
     }
@@ -141,6 +172,7 @@ private fun RoundKey(label: String, onClick: () -> Unit) {
 
 @Composable
 private fun DPad(
+    has: (ButtonId) -> Boolean,
     onUp: () -> Unit,
     onDown: () -> Unit,
     onLeft: () -> Unit,
@@ -148,12 +180,12 @@ private fun DPad(
     onOk: () -> Unit,
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        RoundKey("▲", onUp)
+        if (has(ButtonId.NAV_UP)) RoundKey("▲", onClick = onUp)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            RoundKey("◀", onLeft)
-            RoundKey("OK", onOk)
-            RoundKey("▶", onRight)
+            if (has(ButtonId.NAV_LEFT)) RoundKey("◀", onClick = onLeft)
+            if (has(ButtonId.NAV_OK)) RoundKey("OK", onClick = onOk)
+            if (has(ButtonId.NAV_RIGHT)) RoundKey("▶", onClick = onRight)
         }
-        RoundKey("▼", onDown)
+        if (has(ButtonId.NAV_DOWN)) RoundKey("▼", onClick = onDown)
     }
 }

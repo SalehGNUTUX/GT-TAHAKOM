@@ -8,27 +8,28 @@
     <string name="devices_scanning">جارٍ البحث… (انقر للإيقاف)</string>
     <string name="devices_scanning_hint">يجري البحث عن الأجهزة على شبكة WiFi لديك…</string>
     <string name="devices_add_manual">إضافة بالاسم / الطراز</string>
+    <string name="devices_my">أجهزتي</string>
+    <string name="devices_discovered">مُكتشَفة على الشبكة</string>
+    <string name="device_delete">حذف</string>
 
-    <!-- إضافة جهاز بالاسم/الطراز -->
+    <!-- إضافة جهاز بالاسم/الطراز (قاعدة IR الحقيقية) -->
     <string name="add_device_title">إضافة بالاسم / الطراز</string>
-    <string name="add_device_ip_hint">أدخل عنوان IP للجهاز على شبكة WiFi لديك.</string>
-    <string name="add_device_ip_label">عنوان IP (مثال: 192.168.1.20)</string>
-    <string name="add_device_ir_note">علامات IR تتطلّب باعث IR أو جسر WiFi-IR (قادم في المرحلة 4).</string>
-    <string name="add_device_open_remote">افتح الريموت</string>
+    <string name="add_device_search_ir">ابحث عن علامة / طراز (Samsung، LG، Sony…)</string>
+    <string name="add_device_buttons_count">%1$d زراً</string>
+    <string name="cat_tv">أجهزة التلفاز</string>
+    <string name="cat_cable">أجهزة الاستقبال الرقمي / الستلايت</string>
+    <string name="cat_audio">أجهزة الصوت</string>
+    <string name="ir_pick_other">اختر علامة أخرى</string>
 
     <!-- ضبط جهاز IR شبه الآلي -->
     <string name="ir_setup_title">ضبط جهاز IR</string>
     <string name="ir_no_emitter">لا يحتوي هذا الهاتف على باعث IR. استخدم جسر WiFi-IR (قريباً) أو جهازاً شبكياً بدلاً منه.</string>
-    <string name="ir_pick_category">اختر فئة الجهاز</string>
-    <string name="ir_brand_progress">العلامة %1$d من %2$d</string>
     <string name="ir_power_question">هل جهازك مشغّل الآن أم مطفأ؟ اختر الاختبار المناسب أدناه.</string>
     <string name="ir_test_power">الجهاز مطفأ — أرسل زر الطاقة</string>
     <string name="ir_test_volume">الجهاز مشغّل — أرسل الصوت/القناة</string>
     <string name="ir_sent_signal">أُرسلت إشارة الاختبار: %1$s</string>
     <string name="ir_responded_question">هل استجاب الجهاز؟</string>
-    <string name="ir_yes_responded">نعم — اعتمد هذه العلامة</string>
-    <string name="ir_next_brand">العلامة التالية</string>
-    <string name="ir_prev_brand">السابقة</string>
+    <string name="ir_yes_responded">نعم — اعتمد هذا الجهاز</string>
 
     <!-- الإعدادات واللغة -->
     <string name="settings_title">الإعدادات</string>
