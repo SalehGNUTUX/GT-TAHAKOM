@@ -5,6 +5,8 @@
     <string name="devices_empty_title">No devices yet</string>
     <string name="devices_empty_subtitle">Automatic device discovery (mDNS/SSDP) arrives in milestone 1.</string>
     <string name="devices_scan">Scan for devices</string>
+    <string name="devices_scanning">Scanning… (tap to stop)</string>
+    <string name="devices_scanning_hint">Looking for devices on your WiFi network…</string>
     <string name="devices_add_manual">Add by name / model</string>
 
     <!-- الإعدادات واللغة -->

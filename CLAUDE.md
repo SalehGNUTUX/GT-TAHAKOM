@@ -33,9 +33,13 @@ Android SDK: `/home/gnutux/Android/Sdk` (مضبوط في `local.properties`).
 - اتجاه RTL يتولّاه Compose تلقائياً حسب اللغة — لا تُجبر اتجاهاً.
 
 ## الحالة والخطة
-- **م0 (التأسيس): ✅ منجز** — Transport/Registry، النموذج، IrTransport، Hilt، شاشة أجهزة، أيقونة، توثيق، Gradle wrapper.
-- **التالي: م1** — الاكتشاف التلقائي (NSD/mDNS + SSDP) + قائمة الأجهزة.
-- بقية المراحل (م2–م5) في docs/ARCHITECTURE.md.
+- **م0 (التأسيس): ✅ منجز** — Transport/Registry، النموذج، IrTransport، Hilt، أيقونة، توثيق، Gradle wrapper.
+- **م1 (الاكتشاف): ✅ منجز** — MdnsDiscovery (NsdManager) + SsdpDiscovery (UDP multicast) + DiscoveryManager + MulticastLockHolder + DiscoveryViewModel + شاشة أجهزة حيّة. اكتشاف أوفلاين بالكامل.
+- **التالي: م2** — أول وسيلتي نقل (AndroidTvTransport + RokuTransport) + شاشة الريموت + ربط الاستيراد بـ Room.
+- بقية المراحل (م3–م5) في docs/ARCHITECTURE.md.
+
+## مبدأ قاعدة البيانات (موثّق في docs/DATABASE.md)
+أوفلاين افتراضياً. اكتشاف الشبكة لا يحتاج قاعدة (الجهاز يُعلن عن نفسه). أكواد IR: قاعدة مدمجة في assets للعلامات الشهيرة (أوفلاين) + تنزيل اختياري لعلامة نادرة من LIRC (مرة واحدة ثم كاش) + حزم .tahakom + التعلّم. لا تجعل أي وظيفة أساسية تعتمد على الإنترنت.
 
 ## قرارات محسومة مع المستخدم
 - متعدد البروتوكولات من البداية (لا IR-only).

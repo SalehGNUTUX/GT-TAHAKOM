@@ -1,6 +1,11 @@
 package com.gnutux.tahakom.di
 
 import android.content.Context
+import com.gnutux.tahakom.core.discovery.DeviceDiscovery
+import com.gnutux.tahakom.core.discovery.DiscoveryManager
+import com.gnutux.tahakom.core.discovery.MdnsDiscovery
+import com.gnutux.tahakom.core.discovery.MulticastLockHolder
+import com.gnutux.tahakom.core.discovery.SsdpDiscovery
 import com.gnutux.tahakom.core.transport.Transport
 import com.gnutux.tahakom.core.transport.TransportRegistry
 import com.gnutux.tahakom.core.transport.impl.IrTransport
@@ -33,5 +38,17 @@ object AppModule {
             // م4: BroadlinkTransport(...)
         )
         return TransportRegistry(transports)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDiscoveryManager(
+        @ApplicationContext context: Context,
+    ): DiscoveryManager {
+        val discoveries: List<DeviceDiscovery> = listOf(
+            MdnsDiscovery(context),
+            SsdpDiscovery(),
+        )
+        return DiscoveryManager(discoveries, MulticastLockHolder(context))
     }
 }

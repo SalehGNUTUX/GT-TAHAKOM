@@ -66,7 +66,7 @@ com.gnutux.tahakom
 | المرحلة | المحتوى | الحالة |
 | :-- | :-- | :-- |
 | **م0** | التأسيس: Kotlin/Compose، RTL، Hilt، طبقة Transport، النموذج، IrTransport | ✅ مُنجز |
-| **م1** | الاكتشاف التلقائي: NSD/mDNS + SSDP + شاشة الأجهزة | ⏳ |
+| **م1** | الاكتشاف التلقائي: NSD/mDNS + SSDP + شاشة الأجهزة الحيّة | ✅ مُنجز |
 | **م2** | أول نقلين: `AndroidTvTransport` + `RokuTransport` + شاشة الريموت | ⏳ |
 | **م3** | توسّع الشبكة: Samsung + LG + Sony | ⏳ |
 | **م4** | IR: `IrTransport` كامل + `BroadlinkTransport` + استيراد LIRC/قاعدة محلية | ⏳ |
