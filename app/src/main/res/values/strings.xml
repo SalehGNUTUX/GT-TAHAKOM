@@ -11,6 +11,7 @@
     <string name="devices_my">My devices</string>
     <string name="devices_discovered">Discovered on network</string>
     <string name="device_delete">Delete</string>
+    <string name="exit_hint">Press back again to exit</string>
 
     <!-- إضافة جهاز بالاسم/الطراز (قاعدة IR الحقيقية) -->
     <string name="add_device_title">Add by name / model</string>

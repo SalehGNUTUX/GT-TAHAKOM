@@ -11,6 +11,7 @@
     <string name="devices_my">أجهزتي</string>
     <string name="devices_discovered">مُكتشَفة على الشبكة</string>
     <string name="device_delete">حذف</string>
+    <string name="exit_hint">اضغط رجوع مرة أخرى للخروج</string>
 
     <!-- إضافة جهاز بالاسم/الطراز (قاعدة IR الحقيقية) -->
     <string name="add_device_title">إضافة بالاسم / الطراز</string>

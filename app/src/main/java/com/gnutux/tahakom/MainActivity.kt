@@ -2,14 +2,18 @@ package com.gnutux.tahakom
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.gnutux.tahakom.core.discovery.toDevice
 import com.gnutux.tahakom.core.model.Device
@@ -76,6 +80,27 @@ class MainActivity : AppCompatActivity() {
                     )
                     val intent = RemotePackSharing.exportToShareIntent(context, pack)
                     context.startActivity(Intent.createChooser(intent, device.name))
+                }
+
+                // زر رجوع الهاتف: من أي شاشة فرعية → يعود للرئيسية؛ من الرئيسية →
+                // نقرتان خلال ثانيتين للخروج (مع رسالة تأكيد).
+                var lastBackMs by remember { mutableLongStateOf(0L) }
+                val exitHint = stringResource(R.string.exit_hint)
+                BackHandler(enabled = true) {
+                    if (screen != Screen.Devices) {
+                        screen = when (screen) {
+                            is Screen.IrSetup -> Screen.AddDevice
+                            else -> Screen.Devices
+                        }
+                    } else {
+                        val now = System.currentTimeMillis()
+                        if (now - lastBackMs < 2000) {
+                            finish()
+                        } else {
+                            lastBackMs = now
+                            Toast.makeText(context, exitHint, Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
 
                 when (val s = screen) {

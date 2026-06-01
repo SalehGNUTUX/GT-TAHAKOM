@@ -1,30 +1,26 @@
 package com.gnutux.tahakom.ui.icons
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/** يرسم أيقونة خطّية من [TahakomIcons] بلون وحجم محدّدين. */
+/** يرسم أيقونة من [TahakomIcons] (Material Outlined) بلون وحجم محدّدين. */
 @Composable
 fun TahakomIcon(
     name: String,
     tint: Color,
     modifier: Modifier = Modifier,
     size: Dp = 24.dp,
-    strokeWidth: Float = 1.7f,
+    strokeWidth: Float = 1.7f, // مُتجاهَل (للتوافق مع نداءات سابقة)
 ) {
-    val vector = remember(name, tint, strokeWidth) {
-        TahakomIcons.vector(name, tint, strokeWidth)
-    }
-    Image(
-        painter = rememberVectorPainter(vector),
+    Icon(
+        imageVector = TahakomIcons.vector(name),
         contentDescription = null,
+        tint = tint,
         modifier = modifier.size(size),
     )
 }

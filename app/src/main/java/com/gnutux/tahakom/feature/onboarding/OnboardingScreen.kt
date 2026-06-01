@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -61,7 +62,8 @@ fun OnboardingScreen(onDone: () -> Unit) {
     val last = index == slides.lastIndex
 
     Column(
-        Modifier.fillMaxSize().background(c.bg).padding(horizontal = 26.dp, vertical = 16.dp),
+        Modifier.fillMaxSize().background(c.bg).systemBarsPadding()
+            .padding(horizontal = 26.dp, vertical = 16.dp),
     ) {
         // الترويسة: زر تخطّي
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
