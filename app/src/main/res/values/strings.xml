@@ -13,6 +13,31 @@
     <string name="device_delete">Delete</string>
     <string name="exit_hint">Press back again to exit</string>
 
+    <!-- تعلّم ريموت يدوياً -->
+    <string name="learn_title">Learn a remote</string>
+    <string name="learn_hint">For unlisted devices: enter the Pronto IR code for each button (find it online for your model, or import via a shared .tahakom file). Leave blank what you don\'t need.</string>
+    <string name="learn_device_name">Device name (e.g. Unionaire)</string>
+    <string name="learn_codes_label">Pronto codes (hex, starting with 0000)</string>
+    <string name="learn_save">Save device</string>
+    <string name="learn_err_name">Please enter a device name.</string>
+    <string name="learn_err_codes">Enter at least one valid Pronto code.</string>
+    <string name="learn_entry">Learn / enter codes manually</string>
+    <string name="learn_btn_power">Power</string>
+    <string name="learn_btn_vol_up">Volume +</string>
+    <string name="learn_btn_vol_down">Volume −</string>
+    <string name="learn_btn_mute">Mute</string>
+    <string name="learn_btn_ch_up">Channel +</string>
+    <string name="learn_btn_ch_down">Channel −</string>
+    <string name="learn_btn_up">Up</string>
+    <string name="learn_btn_down">Down</string>
+    <string name="learn_btn_left">Left</string>
+    <string name="learn_btn_right">Right</string>
+    <string name="learn_btn_ok">OK</string>
+    <string name="learn_btn_back">Back</string>
+    <string name="learn_btn_home">Home</string>
+    <string name="learn_btn_menu">Menu</string>
+    <string name="learn_btn_source">Source</string>
+
     <!-- إضافة جهاز بالاسم/الطراز (قاعدة IR الحقيقية) -->
     <string name="add_device_title">Add by name / model</string>
     <string name="add_device_search_ir">Search brand / model (Samsung, LG, Sony…)</string>

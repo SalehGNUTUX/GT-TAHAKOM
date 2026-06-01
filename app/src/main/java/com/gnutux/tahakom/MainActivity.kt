@@ -24,6 +24,7 @@ import com.gnutux.tahakom.feature.devices.AddDeviceScreen
 import com.gnutux.tahakom.feature.devices.DevicesScreen
 import com.gnutux.tahakom.feature.devices.DevicesViewModel
 import com.gnutux.tahakom.feature.irsetup.IrSetupScreen
+import com.gnutux.tahakom.feature.learn.LearnScreen
 import com.gnutux.tahakom.feature.onboarding.OnboardingScreen
 import com.gnutux.tahakom.feature.remote.RemoteScreen
 import com.gnutux.tahakom.feature.settings.SettingsScreen
@@ -36,6 +37,7 @@ private sealed interface Screen {
     data object Devices : Screen
     data object Settings : Screen
     data object AddDevice : Screen
+    data object Learn : Screen
     data class IrSetup(val irFile: String) : Screen
     data class Remote(val device: Device) : Screen
 }
@@ -89,7 +91,7 @@ class MainActivity : AppCompatActivity() {
                 BackHandler(enabled = true) {
                     if (screen != Screen.Devices) {
                         screen = when (screen) {
-                            is Screen.IrSetup -> Screen.AddDevice
+                            is Screen.IrSetup, Screen.Learn -> Screen.AddDevice
                             else -> Screen.Devices
                         }
                     } else {
@@ -116,6 +118,11 @@ class MainActivity : AppCompatActivity() {
                     Screen.AddDevice -> AddDeviceScreen(
                         onBack = { screen = Screen.Devices },
                         onPickIrDevice = { screen = Screen.IrSetup(it.file) },
+                        onLearn = { screen = Screen.Learn },
+                    )
+                    Screen.Learn -> LearnScreen(
+                        onBack = { screen = Screen.AddDevice },
+                        onSaved = { adopt(it) },
                     )
                     is Screen.IrSetup -> IrSetupScreen(
                         irFile = s.irFile,

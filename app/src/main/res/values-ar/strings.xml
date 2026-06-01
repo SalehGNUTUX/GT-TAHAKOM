@@ -13,6 +13,31 @@
     <string name="device_delete">حذف</string>
     <string name="exit_hint">اضغط رجوع مرة أخرى للخروج</string>
 
+    <!-- تعلّم ريموت يدوياً -->
+    <string name="learn_title">تعلّم ريموت</string>
+    <string name="learn_hint">للأجهزة غير المدرجة: أدخل كود Pronto لكل زر (تجده أونلاين لطرازك، أو استورده عبر ملف ‎.tahakom‎ مشترَك). اترك ما لا تحتاجه فارغاً.</string>
+    <string name="learn_device_name">اسم الجهاز (مثل Unionaire)</string>
+    <string name="learn_codes_label">أكواد Pronto (hex، تبدأ بـ 0000)</string>
+    <string name="learn_save">حفظ الجهاز</string>
+    <string name="learn_err_name">أدخل اسم الجهاز.</string>
+    <string name="learn_err_codes">أدخل كود Pronto صالحاً واحداً على الأقل.</string>
+    <string name="learn_entry">تعلّم / إدخال الأكواد يدوياً</string>
+    <string name="learn_btn_power">الطاقة</string>
+    <string name="learn_btn_vol_up">الصوت +</string>
+    <string name="learn_btn_vol_down">الصوت −</string>
+    <string name="learn_btn_mute">كتم</string>
+    <string name="learn_btn_ch_up">القناة +</string>
+    <string name="learn_btn_ch_down">القناة −</string>
+    <string name="learn_btn_up">فوق</string>
+    <string name="learn_btn_down">تحت</string>
+    <string name="learn_btn_left">يسار</string>
+    <string name="learn_btn_right">يمين</string>
+    <string name="learn_btn_ok">موافق</string>
+    <string name="learn_btn_back">رجوع</string>
+    <string name="learn_btn_home">الرئيسية</string>
+    <string name="learn_btn_menu">القائمة</string>
+    <string name="learn_btn_source">المصدر</string>
+
     <!-- إضافة جهاز بالاسم/الطراز (قاعدة IR الحقيقية) -->
     <string name="add_device_title">إضافة بالاسم / الطراز</string>
     <string name="add_device_search_ir">ابحث عن علامة / طراز (Samsung، LG، Sony…)</string>

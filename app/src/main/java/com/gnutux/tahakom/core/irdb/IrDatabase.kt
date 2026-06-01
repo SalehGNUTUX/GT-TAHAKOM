@@ -16,15 +16,37 @@ import org.json.JSONObject
 class IrDatabase(private val context: Context) {
 
     private val mutex = Mutex()
-    @Volatile private var index: List<IrDeviceEntry>? = null
+    @Volatile private var assetIndex: List<IrDeviceEntry>? = null
+    private val learned = LearnedRemoteStore(context)
 
-    /** فهرس كل الأجهزة (يُحمَّل مرة واحدة). */
-    suspend fun index(): List<IrDeviceEntry> {
-        index?.let { return it }
-        return mutex.withLock {
-            index ?: loadIndex().also { index = it }
+    /** بادئة ملف الريموتات المتعلَّمة (يميّزها عن أجهزة assets). */
+    private val LEARNED_PREFIX = "learned:"
+
+    /** فهرس كل الأجهزة = assets المدمجة + ريموتات المستخدم المتعلَّمة. */
+    suspend fun index(): List<IrDeviceEntry> = withContext(Dispatchers.IO) {
+        val assets = assetIndex ?: mutex.withLock {
+            assetIndex ?: loadIndex().also { assetIndex = it }
         }
+        // الريموتات المتعلَّمة أولاً (الأحدث/الأهم للمستخدم) ثم القاعدة المدمجة.
+        learnedEntries() + assets
     }
+
+    /** مدخلات الريموتات المتعلَّمة (تُقرأ حيّةً في كل مرة لتعكس أي إضافة). */
+    private fun learnedEntries(): List<IrDeviceEntry> = learned.all().map { d ->
+        IrDeviceEntry(
+            category = d.category,
+            brand = d.brand,
+            model = d.model,
+            file = "$LEARNED_PREFIX${d.brand}",
+            freq = d.freq,
+            buttons = d.buttons.size,
+        )
+    }
+
+    /** يحفظ ريموتاً متعلَّماً (إدخال يدوي) ويظهر فوراً في الفهرس. */
+    fun saveLearned(device: IrDevice) = learned.save(device)
+
+    fun deleteLearned(brand: String) = learned.delete(brand)
 
     /** الفئات المتاحة (TV, Cable, Audio...). */
     suspend fun categories(): List<String> =
@@ -45,10 +67,15 @@ class IrDatabase(private val context: Context) {
         }
     }
 
-    /** يحمّل جهازاً كاملاً بأزراره من ملفه. */
+    /** يحمّل جهازاً كاملاً بأزراره (من assets أو من المتعلَّمة). */
     suspend fun loadDevice(entry: IrDeviceEntry): IrDevice = withContext(Dispatchers.IO) {
-        val text = context.assets.open("irdb/${entry.file}").bufferedReader().use { it.readText() }
-        parseDevice(text)
+        if (entry.file.startsWith(LEARNED_PREFIX)) {
+            val brand = entry.file.removePrefix(LEARNED_PREFIX)
+            learned.load(brand) ?: error("learned device not found: $brand")
+        } else {
+            val text = context.assets.open("irdb/${entry.file}").bufferedReader().use { it.readText() }
+            parseDevice(text)
+        }
     }
 
     private fun loadIndex(): List<IrDeviceEntry> {

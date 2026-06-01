@@ -9,7 +9,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,6 +40,7 @@ import com.gnutux.tahakom.core.irdb.IrDeviceEntry
 fun AddDeviceScreen(
     onBack: () -> Unit,
     onPickIrDevice: (IrDeviceEntry) -> Unit,
+    onLearn: () -> Unit = {},
     viewModel: AddDeviceViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -60,8 +63,16 @@ fun AddDeviceScreen(
                 onValueChange = viewModel::onQueryChange,
                 label = { Text(stringResource(R.string.add_device_search_ir)) },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
             )
+            // مدخل التعلّم اليدوي للأجهزة غير المدرجة (مثل Unionaire).
+            OutlinedButton(
+                onClick = onLearn,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            ) {
+                Icon(Icons.Outlined.Add, contentDescription = null)
+                Text(stringResource(R.string.learn_entry), modifier = Modifier.padding(start = 8.dp))
+            }
 
             LazyColumn(Modifier.fillMaxSize()) {
                 state.irByCategory.forEach { (category, devices) ->
