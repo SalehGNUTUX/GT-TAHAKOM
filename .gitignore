@@ -16,3 +16,8 @@
 # ملفات محلية متفرقة
 /Text File.txt
 *.apk
+
+# أسرار التوقيع — لا تُرفع أبداً
+keystore.properties
+*.jks
+*.keystore
