@@ -6,6 +6,7 @@ import com.gnutux.tahakom.core.discovery.DiscoveryManager
 import com.gnutux.tahakom.core.discovery.MdnsDiscovery
 import com.gnutux.tahakom.core.discovery.MulticastLockHolder
 import com.gnutux.tahakom.core.discovery.SsdpDiscovery
+import com.gnutux.tahakom.core.irdb.IrDatabase
 import com.gnutux.tahakom.core.transport.Transport
 import com.gnutux.tahakom.core.transport.TransportRegistry
 import com.gnutux.tahakom.core.transport.impl.IrTransport
@@ -53,4 +54,10 @@ object AppModule {
         )
         return DiscoveryManager(discoveries, MulticastLockHolder(context))
     }
+
+    @Provides
+    @Singleton
+    fun provideIrDatabase(
+        @ApplicationContext context: Context,
+    ): IrDatabase = IrDatabase(context)
 }

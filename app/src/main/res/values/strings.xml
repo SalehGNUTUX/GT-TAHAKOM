@@ -16,6 +16,20 @@
     <string name="add_device_ir_note">IR brands require an IR blaster or a WiFi-IR bridge (coming in milestone 4).</string>
     <string name="add_device_open_remote">Open remote</string>
 
+    <!-- ضبط جهاز IR شبه الآلي -->
+    <string name="ir_setup_title">Set up IR device</string>
+    <string name="ir_no_emitter">This phone has no IR blaster. Use a WiFi-IR bridge (coming soon) or a network device instead.</string>
+    <string name="ir_pick_category">Choose device category</string>
+    <string name="ir_brand_progress">Brand %1$d of %2$d</string>
+    <string name="ir_power_question">Is your device currently ON or OFF? Pick the matching test below.</string>
+    <string name="ir_test_power">Device is OFF — send Power</string>
+    <string name="ir_test_volume">Device is ON — send Volume/Channel</string>
+    <string name="ir_sent_signal">Sent test signal: %1$s</string>
+    <string name="ir_responded_question">Did the device respond?</string>
+    <string name="ir_yes_responded">Yes — use this brand</string>
+    <string name="ir_next_brand">Next brand</string>
+    <string name="ir_prev_brand">Previous</string>
+
     <!-- الإعدادات واللغة -->
     <string name="settings_title">Settings</string>
     <string name="settings_language">Language</string>

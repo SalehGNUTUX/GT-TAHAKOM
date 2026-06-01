@@ -12,6 +12,7 @@ import com.gnutux.tahakom.core.discovery.toDevice
 import com.gnutux.tahakom.core.model.Device
 import com.gnutux.tahakom.feature.devices.AddDeviceScreen
 import com.gnutux.tahakom.feature.devices.DevicesScreen
+import com.gnutux.tahakom.feature.irsetup.IrSetupScreen
 import com.gnutux.tahakom.feature.remote.RemoteScreen
 import com.gnutux.tahakom.feature.settings.SettingsScreen
 import com.gnutux.tahakom.ui.theme.TahakomTheme
@@ -22,6 +23,7 @@ private sealed interface Screen {
     data object Devices : Screen
     data object Settings : Screen
     data object AddDevice : Screen
+    data object IrSetup : Screen
     data class Remote(val device: Device) : Screen
 }
 
@@ -46,6 +48,11 @@ class MainActivity : AppCompatActivity() {
                     Screen.Settings -> SettingsScreen(onBack = { screen = Screen.Devices })
                     Screen.AddDevice -> AddDeviceScreen(
                         onBack = { screen = Screen.Devices },
+                        onDeviceReady = { screen = Screen.Remote(it) },
+                        onChooseIr = { screen = Screen.IrSetup },
+                    )
+                    Screen.IrSetup -> IrSetupScreen(
+                        onBack = { screen = Screen.AddDevice },
                         onDeviceReady = { screen = Screen.Remote(it) },
                     )
                     is Screen.Remote -> RemoteScreen(

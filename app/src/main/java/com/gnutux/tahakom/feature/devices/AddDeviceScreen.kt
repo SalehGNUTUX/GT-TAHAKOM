@@ -39,6 +39,7 @@ import com.gnutux.tahakom.core.model.Device
 fun AddDeviceScreen(
     onBack: () -> Unit,
     onDeviceReady: (Device) -> Unit,
+    onChooseIr: () -> Unit = {},
 ) {
     var selected by remember { mutableStateOf<BrandCatalog.Brand?>(null) }
 
@@ -59,7 +60,10 @@ fun AddDeviceScreen(
             LazyColumn(Modifier.padding(padding).padding(16.dp)) {
                 items(BrandCatalog.brands, key = { it.name }) { brand ->
                     ElevatedCard(
-                        Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { selected = brand },
+                        Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable {
+                            // علامات IR (بلا عنوان) → تدفّق الضبط شبه الآلي (هل الجهاز مشغّل؟)
+                            if (!brand.needsAddress) onChooseIr() else selected = brand
+                        },
                     ) {
                         Column(Modifier.padding(16.dp)) {
                             Text(brand.name, style = MaterialTheme.typography.titleMedium)

@@ -16,6 +16,20 @@
     <string name="add_device_ir_note">علامات IR تتطلّب باعث IR أو جسر WiFi-IR (قادم في المرحلة 4).</string>
     <string name="add_device_open_remote">افتح الريموت</string>
 
+    <!-- ضبط جهاز IR شبه الآلي -->
+    <string name="ir_setup_title">ضبط جهاز IR</string>
+    <string name="ir_no_emitter">لا يحتوي هذا الهاتف على باعث IR. استخدم جسر WiFi-IR (قريباً) أو جهازاً شبكياً بدلاً منه.</string>
+    <string name="ir_pick_category">اختر فئة الجهاز</string>
+    <string name="ir_brand_progress">العلامة %1$d من %2$d</string>
+    <string name="ir_power_question">هل جهازك مشغّل الآن أم مطفأ؟ اختر الاختبار المناسب أدناه.</string>
+    <string name="ir_test_power">الجهاز مطفأ — أرسل زر الطاقة</string>
+    <string name="ir_test_volume">الجهاز مشغّل — أرسل الصوت/القناة</string>
+    <string name="ir_sent_signal">أُرسلت إشارة الاختبار: %1$s</string>
+    <string name="ir_responded_question">هل استجاب الجهاز؟</string>
+    <string name="ir_yes_responded">نعم — اعتمد هذه العلامة</string>
+    <string name="ir_next_brand">العلامة التالية</string>
+    <string name="ir_prev_brand">السابقة</string>
+
     <!-- الإعدادات واللغة -->
     <string name="settings_title">الإعدادات</string>
     <string name="settings_language">اللغة</string>
