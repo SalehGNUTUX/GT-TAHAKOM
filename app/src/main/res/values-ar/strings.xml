@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">تحكُّم</string>
+
+    <!-- شاشة الأجهزة -->
+    <string name="devices_empty_title">لا توجد أجهزة بعد</string>
+    <string name="devices_empty_subtitle">سيُضاف الاكتشاف التلقائي للأجهزة (mDNS/SSDP) في المرحلة 1.</string>
+    <string name="devices_scan">ابحث عن الأجهزة</string>
+    <string name="devices_add_manual">إضافة بالاسم / الطراز</string>
+
+    <!-- الإعدادات واللغة -->
+    <string name="settings_title">الإعدادات</string>
+    <string name="settings_language">اللغة</string>
+    <string name="language_system">لغة النظام</string>
+    <string name="language_arabic">العربية</string>
+    <string name="language_english">English</string>
+
+    <!-- استيراد/مشاركة حزم الريموت -->
+    <string name="import_title">استيراد حزمة ريموت</string>
+    <string name="import_scope_brand">كل أجهزة %1$s</string>
+    <string name="import_scope_model">%1$s — %2$s</string>
+    <string name="import_remotes_count">عدد الريموتات المضمّنة: %1$d</string>
+    <string name="import_confirm">استيراد</string>
+    <string name="import_error">هذا الملف ليس حزمة GT-TAHAKOM صالحة.</string>
+    <string name="share_pack">مشاركة حزمة ريموت</string>
+
+    <!-- أزرار عامة -->
+    <string name="action_cancel">إلغاء</string>
+    <string name="action_close">إغلاق</string>
+</resources>

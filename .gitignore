@@ -1,0 +1,18 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+/app/build/
+
+# مرجع IRRemote المفكوك (للدراسة فقط، لا يُرفع)
+/_study/
+/IRRemote-libre.zip
+
+# ملفات محلية متفرقة
+/Text File.txt
+*.apk
