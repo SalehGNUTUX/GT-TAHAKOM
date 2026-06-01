@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+يستورد أجهزة من قاعدة probonopd/irdb (CSV) ويحوّلها إلى صيغة GT-TAHAKOM الموحّدة
+في app/src/main/assets/irdb/. يحوّل بروتوكولات NEC/NECx إلى Pronto hex.
+
+الاستخدام (يتطلّب إنترنت مرة واحدة للتنزيل):
+  python3 tools/import_irdb.py "TV/Unionaire" "Samsung/TV/7,7" ...
+أو بقائمة من ملف. ثم يُضاف الناتج إلى index.json.
+
+المصدر: https://github.com/probonopd/irdb (مفتوح). الصيغة:
+  functionname,protocol,device,subdevice,function
+"""
+import csv
+import io
+import json
+import os
+import re
+import sys
+import urllib.request
+
+RAW = "https://raw.githubusercontent.com/probonopd/irdb/master/codes"
+DST = "app/src/main/assets/irdb"
+
+# تطبيع أسماء أزرار probonopd → ButtonId الدلالي عندنا
+NAME_MAP = {
+    "POWER": "POWER", "POWER ON": "POWER_ON", "POWER OFF": "POWER_OFF",
+    "VOLUME +": "VOL_UP", "VOLUME -": "VOL_DOWN", "VOL +": "VOL_UP", "VOL -": "VOL_DOWN",
+    "MUTE": "MUTE", "CHANNEL +": "CH_UP", "CHANNEL -": "CH_DOWN", "CH +": "CH_UP", "CH -": "CH_DOWN",
+    "UP": "NAV_UP", "DOWN": "NAV_DOWN", "LEFT": "NAV_LEFT", "RIGHT": "NAV_RIGHT",
+    "OK": "NAV_OK", "ENTER": "NAV_OK", "SELECT": "NAV_OK",
+    "BACK": "BACK", "RETURN": "BACK", "EXIT": "EXIT", "HOME": "HOME", "MENU": "MENU",
+    "INFO": "INFO", "DISPLAY": "DISP", "GUIDE": "GUIDE", "EPG": "GUIDE",
+    "INPUT SOURCE": "SOURCE", "INPUT": "SOURCE", "SOURCE": "SOURCE", "TV/AV": "SOURCE",
+    "0": "DIGIT_0", "1": "DIGIT_1", "2": "DIGIT_2", "3": "DIGIT_3", "4": "DIGIT_4",
+    "5": "DIGIT_5", "6": "DIGIT_6", "7": "DIGIT_7", "8": "DIGIT_8", "9": "DIGIT_9",
+    "PLAY": "PLAY", "PAUSE": "PAUSE", "STOP": "STOP", "FAST FORWARD": "FFWD",
+    "REWIND": "RWD", "RECORD": "RECORD", "SLEEP": "SLEEP", "LIST": "LIST",
+    "RED": "RED", "GREEN": "GREEN", "YELLOW": "YELLOW", "BLUE": "BLUE",
+    "SUBTITLE": "CC", "TEXT": "TEXT", "FAVORITE": "FAV", "FAV": "FAV",
+}
+
+NEC_FREQ = 38000  # Hz
+
+
+def nec_to_pronto(device, subdevice, function):
+    """يولّد كود Pronto hex لإطار NEC من (device, subdevice, function)."""
+    # NEC: حامل 38kHz. وحدة Pronto: 1/(freq*0.241246e-6).
+    carrier = round(1_000_000 / (NEC_FREQ * 0.241246))  # = word1
+    # NEC يرسل: device, ~device (أو subdevice), function, ~function (8 بت لكل منها، LSB أولاً)
+    if subdevice < 0:
+        sub = (~device) & 0xFF
+    else:
+        sub = subdevice & 0xFF
+    bytes_ = [device & 0xFF, sub, function & 0xFF, (~function) & 0xFF]
+
+    # وحدة NEC = 562.5us ≈ 560us. بوحدات Pronto: round(562.5/(carrier*0.241246)).
+    unit = round(562.5 / (carrier * 0.241246))
+    pairs = []
+    # رأس: 9000us on (16 وحدة) + 4500us off (8 وحدات)
+    pairs += [16 * unit, 8 * unit]
+    for b in bytes_:
+        for i in range(8):
+            bit = (b >> i) & 1
+            if bit:
+                pairs += [unit, 3 * unit]  # 1 = 560 on, 1690 off
+            else:
+                pairs += [unit, unit]      # 0 = 560 on, 560 off
+    # نبضة نهاية
+    pairs += [unit, 39 * unit]
+
+    n = len(pairs) // 2
+    words = [0x0000, carrier, 0x0000, n] + pairs
+    return " ".join(f"{w:04x}" for w in words)
+
+
+def fetch_csv(path):
+    url = f"{RAW}/{path}.csv"
+    with urllib.request.urlopen(url, timeout=20) as r:
+        return r.read().decode("utf-8", errors="ignore")
+
+
+def convert(csv_text):
+    buttons = []
+    reader = csv.DictReader(io.StringIO(csv_text))
+    for row in reader:
+        proto = (row.get("protocol") or "").strip().upper()
+        if not proto.startswith("NEC"):
+            continue  # ندعم NEC/NECx الآن؛ بروتوكولات أخرى لاحقاً
+        try:
+            dev = int(row["device"]); sub = int(row["subdevice"]); fn = int(row["function"])
+        except (ValueError, KeyError):
+            continue
+        name = (row.get("functionname") or "").strip().upper()
+        bid = NAME_MAP.get(name, "UNKNOWN")
+        code = nec_to_pronto(dev, sub, fn)
+        buttons.append({"id": bid, "label": name, "code": code, "freq": NEC_FREQ})
+    return buttons
+
+
+def slugify(name):
+    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "device"
+
+
+def main(specs):
+    """specs: قائمة 'Brand/TV/dev,sub' (مسار probonopd). الفئة تُستنتج من الجزء الثاني."""
+    index_path = os.path.join(DST, "index.json")
+    index = json.load(open(index_path, encoding="utf-8"))["devices"]
+    added = 0
+    for spec in specs:
+        parts = spec.split("/")
+        brand = parts[0]
+        category = "TV" if len(parts) < 2 else parts[1].replace(" ", "_")
+        try:
+            buttons = convert(fetch_csv(spec))
+        except Exception as e:
+            print(f"skip {spec}: {e}", file=sys.stderr)
+            continue
+        if not buttons:
+            print(f"skip {spec}: no NEC buttons", file=sys.stderr)
+            continue
+        cat_dir = "TV" if "TV" in category else category
+        os.makedirs(os.path.join(DST, cat_dir), exist_ok=True)
+        slug = slugify(brand)
+        rel = f"{cat_dir}/{slug}.json"
+        device = {"category": cat_dir, "brand": brand, "model": brand,
+                  "freq": NEC_FREQ, "buttons": buttons}
+        json.dump(device, open(os.path.join(DST, rel), "w", encoding="utf-8"),
+                  ensure_ascii=False, separators=(",", ":"))
+        if not any(d["file"] == rel for d in index):
+            index.append({"category": cat_dir, "brand": brand, "model": brand,
+                          "file": rel, "freq": NEC_FREQ, "buttons": len(buttons)})
+        added += 1
+        print(f"added {brand} ({len(buttons)} buttons) ← {spec}")
+    json.dump({"version": 1, "devices": index},
+              open(index_path, "w", encoding="utf-8"),
+              ensure_ascii=False, separators=(",", ":"))
+    print(f"done: {added} devices, index now {len(index)}")
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
