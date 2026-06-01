@@ -33,14 +33,13 @@ Android SDK: `/home/gnutux/Android/Sdk` (مضبوط في `local.properties`).
 - اتجاه RTL يتولّاه Compose تلقائياً حسب اللغة — لا تُجبر اتجاهاً.
 
 ## الحالة والخطة
-- **م0 (التأسيس): ✅ منجز** — Transport/Registry، النموذج، IrTransport، Hilt، أيقونة، توثيق، Gradle wrapper.
-- **م1 (الاكتشاف): ✅ منجز** — MdnsDiscovery (NsdManager) + SsdpDiscovery (UDP multicast) + DiscoveryManager + MulticastLockHolder + DiscoveryViewModel + شاشة أجهزة حيّة. اكتشاف أوفلاين بالكامل.
-- **م2 (التحكّم الفعلي): ✅** — RokuTransport (ECP) + RemoteScreen + RemoteViewModel.
-- **م4 (IR): ✅ القاعدة + الإرسال** — قاعدة محلية 44 جهازاً (assets/irdb) + IrTransport (Pronto) + ضبط شبه آلي بمنطق الطاقة/الصوت.
-- **إصلاحات حرجة (v0.4.0):** ريموت IR يرسل فعلياً الآن (RemoteViewModel يحمّل IrDevice ويترجم ButtonId→Pronto؛ كان يرسل Command.Key لـ IrTransport فيفشل بـ UNSUPPORTED_COMMAND). شاشة الإضافة تعرض قاعدة الـ44 الحقيقية مصنّفة وقابلة للبحث (حُذف BrandCatalog الوهمي). قائمة أجهزة محفوظة (SavedDevicesRepository/DataStore) بحفظ/حذف/مشاركة. الريموت يُظهر الأزرار المدعومة فقط.
-- **التصميم (v0.5.0): 🔄 جزئي** — اعتُمد نظام GT-TAHAKOM-DESIGN: رموز تصميم serene (OKLCH→sRGB في ui/theme/Tokens.kt) + أيقونات SVG حقيقية (ui/icons/TahakomIcons.kt، محوّلة من icons.jsx، تحلّ مشكلة الأيقونات الناقصة) + شاشة Onboarding (3 شرائح) + RemoteScreen جديدة (أزرار دائرية بأيقونات + شريط وسيلة + لوحة لمس بإيماءات + روكرات). أُصلح "النقر مرتين" (ensureLoaded في send قبل الإرسال). **تبقّى:** تطبيق التصميم على DevicesScreen/AddDeviceScreen/IrSetupScreen + bottom sheets + BottomNav + سمة فاتح/داكن قابلة للتبديل.
-- **التالي:** إكمال تطبيق التصميم على بقية الشاشات. ثم توسيع قاعدة IR. ثم AndroidTv/Samsung/LG/Sony.
-- بقية المراحل (م3–م5) في docs/ARCHITECTURE.md.
+> **الحالة التفصيلية الكاملة في [docs/STATUS.md](docs/STATUS.md)** (المصدر المرجعي). الإصدار الحالي: **0.6.0**.
+
+- **م0–م2 + م4(جزئياً): ✅** — Transport/Registry، الاكتشاف (mDNS/SSDP)، RokuTransport، قاعدة IR محلية (44 جهازاً) + IrTransport (Pronto) + ضبط شبه آلي.
+- **المزايا: ✅** — تبديل اللغة، مشاركة .tahakom، قائمة أجهزتي (DataStore)، شاشة ترحيب، زر رجوع ذكي، هوامش النظام.
+- **الريموت: ✅ عام لكل جهاز** — أزرار اتجاهات بالنقر + روكرات + وسائط + زر "المزيد" (⋮: أرقام/وظائف/ألوان). يعرض المدعوم فقط.
+- **التصميم: 🔄 جزئي** — رموز serene + أيقونات Material + شاشتا الترحيب والريموت بالتصميم. تبقّى: بقية الشاشات + سمة فاتح/داكن + sheets + BottomNav.
+- **التالي (أولوية):** بروتوكولات الشبكة للتلفاز الذكي (AndroidTv بالإقران + Samsung/LG/Sony) — ضرورية لفتح التطبيقات/التنقّل (IR لا يكفي). ثم إكمال التصميم، ثم توسيع القاعدة (probonopd/irdb).
 
 ## مبدأ قاعدة البيانات (موثّق في docs/DATABASE.md)
 أوفلاين افتراضياً. اكتشاف الشبكة لا يحتاج قاعدة (الجهاز يُعلن عن نفسه). أكواد IR: قاعدة مدمجة في assets للعلامات الشهيرة (أوفلاين) + تنزيل اختياري لعلامة نادرة من LIRC (مرة واحدة ثم كاش) + حزم .tahakom + التعلّم. لا تجعل أي وظيفة أساسية تعتمد على الإنترنت.
