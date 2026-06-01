@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/الإصدار-0.1.0--alpha-21E6C1?style=for-the-badge" alt="Version"/>
+  <img src="https://img.shields.io/badge/الإصدار-0.9.0-21E6C1?style=for-the-badge" alt="Version"/>
   <img src="https://img.shields.io/badge/الترخيص-GPLv3-FF7A1A?style=for-the-badge" alt="License"/>
   <img src="https://img.shields.io/badge/Kotlin-Compose-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin"/>
   <img src="https://img.shields.io/badge/Android-8.0%2B-3ddc84?style=for-the-badge&logo=android&logoColor=white" alt="Android"/>
@@ -47,11 +47,11 @@
 
 ## الحالة الراهنة
 
-- **م0–م2 ✅** — البنية، الاكتشاف الحيّ (mDNS/SSDP)، `RokuTransport`، شاشة ريموت تعمل.
-- **قاعدة IR محلية ✅** — 44 جهازاً (تلفاز/استقبال/صوت) أوفلاين + إرسال فعلي (Pronto) + ضبط شبه آلي.
-- **المزايا ✅** — تبديل اللغة، مشاركة `.tahakom`، قائمة "أجهزتي"، شاشة ترحيب، ريموت عام لكل جهاز بقائمة "المزيد".
-- **التصميم 🔄** — اعتُمد جزئياً (الترحيب + الريموت). الإصدار الحالي **0.6.0**.
-- **التالي** — بروتوكولات الشبكة للتلفاز الذكي (Android TV/Samsung/LG/Sony). الحالة الكاملة في [docs/STATUS.md](docs/STATUS.md).
+- **التحكّم الشبكي ✅** — اكتشاف حيّ (mDNS/SSDP) + `RokuTransport` + `WebosTransport` (LG webOS/SSAP) + `SamsungTizenTransport`.
+- **قاعدة IR محلية ✅** — 46 جهازاً (تلفاز/استقبال/صوت) أوفلاين + إرسال فعلي (Pronto) + ضبط شبه آلي + **تعلّم بالإدخال اليدوي**.
+- **المزايا ✅** — تبديل اللغة، مشاركة `.tahakom`، قائمة "أجهزتي"، شاشة ترحيب، جهاز تحكّم عام لكل جهاز بقائمة "المزيد"، إعدادات كاملة + سمة فاتح/داكن.
+- **التصميم 🔄** — اعتُمد على شاشتي الترحيب والتحكّم والإعدادات. الإصدار الحالي **0.9.0**.
+- **التالي** — Android TV (Remote v2) + لوحة لمس المؤشّر للتلفاز الذكي. الحالة الكاملة في [docs/STATUS.md](docs/STATUS.md).
 
 خطة المراحل الكاملة في [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#خطة-المراحل).
 

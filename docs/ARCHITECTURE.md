@@ -15,13 +15,13 @@ UI (Compose)
    ▼
 TransportRegistry.forDevice(device) ──► Transport (مختار حسب النوع)
    │
-   ├─ IrTransport          (ConsumerIrManager)         [م4]
-   ├─ AndroidTvTransport   (Remote v2 + إقران TLS)      [م2]
-   ├─ RokuTransport        (ECP / HTTP)                 [م2]
-   ├─ SamsungTizenTransport(WebSocket)                  [م3]
-   ├─ WebosTransport       (SSAP WebSocket)             [م3]
-   ├─ SonyBraviaTransport  (IRCC / REST)                [م3]
-   └─ BroadlinkTransport   (جسر WiFi-IR)                [م4]
+   ├─ IrTransport          (ConsumerIrManager / Pronto)  ✅
+   ├─ RokuTransport        (ECP / HTTP)                  ✅
+   ├─ WebosTransport       (LG SSAP WebSocket)           ✅
+   ├─ SamsungTizenTransport(WebSocket)                   ✅
+   ├─ AndroidTvTransport   (Remote v2 + إقران TLS)       ⏳
+   ├─ SonyBraviaTransport  (IRCC / REST)                 ⏳
+   └─ BroadlinkTransport   (جسر WiFi-IR)                 ⏳
 ```
 
 ## بنية الحزم
@@ -79,11 +79,12 @@ com.gnutux.tahakom
 | :-- | :-- | :-- |
 | **م0** | التأسيس: Kotlin/Compose، RTL، Hilt، طبقة Transport، النموذج، IrTransport | ✅ مُنجز |
 | **م1** | الاكتشاف التلقائي: NSD/mDNS + SSDP + شاشة الأجهزة الحيّة | ✅ مُنجز |
-| **م2** | `RokuTransport` (ECP) عامل + شاشة ريموت ترسل فعلاً + إضافة من القاعدة + أجهزتي | ✅ مُنجز |
-| **م4** | قاعدة IR محلية (44 جهازاً) + `IrTransport` (Pronto) + ضبط شبه آلي + قائمة "المزيد" | ✅ القاعدة والإرسال؛ التوسيع لاحقاً |
-| **التصميم** | اعتماد GT-TAHAKOM-DESIGN: رموز serene + أيقونات + ترحيب + ريموت | 🔄 جزئي (الترحيب/الريموت) |
-| **م3** | توسّع الشبكة: Android TV (إقران TLS) + Samsung + LG + Sony | ⏳ التالي |
-| **م5** | جسر Broadlink + توسيع القاعدة (probonopd/irdb) + المحرر المرئي + ويدجت + تحزيم F-Droid/CI | ⏳ |
+| **م2** | `RokuTransport` (ECP) + شاشة تحكّم ترسل فعلاً + إضافة من القاعدة + أجهزتي | ✅ مُنجز |
+| **م4** | قاعدة IR محلية (46 جهازاً) + `IrTransport` (Pronto) + ضبط شبه آلي + قائمة "المزيد" + تعلّم يدوي | ✅ مُنجز؛ التوسيع متعدّد البروتوكولات لاحقاً |
+| **م3** | توسّع الشبكة: `WebosTransport` (LG) + `SamsungTizenTransport` | ✅ LG+Samsung؛ Android TV/Sony لاحقاً |
+| **التصميم** | رموز serene + أيقونات + ترحيب + شاشة تحكّم + إعدادات كاملة + سمة | 🔄 جزئي (يتبقّى Devices/AddDevice) |
+| **التالي** | `AndroidTvTransport` (Remote v2) + لوحة لمس المؤشّر (pointer socket) + Sony | ⏳ |
+| **م5** | جسر Broadlink + محوّلات RC5/RC6 لـ probonopd + المحرر المرئي + ويدجت + F-Droid/CI | ⏳ |
 
 > الحالة التفصيلية الكاملة في [STATUS.md](STATUS.md). أزرار الريموت في [REMOTE_BUTTONS.md](REMOTE_BUTTONS.md). مبدأ القاعدة في [DATABASE.md](DATABASE.md).
 
