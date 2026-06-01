@@ -9,6 +9,13 @@
     <string name="devices_scanning_hint">يجري البحث عن الأجهزة على شبكة WiFi لديك…</string>
     <string name="devices_add_manual">إضافة بالاسم / الطراز</string>
 
+    <!-- إضافة جهاز بالاسم/الطراز -->
+    <string name="add_device_title">إضافة بالاسم / الطراز</string>
+    <string name="add_device_ip_hint">أدخل عنوان IP للجهاز على شبكة WiFi لديك.</string>
+    <string name="add_device_ip_label">عنوان IP (مثال: 192.168.1.20)</string>
+    <string name="add_device_ir_note">علامات IR تتطلّب باعث IR أو جسر WiFi-IR (قادم في المرحلة 4).</string>
+    <string name="add_device_open_remote">افتح الريموت</string>
+
     <!-- الإعدادات واللغة -->
     <string name="settings_title">الإعدادات</string>
     <string name="settings_language">اللغة</string>

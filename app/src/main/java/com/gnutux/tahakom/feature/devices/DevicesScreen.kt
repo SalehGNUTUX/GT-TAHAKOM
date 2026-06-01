@@ -1,5 +1,6 @@
 package com.gnutux.tahakom.feature.devices
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,6 +45,7 @@ import com.gnutux.tahakom.core.discovery.DiscoveredDevice
 fun DevicesScreen(
     onOpenSettings: () -> Unit = {},
     onAddManual: () -> Unit = {},
+    onDeviceClick: (DiscoveredDevice) -> Unit = {},
     viewModel: DiscoveryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -73,7 +75,7 @@ fun DevicesScreen(
             } else {
                 LazyColumn(Modifier.fillMaxSize().padding(top = 12.dp)) {
                     items(state.devices, key = { it.host + it.transport.name }) { device ->
-                        DeviceRow(device)
+                        DeviceRow(device, onClick = { onDeviceClick(device) })
                     }
                 }
             }
@@ -111,8 +113,8 @@ private fun ScanControls(
 }
 
 @Composable
-private fun DeviceRow(device: DiscoveredDevice) {
-    ElevatedCard(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+private fun DeviceRow(device: DiscoveredDevice, onClick: () -> Unit) {
+    ElevatedCard(Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable(onClick = onClick)) {
         Column(Modifier.padding(16.dp)) {
             Text(text = device.name, style = MaterialTheme.typography.titleMedium)
             val subtitle = buildString {

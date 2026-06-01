@@ -9,6 +9,7 @@ import com.gnutux.tahakom.core.discovery.SsdpDiscovery
 import com.gnutux.tahakom.core.transport.Transport
 import com.gnutux.tahakom.core.transport.TransportRegistry
 import com.gnutux.tahakom.core.transport.impl.IrTransport
+import com.gnutux.tahakom.core.transport.impl.RokuTransport
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,7 +34,8 @@ object AppModule {
     ): TransportRegistry {
         val transports: List<Transport> = listOf(
             IrTransport(context),
-            // م2: AndroidTvTransport(context), RokuTransport(...)
+            RokuTransport(),
+            // م2: AndroidTvTransport(context)
             // م3: SamsungTizenTransport(...), WebosTransport(...), SonyBraviaTransport(...)
             // م4: BroadlinkTransport(...)
         )

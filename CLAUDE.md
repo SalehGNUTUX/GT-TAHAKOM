@@ -35,7 +35,8 @@ Android SDK: `/home/gnutux/Android/Sdk` (مضبوط في `local.properties`).
 ## الحالة والخطة
 - **م0 (التأسيس): ✅ منجز** — Transport/Registry، النموذج، IrTransport، Hilt، أيقونة، توثيق، Gradle wrapper.
 - **م1 (الاكتشاف): ✅ منجز** — MdnsDiscovery (NsdManager) + SsdpDiscovery (UDP multicast) + DiscoveryManager + MulticastLockHolder + DiscoveryViewModel + شاشة أجهزة حيّة. اكتشاف أوفلاين بالكامل.
-- **التالي: م2** — أول وسيلتي نقل (AndroidTvTransport + RokuTransport) + شاشة الريموت + ربط الاستيراد بـ Room.
+- **م2 (التحكّم الفعلي): 🔄 جارٍ** — RokuTransport (ECP/HTTP، إرسال حقيقي) + RemoteScreen (أزرار تعمل: طاقة/تنقّل/صوت/قنوات/وسائط) + RemoteViewModel + BrandCatalog + AddDeviceScreen (اختيار علامة + IP) + تنقّل في MainActivity (Devices/Settings/AddDevice/Remote). النقر على جهاز مكتشَف أو إضافته يدوياً يفتح ريموته.
+- **التالي ضمن م2:** AndroidTvTransport (Remote v2 + إقران TLS)، ثم توسيع نطاق الأجهزة (محاكاة IRRemote: م4 IR بقاعدة assets) حسب طلب المستخدم.
 - بقية المراحل (م3–م5) في docs/ARCHITECTURE.md.
 
 ## مبدأ قاعدة البيانات (موثّق في docs/DATABASE.md)
