@@ -51,6 +51,21 @@
     <string name="tr_ir">أشعة تحت الحمراء</string>
     <string name="tr_bridge">جسر WiFi-IR</string>
 
+    <!-- قائمة المزيد -->
+    <string name="more_title">أزرار إضافية</string>
+    <string name="more_numbers">الأرقام</string>
+    <string name="more_functions">الوظائف</string>
+    <string name="more_colors">الأزرار الملوّنة</string>
+    <string name="fn_guide">دليل البرامج</string>
+    <string name="fn_list">قائمة القنوات</string>
+    <string name="fn_info">معلومات</string>
+    <string name="fn_subs">الترجمة</string>
+    <string name="fn_smart">القائمة الذكية / التطبيقات</string>
+    <string name="fn_settings">الإعدادات</string>
+    <string name="fn_source">المصدر</string>
+    <string name="fn_exit">خروج</string>
+    <string name="fn_text">تيليتكست</string>
+
     <!-- الإعدادات واللغة -->
     <string name="settings_title">الإعدادات</string>
     <string name="settings_language">اللغة</string>

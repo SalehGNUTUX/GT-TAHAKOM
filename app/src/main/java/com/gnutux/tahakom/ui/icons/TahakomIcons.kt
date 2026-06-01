@@ -33,6 +33,9 @@ import androidx.compose.material.icons.outlined.Sensors
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.SettingsRemote
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.ClosedCaption
+import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.outlined.Input
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Tv
 import androidx.compose.material.icons.outlined.Wifi
@@ -72,7 +75,9 @@ object TahakomIcons {
         "rewind" -> Icons.Outlined.FastRewind
         "forward" -> Icons.Outlined.FastForward
         "menu" -> Icons.Outlined.Menu
-        "source" -> Icons.Outlined.Tv
+        "source" -> Icons.Outlined.Input
+        "guide" -> Icons.Outlined.GridView
+        "subtitles" -> Icons.Outlined.ClosedCaption
 
         "tv" -> Icons.Outlined.Tv
         "wifi" -> Icons.Outlined.Wifi

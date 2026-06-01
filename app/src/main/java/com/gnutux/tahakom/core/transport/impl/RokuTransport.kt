@@ -82,6 +82,16 @@ class RokuTransport : Transport {
         ButtonId.PLAY, ButtonId.PAUSE -> "Play"
         ButtonId.FFWD -> "Fwd"
         ButtonId.RWD -> "Rev"
+        ButtonId.DIGIT_0 -> "Lit_0"
+        ButtonId.DIGIT_1 -> "Lit_1"
+        ButtonId.DIGIT_2 -> "Lit_2"
+        ButtonId.DIGIT_3 -> "Lit_3"
+        ButtonId.DIGIT_4 -> "Lit_4"
+        ButtonId.DIGIT_5 -> "Lit_5"
+        ButtonId.DIGIT_6 -> "Lit_6"
+        ButtonId.DIGIT_7 -> "Lit_7"
+        ButtonId.DIGIT_8 -> "Lit_8"
+        ButtonId.DIGIT_9 -> "Lit_9"
         else -> null
     }
 }

@@ -51,6 +51,21 @@
     <string name="tr_ir">Infrared</string>
     <string name="tr_bridge">WiFi-IR bridge</string>
 
+    <!-- قائمة المزيد -->
+    <string name="more_title">More controls</string>
+    <string name="more_numbers">Numbers</string>
+    <string name="more_functions">Functions</string>
+    <string name="more_colors">Color buttons</string>
+    <string name="fn_guide">Guide</string>
+    <string name="fn_list">Channel list</string>
+    <string name="fn_info">Info</string>
+    <string name="fn_subs">Subtitles</string>
+    <string name="fn_smart">Smart / Apps</string>
+    <string name="fn_settings">Settings</string>
+    <string name="fn_source">Source</string>
+    <string name="fn_exit">Exit</string>
+    <string name="fn_text">Teletext</string>
+
     <!-- الإعدادات واللغة -->
     <string name="settings_title">Settings</string>
     <string name="settings_language">Language</string>

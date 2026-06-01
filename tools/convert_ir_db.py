@@ -27,6 +27,9 @@ ID_NAMES = {
     30: "CLEAR", 31: "EXIT", 32: "CC", 33: "INFO", 34: "SLEEP", 35: "PLAY",
     36: "PAUSE", 37: "STOP", 38: "FFWD", 39: "RWD", 40: "NEXT", 41: "PREV",
     42: "RECORD", 43: "DISP", 61: "HOME",
+    # وظائف إضافية + أزرار ملوّنة (تطابق Button.java في IRRemote)
+    48: "RED", 49: "GREEN", 50: "BLUE", 51: "YELLOW",
+    62: "LIST", 63: "FAV", 68: "SETTINGS",
 }
 
 
