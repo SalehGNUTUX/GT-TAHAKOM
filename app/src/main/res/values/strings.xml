@@ -105,6 +105,22 @@
     <string name="language_system">System default</string>
     <string name="language_arabic">العربية</string>
     <string name="language_english">English</string>
+    <string name="app_tagline">One control hub</string>
+    <string name="set_appearance">Appearance</string>
+    <string name="set_theme">Theme</string>
+    <string name="set_light">Light</string>
+    <string name="set_dark">Dark</string>
+    <string name="theme_system">System</string>
+    <string name="set_transports">Sending paths</string>
+    <string name="set_network">Network discovery</string>
+    <string name="set_network_sub">Auto-detects smart TVs on WiFi</string>
+    <string name="set_ir">Infrared blaster</string>
+    <string name="set_ir_sub">Uses the phone\'s IR emitter if present</string>
+    <string name="set_bridge">WiFi-IR bridge</string>
+    <string name="set_bridge_sub">Broadlink (coming soon)</string>
+    <string name="set_about">About</string>
+    <string name="set_version">Version</string>
+    <string name="set_license">License</string>
 
     <!-- استيراد/مشاركة حزم الريموت -->
     <string name="import_title">Import remote pack</string>

@@ -27,12 +27,20 @@ class SavedDevicesRepository(private val context: Context) {
 
     private val key = stringPreferencesKey("saved_devices")
     private val onboardingKey = booleanPreferencesKey("onboarding_done")
+    private val themeKey = stringPreferencesKey("theme_mode") // "system" | "light" | "dark"
 
     /** هل أنهى المستخدم شاشة الترحيب؟ */
     val onboardingDone: Flow<Boolean> = context.dataStore.data.map { it[onboardingKey] ?: false }
 
     suspend fun setOnboardingDone() {
         context.dataStore.edit { it[onboardingKey] = true }
+    }
+
+    /** وضع السمة: system / light / dark. */
+    val themeMode: Flow<String> = context.dataStore.data.map { it[themeKey] ?: "system" }
+
+    suspend fun setThemeMode(mode: String) {
+        context.dataStore.edit { it[themeKey] = mode }
     }
 
     /** تدفّق الأجهزة المحفوظة (يتحدّث تلقائياً عند أي تغيير). */

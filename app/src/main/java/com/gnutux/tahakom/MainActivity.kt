@@ -52,10 +52,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TahakomTheme {
+            // ViewModel مشترك يُنشأ قبل السمة كي تقرأ وضع السمة المحفوظ منه.
+            val devicesVm: DevicesViewModel = hiltViewModel()
+            val themeMode by devicesVm.themeMode.collectAsStateWithLifecycle()
+            val systemDark = androidx.compose.foundation.isSystemInDarkTheme()
+            val dark = when (themeMode) {
+                "light" -> false
+                "dark" -> true
+                else -> systemDark
+            }
+            TahakomTheme(darkTheme = dark) {
                 val context = LocalContext.current
-                // ViewModel مشترك على مستوى الشاشة الرئيسية للحفظ/المشاركة.
-                val devicesVm: DevicesViewModel = hiltViewModel()
                 val onboardingDone by devicesVm.onboardingDone.collectAsStateWithLifecycle()
                 var screen by remember { mutableStateOf<Screen>(Screen.Devices) }
 
@@ -114,7 +121,11 @@ class MainActivity : AppCompatActivity() {
                         onShareDevice = { shareDevice(it) },
                         viewModel = devicesVm,
                     )
-                    Screen.Settings -> SettingsScreen(onBack = { screen = Screen.Devices })
+                    Screen.Settings -> SettingsScreen(
+                        onBack = { screen = Screen.Devices },
+                        themeMode = themeMode,
+                        onThemeMode = devicesVm::setThemeMode,
+                    )
                     Screen.AddDevice -> AddDeviceScreen(
                         onBack = { screen = Screen.Devices },
                         onPickIrDevice = { screen = Screen.IrSetup(it.file) },

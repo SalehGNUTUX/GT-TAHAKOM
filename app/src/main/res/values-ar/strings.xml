@@ -13,8 +13,8 @@
     <string name="device_delete">حذف</string>
     <string name="exit_hint">اضغط رجوع مرة أخرى للخروج</string>
 
-    <!-- تعلّم ريموت يدوياً -->
-    <string name="learn_title">تعلّم ريموت</string>
+    <!-- تعلّم جهاز تحكّم يدوياً -->
+    <string name="learn_title">تعلّم جهاز تحكّم</string>
     <string name="learn_hint">للأجهزة غير المدرجة: أدخل كود Pronto لكل زر. الكود يبدأ بـ 0000 (كلمات hex). تجده في remotecentral.com أو irdb، أو استورده عبر ملف ‎.tahakom‎ مشترَك. اترك ما لا تحتاجه فارغاً — يكفي كود صالح واحد للحفظ.</string>
     <string name="learn_device_name">اسم الجهاز (مثل Unionaire)</string>
     <string name="learn_codes_label">أكواد Pronto (hex، تبدأ بـ 0000)</string>
@@ -68,7 +68,7 @@
     <string name="ob3_title">ثلاث وسائل، تجربة واحدة</string>
     <string name="ob3_body">شبكة WiFi للتلفازات الذكية، أشعة تحت الحمراء للأجهزة القديمة، وجسر Broadlink لكل ما بينهما.</string>
 
-    <!-- شاشة الريموت -->
+    <!-- شاشة جهاز التحكّم -->
     <string name="rm_volume">الصوت</string>
     <string name="rm_channel">القناة</string>
     <string name="rm_active_path">وسيلة الإرسال النشطة</string>
@@ -105,15 +105,31 @@
     <string name="language_system">لغة النظام</string>
     <string name="language_arabic">العربية</string>
     <string name="language_english">English</string>
+    <string name="app_tagline">مركز تحكّم موحّد</string>
+    <string name="set_appearance">المظهر</string>
+    <string name="set_theme">السمة</string>
+    <string name="set_light">فاتح</string>
+    <string name="set_dark">داكن</string>
+    <string name="theme_system">النظام</string>
+    <string name="set_transports">وسائل الإرسال</string>
+    <string name="set_network">اكتشاف الشبكة</string>
+    <string name="set_network_sub">يكتشف التلفازات الذكية على WiFi تلقائياً</string>
+    <string name="set_ir">باعث الأشعة تحت الحمراء</string>
+    <string name="set_ir_sub">يستخدم باعث IR في الهاتف إن وُجد</string>
+    <string name="set_bridge">جسر WiFi-IR</string>
+    <string name="set_bridge_sub">Broadlink (قريباً)</string>
+    <string name="set_about">حول التطبيق</string>
+    <string name="set_version">الإصدار</string>
+    <string name="set_license">الترخيص</string>
 
-    <!-- استيراد/مشاركة حزم الريموت -->
-    <string name="import_title">استيراد حزمة ريموت</string>
+    <!-- استيراد/مشاركة حزم جهاز التحكّم -->
+    <string name="import_title">استيراد حزمة جهاز تحكّم</string>
     <string name="import_scope_brand">كل أجهزة %1$s</string>
     <string name="import_scope_model">%1$s — %2$s</string>
-    <string name="import_remotes_count">عدد الريموتات المضمّنة: %1$d</string>
+    <string name="import_remotes_count">عدد أجهزة التحكّم المضمّنة: %1$d</string>
     <string name="import_confirm">استيراد</string>
     <string name="import_error">هذا الملف ليس حزمة GT-TAHAKOM صالحة.</string>
-    <string name="share_pack">مشاركة حزمة ريموت</string>
+    <string name="share_pack">مشاركة حزمة جهاز تحكّم</string>
 
     <!-- أزرار عامة -->
     <string name="action_cancel">إلغاء</string>

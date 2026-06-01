@@ -1,39 +1,55 @@
 package com.gnutux.tahakom.feature.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.gnutux.tahakom.R
 import com.gnutux.tahakom.core.settings.AppLanguage
 import com.gnutux.tahakom.core.settings.LocaleManager
+import com.gnutux.tahakom.ui.icons.TahakomIcon
+import com.gnutux.tahakom.ui.theme.tokens
 
 /**
- * شاشة الإعدادات — تتضمّن مبدّل اللغة (عربي/إنجليزي/النظام).
- * التبديل فوري عبر [LocaleManager]؛ يعيد النظام إنشاء الواجهة باللغة الجديدة.
+ * شاشة الإعدادات الكاملة (مقتبسة من تصميم SettingsScreen): هوية التطبيق + المظهر
+ * (سمة فاتح/داكن/نظام + اللغة) + وسائل الإرسال + حول التطبيق.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(onBack: () -> Unit) {
+fun SettingsScreen(
+    onBack: () -> Unit,
+    themeMode: String,
+    onThemeMode: (String) -> Unit,
+) {
+    val c = tokens.colors
     Scaffold(
         topBar = {
             TopAppBar(
@@ -46,45 +62,149 @@ fun SettingsScreen(onBack: () -> Unit) {
             )
         },
     ) { padding ->
-        Column(Modifier.padding(padding).padding(16.dp)) {
-            Text(
-                text = stringResource(R.string.settings_language),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 8.dp),
-            )
-            var selected by remember { mutableStateOf(LocaleManager.current()) }
-            LanguageOption(AppLanguage.SYSTEM, R.string.language_system, selected) {
-                selected = it; LocaleManager.apply(it)
+        Column(
+            Modifier.padding(padding).padding(16.dp).verticalScroll(rememberScrollState()),
+        ) {
+            // بطاقة هوية التطبيق
+            Row(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(tokens.shape.lg))
+                    .background(c.surface).border(1.dp, c.line, RoundedCornerShape(tokens.shape.lg))
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text("GT-TAHAKOM", color = c.text, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.app_tagline), color = c.textFaint, fontSize = 13.sp)
+                }
+                Chip("v0.9.0")
             }
-            LanguageOption(AppLanguage.ARABIC, R.string.language_arabic, selected) {
-                selected = it; LocaleManager.apply(it)
+            Spacer(Modifier.size(20.dp))
+
+            // قسم المظهر
+            SectionTitle(stringResource(R.string.set_appearance))
+            SettingRow("moon", stringResource(R.string.set_theme)) {
+                Segmented(
+                    options = listOf(
+                        "system" to stringResource(R.string.theme_system),
+                        "light" to stringResource(R.string.set_light),
+                        "dark" to stringResource(R.string.set_dark),
+                    ),
+                    selected = themeMode,
+                    onSelect = onThemeMode,
+                )
             }
-            LanguageOption(AppLanguage.ENGLISH, R.string.language_english, selected) {
-                selected = it; LocaleManager.apply(it)
+            SettingRow("globe", stringResource(R.string.settings_language), last = true) {
+                var current = LocaleManager.current()
+                Segmented(
+                    options = listOf(
+                        AppLanguage.SYSTEM.name to stringResource(R.string.language_system),
+                        AppLanguage.ARABIC.name to "ع",
+                        AppLanguage.ENGLISH.name to "EN",
+                    ),
+                    selected = current.name,
+                    onSelect = { LocaleManager.apply(AppLanguage.valueOf(it)) },
+                )
+            }
+            Spacer(Modifier.size(20.dp))
+
+            // قسم وسائل الإرسال (معلومات)
+            SectionTitle(stringResource(R.string.set_transports))
+            InfoRow("wifi", stringResource(R.string.set_network), stringResource(R.string.set_network_sub))
+            InfoRow("ir", stringResource(R.string.set_ir), stringResource(R.string.set_ir_sub))
+            InfoRow("bridge", stringResource(R.string.set_bridge), stringResource(R.string.set_bridge_sub), last = true)
+            Spacer(Modifier.size(20.dp))
+
+            // قسم حول
+            SectionTitle(stringResource(R.string.set_about))
+            InfoRow("info", stringResource(R.string.set_version), "0.9.0")
+            InfoRow("shield", stringResource(R.string.set_license), "GPLv3", last = true)
+        }
+    }
+}
+
+@Composable
+private fun SectionTitle(text: String) {
+    Text(
+        text.uppercase(), color = tokens.colors.textFaint, fontSize = 12.5.sp,
+        fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp,
+        modifier = Modifier.padding(start = 2.dp, bottom = 8.dp),
+    )
+}
+
+@Composable
+private fun SettingRow(icon: String, label: String, last: Boolean = false, trailing: @Composable () -> Unit) {
+    val c = tokens.colors
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconBox(icon)
+        Text(label, color = c.text, fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(1f).padding(start = 12.dp))
+        trailing()
+    }
+    if (!last) Divider()
+}
+
+@Composable
+private fun InfoRow(icon: String, label: String, value: String, last: Boolean = false) {
+    val c = tokens.colors
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconBox(icon)
+        Text(label, color = c.text, fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(1f).padding(start = 12.dp))
+        Text(value, color = c.textFaint, fontSize = 13.sp)
+    }
+    if (!last) Divider()
+}
+
+@Composable
+private fun IconBox(icon: String) {
+    val c = tokens.colors
+    Box(
+        Modifier.size(38.dp).clip(RoundedCornerShape(tokens.shape.sm)).background(c.bg2),
+        contentAlignment = Alignment.Center,
+    ) { TahakomIcon(icon, c.textDim, size = 20.dp) }
+}
+
+@Composable
+private fun Divider() {
+    Box(Modifier.fillMaxWidth().size(1.dp).background(tokens.colors.line))
+}
+
+@Composable
+private fun Segmented(options: List<Pair<String, String>>, selected: String, onSelect: (String) -> Unit) {
+    val c = tokens.colors
+    Row(
+        Modifier.clip(RoundedCornerShape(50)).background(c.bg2).padding(3.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        options.forEach { (value, label) ->
+            val active = value == selected
+            Box(
+                Modifier.clip(RoundedCornerShape(50))
+                    .background(if (active) c.surface else Color.Transparent)
+                    .clickable { onSelect(value) }
+                    .padding(horizontal = 14.dp, vertical = 7.dp),
+            ) {
+                Text(
+                    label,
+                    color = if (active) c.text else c.textFaint,
+                    fontSize = 13.sp,
+                    fontWeight = if (active) FontWeight.Bold else FontWeight.SemiBold,
+                )
             }
         }
     }
 }
 
 @Composable
-private fun LanguageOption(
-    language: AppLanguage,
-    labelRes: Int,
-    selected: AppLanguage,
-    onSelect: (AppLanguage) -> Unit,
-) {
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .selectable(selected = selected == language, onClick = { onSelect(language) })
-            .padding(vertical = 12.dp),
-    ) {
-        androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
-            RadioButton(selected = selected == language, onClick = { onSelect(language) })
-            Text(
-                text = stringResource(labelRes),
-                modifier = Modifier.padding(start = 8.dp),
-            )
-        }
-    }
+private fun Chip(text: String) {
+    val c = tokens.colors
+    Box(
+        Modifier.clip(RoundedCornerShape(50)).background(c.accentSoft).padding(horizontal = 11.dp, vertical = 5.dp),
+    ) { Text(text, color = c.accent, fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold) }
 }

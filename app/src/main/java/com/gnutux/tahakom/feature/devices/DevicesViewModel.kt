@@ -43,6 +43,12 @@ class DevicesViewModel @Inject constructor(
 
     fun completeOnboarding() = viewModelScope.launch { saved.setOnboardingDone() }
 
+    /** وضع السمة (system/light/dark) — يُطبَّق في MainActivity. */
+    val themeMode: StateFlow<String> =
+        saved.themeMode.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "system")
+
+    fun setThemeMode(mode: String) = viewModelScope.launch { saved.setThemeMode(mode) }
+
     private val _discovery = MutableStateFlow(DiscoveryUiState())
     val discovery: StateFlow<DiscoveryUiState> = _discovery.asStateFlow()
 

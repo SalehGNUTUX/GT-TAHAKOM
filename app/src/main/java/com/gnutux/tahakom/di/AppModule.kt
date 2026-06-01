@@ -12,6 +12,7 @@ import com.gnutux.tahakom.core.transport.Transport
 import com.gnutux.tahakom.core.transport.TransportRegistry
 import com.gnutux.tahakom.core.transport.impl.IrTransport
 import com.gnutux.tahakom.core.transport.impl.RokuTransport
+import com.gnutux.tahakom.core.transport.impl.SamsungTizenTransport
 import com.gnutux.tahakom.core.transport.impl.WebosTransport
 import dagger.Module
 import dagger.Provides
@@ -39,7 +40,8 @@ object AppModule {
             IrTransport(context),
             RokuTransport(),
             WebosTransport(context),
-            // التالي: AndroidTvTransport (إقران TLS) + SamsungTizen + SonyBravia
+            SamsungTizenTransport(context),
+            // التالي: AndroidTvTransport (إقران TLS بروتوبف) + SonyBravia
             // م5: BroadlinkTransport (جسر WiFi-IR)
         )
         return TransportRegistry(transports)
