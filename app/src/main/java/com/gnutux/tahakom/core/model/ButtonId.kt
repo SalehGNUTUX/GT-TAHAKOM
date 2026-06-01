@@ -38,6 +38,8 @@ enum class ButtonId {
     SLEEP,     // مؤقّت النوم
     DISP,      // العرض/المعلومات
     LIST,      // قائمة القنوات
+    SEARCH,    // البحث
+    APPS,      // قائمة التطبيقات (Smart Home / Apps)
     SETTINGS,  // الإعدادات
     TEXT,      // نصّ/تيليتكست
     AD,        // الوصف الصوتي / Quick Access

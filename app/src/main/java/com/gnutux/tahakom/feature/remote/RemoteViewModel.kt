@@ -50,8 +50,10 @@ class RemoteViewModel @Inject constructor(
         boundDeviceId = device.id
 
         if (device.transport != TransportType.IR) {
-            // الأجهزة الشبكية: كل الأزرار متاحة، لا تحميل.
-            _uiState.update { RemoteUiState(supported = ButtonId.entries.toSet(), ready = true) }
+            // الأجهزة الشبكية: الأزرار المدعومة حسب البروتوكول (مدفوع بالبيانات، عام).
+            _uiState.update {
+                RemoteUiState(supported = supportedForTransport(device.transport), ready = true)
+            }
             return
         }
 
@@ -98,5 +100,26 @@ class RemoteViewModel @Inject constructor(
             .mapNotNull { b -> runCatching { ButtonId.valueOf(b.id) }.getOrNull()?.let { it to b.code } }
             .toMap()
         _uiState.update { it.copy(supported = irCodes.keys, ready = true) }
+    }
+
+    /** الأزرار المدعومة لكل بروتوكول شبكي (يطابق ما يترجمه الـ Transport فعلياً). */
+    private fun supportedForTransport(transport: TransportType): Set<ButtonId> = when (transport) {
+        TransportType.LG_WEBOS -> setOf(
+            ButtonId.POWER, ButtonId.VOL_UP, ButtonId.VOL_DOWN, ButtonId.MUTE,
+            ButtonId.CH_UP, ButtonId.CH_DOWN, ButtonId.HOME, ButtonId.APPS,
+            ButtonId.INFO, ButtonId.PLAY, ButtonId.PAUSE, ButtonId.STOP,
+            ButtonId.FFWD, ButtonId.RWD, ButtonId.LIST, ButtonId.SETTINGS,
+            // الاتجاهات تأتي مع pointer socket لاحقاً.
+        )
+        TransportType.ROKU -> setOf(
+            ButtonId.POWER, ButtonId.NAV_UP, ButtonId.NAV_DOWN, ButtonId.NAV_LEFT,
+            ButtonId.NAV_RIGHT, ButtonId.NAV_OK, ButtonId.BACK, ButtonId.HOME,
+            ButtonId.INFO, ButtonId.VOL_UP, ButtonId.VOL_DOWN, ButtonId.MUTE,
+            ButtonId.PLAY, ButtonId.FFWD, ButtonId.RWD,
+            ButtonId.DIGIT_0, ButtonId.DIGIT_1, ButtonId.DIGIT_2, ButtonId.DIGIT_3, ButtonId.DIGIT_4,
+            ButtonId.DIGIT_5, ButtonId.DIGIT_6, ButtonId.DIGIT_7, ButtonId.DIGIT_8, ButtonId.DIGIT_9,
+        )
+        // بروتوكولات أخرى مستقبلاً: مجموعتها الخاصة. مؤقتاً كل الأزرار.
+        else -> ButtonId.entries.toSet()
     }
 }

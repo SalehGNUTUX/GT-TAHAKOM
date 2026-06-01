@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    يسمح باتصالات النص الصريح (ws:// / http://) على الشبكة المحلية فقط،
+    لأن بروتوكولات التلفاز (LG SSAP، Roku ECP) تستخدمها داخل الشبكة المنزلية.
+    الإنترنت العام يبقى محمياً (cleartext غير مسموح افتراضياً خارج هذه النطاقات).
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- نطاقات الشبكة المحلية الخاصة (RFC 1918) -->
+        <domain includeSubdomains="true">192.168.0.0</domain>
+        <domain includeSubdomains="true">10.0.0.0</domain>
+        <domain includeSubdomains="true">172.16.0.0</domain>
+    </domain-config>
+    <!-- احتياطي: السماح العام بالنص الصريح (أجهزة محلية بعناوين متغيّرة) -->
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

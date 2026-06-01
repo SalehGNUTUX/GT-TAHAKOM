@@ -23,6 +23,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -109,6 +110,22 @@ fun RemoteScreen(
                 onOk = { key(ButtonId.NAV_OK, "OK") },
             )
             Spacer(Modifier.height(16.dp))
+        }
+
+        // صف سياقي: القائمة الذكية/التطبيقات + قائمة القنوات + بحث (يظهر المدعوم فقط)
+        if (listOf(ButtonId.APPS, ButtonId.SMART, ButtonId.LIST, ButtonId.GUIDE, ButtonId.SEARCH).any(has)) {
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            ) {
+                if (has(ButtonId.APPS) || has(ButtonId.SMART)) {
+                    PillBtn("tv", stringResource(R.string.fn_smart)) {
+                        key(if (has(ButtonId.APPS)) ButtonId.APPS else ButtonId.SMART, "Apps")
+                    }
+                }
+                if (has(ButtonId.LIST)) PillBtn("menu", stringResource(R.string.fn_list)) { key(ButtonId.LIST, "List") }
+                if (has(ButtonId.SEARCH)) PillBtn("search", stringResource(R.string.fn_search)) { key(ButtonId.SEARCH, "Search") }
+            }
         }
 
         // الروكرات: الصوت + القناة
@@ -207,6 +224,21 @@ private fun RoundIconBtn(icon: String, accent: Boolean = false, surface2: Boolea
 }
 
 @Composable
+private fun PillBtn(icon: String, label: String, onClick: () -> Unit) {
+    val c = tokens.colors
+    Row(
+        Modifier.clip(RoundedCornerShape(50)).background(c.surface)
+            .border(1.dp, c.line, RoundedCornerShape(50))
+            .clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TahakomIcon(icon, c.text, size = 18.dp)
+        Spacer(Modifier.size(6.dp))
+        Text(label, color = c.text, fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
 private fun GhostIconBtn(icon: String, tint: Color, onClick: () -> Unit) {
     Box(
         Modifier.size(40.dp).clip(CircleShape).clickable(onClick = onClick),
@@ -220,14 +252,17 @@ private fun DPad(
     has: (ButtonId) -> Boolean,
     onUp: () -> Unit, onDown: () -> Unit, onLeft: () -> Unit, onRight: () -> Unit, onOk: () -> Unit,
 ) {
-    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        if (has(ButtonId.NAV_UP)) NavKey("caretUp", onUp) else Spacer(Modifier.size(60.dp))
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            if (has(ButtonId.NAV_LEFT)) NavKey("caretLeft", onLeft) else Spacer(Modifier.size(60.dp))
-            if (has(ButtonId.NAV_OK)) OkKey(onOk) else Spacer(Modifier.size(76.dp))
-            if (has(ButtonId.NAV_RIGHT)) NavKey("caretRight", onRight) else Spacer(Modifier.size(60.dp))
+    // الاتجاهات فيزيائية لا لغوية: نُجبر LTR كي لا تنعكس يمين/يسار في العربية.
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            if (has(ButtonId.NAV_UP)) NavKey("caretUp", onUp) else Spacer(Modifier.size(60.dp))
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (has(ButtonId.NAV_LEFT)) NavKey("caretLeft", onLeft) else Spacer(Modifier.size(60.dp))
+                if (has(ButtonId.NAV_OK)) OkKey(onOk) else Spacer(Modifier.size(76.dp))
+                if (has(ButtonId.NAV_RIGHT)) NavKey("caretRight", onRight) else Spacer(Modifier.size(60.dp))
+            }
+            if (has(ButtonId.NAV_DOWN)) NavKey("caretDown", onDown) else Spacer(Modifier.size(60.dp))
         }
-        if (has(ButtonId.NAV_DOWN)) NavKey("caretDown", onDown) else Spacer(Modifier.size(60.dp))
     }
 }
 

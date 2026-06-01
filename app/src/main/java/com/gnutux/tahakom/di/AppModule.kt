@@ -12,6 +12,7 @@ import com.gnutux.tahakom.core.transport.Transport
 import com.gnutux.tahakom.core.transport.TransportRegistry
 import com.gnutux.tahakom.core.transport.impl.IrTransport
 import com.gnutux.tahakom.core.transport.impl.RokuTransport
+import com.gnutux.tahakom.core.transport.impl.WebosTransport
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,9 +38,9 @@ object AppModule {
         val transports: List<Transport> = listOf(
             IrTransport(context),
             RokuTransport(),
-            // م2: AndroidTvTransport(context)
-            // م3: SamsungTizenTransport(...), WebosTransport(...), SonyBraviaTransport(...)
-            // م4: BroadlinkTransport(...)
+            WebosTransport(context),
+            // التالي: AndroidTvTransport (إقران TLS) + SamsungTizen + SonyBravia
+            // م5: BroadlinkTransport (جسر WiFi-IR)
         )
         return TransportRegistry(transports)
     }

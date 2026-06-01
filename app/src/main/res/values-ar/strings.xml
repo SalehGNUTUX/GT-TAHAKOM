@@ -65,6 +65,14 @@
     <string name="fn_source">المصدر</string>
     <string name="fn_exit">خروج</string>
     <string name="fn_text">تيليتكست</string>
+    <string name="fn_search">بحث</string>
+    <string name="more_media">الوسائط</string>
+    <string name="md_rwd">ترجيع</string>
+    <string name="md_play">تشغيل</string>
+    <string name="md_pause">إيقاف مؤقت</string>
+    <string name="md_stop">إيقاف</string>
+    <string name="md_ffwd">تقديم</string>
+    <string name="md_rec">تسجيل</string>
 
     <!-- الإعدادات واللغة -->
     <string name="settings_title">الإعدادات</string>

@@ -81,14 +81,38 @@ fun MoreControls(
             Triple(ButtonId.INFO, "info", R.string.fn_info),
             Triple(ButtonId.CC, "subtitles", R.string.fn_subs),
             Triple(ButtonId.SMART, "tv", R.string.fn_smart),
+            Triple(ButtonId.APPS, "tv", R.string.fn_smart),
+            Triple(ButtonId.SEARCH, "search", R.string.fn_search),
             Triple(ButtonId.SETTINGS, "gear", R.string.fn_settings),
             Triple(ButtonId.SOURCE, "source", R.string.fn_source),
             Triple(ButtonId.EXIT, "close", R.string.fn_exit),
             Triple(ButtonId.TEXT, "subtitles", R.string.fn_text),
-        ).filter { has(it.first) }
+        ).filter { has(it.first) }.distinctBy { it.third } // تجنّب تكرار "ذكية" مرتين
         if (funcs.isNotEmpty()) {
             SectionLabel(stringResource(R.string.more_functions))
             funcs.chunked(3).forEach { row ->
+                Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    row.forEach { (id, icon, labelRes) ->
+                        FuncKey(Modifier.weight(1f), icon, stringResource(labelRes)) { onSend(id, id.name) }
+                    }
+                    repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+                }
+            }
+            Spacer(Modifier.height(14.dp))
+        }
+
+        // التحكّم بالوسائط (تشغيل/إيقاف/توقف/تسجيل) — يعرض المدعوم فقط
+        val media = listOf(
+            Triple(ButtonId.RWD, "rewind", R.string.md_rwd),
+            Triple(ButtonId.PLAY, "play", R.string.md_play),
+            Triple(ButtonId.PAUSE, "pause", R.string.md_pause),
+            Triple(ButtonId.STOP, "close", R.string.md_stop),
+            Triple(ButtonId.FFWD, "forward", R.string.md_ffwd),
+            Triple(ButtonId.RECORD, "info", R.string.md_rec),
+        ).filter { has(it.first) }
+        if (media.isNotEmpty()) {
+            SectionLabel(stringResource(R.string.more_media))
+            media.chunked(3).forEach { row ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     row.forEach { (id, icon, labelRes) ->
                         FuncKey(Modifier.weight(1f), icon, stringResource(labelRes)) { onSend(id, id.name) }
