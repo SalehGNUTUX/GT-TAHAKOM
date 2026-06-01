@@ -20,8 +20,10 @@ import com.gnutux.tahakom.feature.devices.AddDeviceScreen
 import com.gnutux.tahakom.feature.devices.DevicesScreen
 import com.gnutux.tahakom.feature.devices.DevicesViewModel
 import com.gnutux.tahakom.feature.irsetup.IrSetupScreen
+import com.gnutux.tahakom.feature.onboarding.OnboardingScreen
 import com.gnutux.tahakom.feature.remote.RemoteScreen
 import com.gnutux.tahakom.feature.settings.SettingsScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gnutux.tahakom.ui.theme.TahakomTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -48,7 +50,15 @@ class MainActivity : AppCompatActivity() {
                 val context = LocalContext.current
                 // ViewModel مشترك على مستوى الشاشة الرئيسية للحفظ/المشاركة.
                 val devicesVm: DevicesViewModel = hiltViewModel()
+                val onboardingDone by devicesVm.onboardingDone.collectAsStateWithLifecycle()
                 var screen by remember { mutableStateOf<Screen>(Screen.Devices) }
+
+                // شاشة الترحيب عند أول تشغيل (تنتظر تحميل الحالة لتفادي وميض).
+                if (onboardingDone == false) {
+                    OnboardingScreen(onDone = { devicesVm.completeOnboarding() })
+                    return@TahakomTheme
+                }
+                if (onboardingDone == null) return@TahakomTheme // لا تومض قبل المعرفة
 
                 // يعتمد جهازاً: يحفظه في القائمة ثم يفتح ريموته.
                 fun adopt(device: Device) {

@@ -37,6 +37,12 @@ class DevicesViewModel @Inject constructor(
     val savedDevices: StateFlow<List<Device>> =
         saved.devices.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    /** هل أنهى المستخدم الترحيب؟ null = لم يُحمَّل بعد. */
+    val onboardingDone: StateFlow<Boolean?> =
+        saved.onboardingDone.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    fun completeOnboarding() = viewModelScope.launch { saved.setOnboardingDone() }
+
     private val _discovery = MutableStateFlow(DiscoveryUiState())
     val discovery: StateFlow<DiscoveryUiState> = _discovery.asStateFlow()
 

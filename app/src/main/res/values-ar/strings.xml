@@ -31,6 +31,25 @@
     <string name="ir_responded_question">هل استجاب الجهاز؟</string>
     <string name="ir_yes_responded">نعم — اعتمد هذا الجهاز</string>
 
+    <!-- شاشة الترحيب -->
+    <string name="ob_skip">تخطّي</string>
+    <string name="ob_next">التالي</string>
+    <string name="ob_start">لنبدأ</string>
+    <string name="ob1_title">جهاز تحكّم واحد لكل شيء</string>
+    <string name="ob1_body">تحكّم في تلفازك وأجهزتك من مكان واحد — مهما اختلفت علاماتها التجارية أو طريقة اتصالها.</string>
+    <string name="ob2_title">يختار الوسيلة تلقائياً</string>
+    <string name="ob2_body">يكتشف التطبيق هل يصل الجهاز عبر الشبكة أم الأشعة تحت الحمراء أم جسر — ويستخدمها دون إعداد.</string>
+    <string name="ob3_title">ثلاث وسائل، تجربة واحدة</string>
+    <string name="ob3_body">شبكة WiFi للتلفازات الذكية، أشعة تحت الحمراء للأجهزة القديمة، وجسر Broadlink لكل ما بينهما.</string>
+
+    <!-- شاشة الريموت -->
+    <string name="rm_volume">الصوت</string>
+    <string name="rm_channel">القناة</string>
+    <string name="rm_active_path">وسيلة الإرسال النشطة</string>
+    <string name="tr_wifi">شبكة WiFi</string>
+    <string name="tr_ir">أشعة تحت الحمراء</string>
+    <string name="tr_bridge">جسر WiFi-IR</string>
+
     <!-- الإعدادات واللغة -->
     <string name="settings_title">الإعدادات</string>
     <string name="settings_language">اللغة</string>

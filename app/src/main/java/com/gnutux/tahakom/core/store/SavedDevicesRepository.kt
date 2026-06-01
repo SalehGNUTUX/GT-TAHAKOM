@@ -3,6 +3,7 @@ package com.gnutux.tahakom.core.store
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -25,6 +26,14 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 class SavedDevicesRepository(private val context: Context) {
 
     private val key = stringPreferencesKey("saved_devices")
+    private val onboardingKey = booleanPreferencesKey("onboarding_done")
+
+    /** هل أنهى المستخدم شاشة الترحيب؟ */
+    val onboardingDone: Flow<Boolean> = context.dataStore.data.map { it[onboardingKey] ?: false }
+
+    suspend fun setOnboardingDone() {
+        context.dataStore.edit { it[onboardingKey] = true }
+    }
 
     /** تدفّق الأجهزة المحفوظة (يتحدّث تلقائياً عند أي تغيير). */
     val devices: Flow<List<Device>> = context.dataStore.data.map { prefs ->

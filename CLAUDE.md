@@ -38,7 +38,8 @@ Android SDK: `/home/gnutux/Android/Sdk` (مضبوط في `local.properties`).
 - **م2 (التحكّم الفعلي): ✅** — RokuTransport (ECP) + RemoteScreen + RemoteViewModel.
 - **م4 (IR): ✅ القاعدة + الإرسال** — قاعدة محلية 44 جهازاً (assets/irdb) + IrTransport (Pronto) + ضبط شبه آلي بمنطق الطاقة/الصوت.
 - **إصلاحات حرجة (v0.4.0):** ريموت IR يرسل فعلياً الآن (RemoteViewModel يحمّل IrDevice ويترجم ButtonId→Pronto؛ كان يرسل Command.Key لـ IrTransport فيفشل بـ UNSUPPORTED_COMMAND). شاشة الإضافة تعرض قاعدة الـ44 الحقيقية مصنّفة وقابلة للبحث (حُذف BrandCatalog الوهمي). قائمة أجهزة محفوظة (SavedDevicesRepository/DataStore) بحفظ/حذف/مشاركة. الريموت يُظهر الأزرار المدعومة فقط.
-- **التالي:** اعتماد تصميم GT-TAHAKOM-DESIGN في Compose (مهمة #12، بصرية كبيرة). ثم توسيع قاعدة IR بأجهزة أكثر. ثم AndroidTv/Samsung/LG/Sony.
+- **التصميم (v0.5.0): 🔄 جزئي** — اعتُمد نظام GT-TAHAKOM-DESIGN: رموز تصميم serene (OKLCH→sRGB في ui/theme/Tokens.kt) + أيقونات SVG حقيقية (ui/icons/TahakomIcons.kt، محوّلة من icons.jsx، تحلّ مشكلة الأيقونات الناقصة) + شاشة Onboarding (3 شرائح) + RemoteScreen جديدة (أزرار دائرية بأيقونات + شريط وسيلة + لوحة لمس بإيماءات + روكرات). أُصلح "النقر مرتين" (ensureLoaded في send قبل الإرسال). **تبقّى:** تطبيق التصميم على DevicesScreen/AddDeviceScreen/IrSetupScreen + bottom sheets + BottomNav + سمة فاتح/داكن قابلة للتبديل.
+- **التالي:** إكمال تطبيق التصميم على بقية الشاشات. ثم توسيع قاعدة IR. ثم AndroidTv/Samsung/LG/Sony.
 - بقية المراحل (م3–م5) في docs/ARCHITECTURE.md.
 
 ## مبدأ قاعدة البيانات (موثّق في docs/DATABASE.md)

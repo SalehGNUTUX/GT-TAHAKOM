@@ -55,26 +55,8 @@ class RemoteViewModel @Inject constructor(
             return
         }
 
-        val file = device.metadata["irFile"]
-        if (file == null) {
-            _uiState.update { it.copy(ready = true, lastError = "ir_file_missing") }
-            return
-        }
-        viewModelScope.launch {
-            val entry = irDb.index().firstOrNull { it.file == file }
-            if (entry == null) {
-                _uiState.update { it.copy(ready = true, lastError = "ir_device_not_found") }
-                return@launch
-            }
-            val irDevice = irDb.loadDevice(entry)
-            // أول كود لكل معرّف دلالي (قد يتكرّر المعرّف في بعض القواعد).
-            irCodes = irDevice.buttons
-                .mapNotNull { b -> runCatching { ButtonId.valueOf(b.id) }.getOrNull()?.let { it to b.code } }
-                .toMap()
-            _uiState.update {
-                RemoteUiState(supported = irCodes.keys, ready = true)
-            }
-        }
+        irCodes = emptyMap()
+        viewModelScope.launch { ensureLoaded(device) }
     }
 
     fun send(device: Device, button: ButtonId, label: String) {
@@ -82,17 +64,21 @@ class RemoteViewModel @Inject constructor(
             _uiState.update { it.copy(lastError = "transport_unavailable") }
             return
         }
-        // ترجمة الأمر حسب الوسيلة.
-        val command: Command = if (device.transport == TransportType.IR) {
-            val code = irCodes[button] ?: run {
-                _uiState.update { it.copy(lastError = "UNSUPPORTED_COMMAND") }
-                return
-            }
-            Command.Raw(code)
-        } else {
-            Command.Key(button)
-        }
         viewModelScope.launch {
+            // لأجهزة IR: تأكّد أن الأكواد حُمِّلت قبل الإرسال (يحلّ مشكلة "النقر مرتين"؛
+            // أول نقرة كانت تسبق اكتمال التحميل غير المتزامن فتفشل صامتةً).
+            if (device.transport == TransportType.IR && irCodes.isEmpty()) {
+                ensureLoaded(device)
+            }
+            val command: Command = if (device.transport == TransportType.IR) {
+                val code = irCodes[button] ?: run {
+                    _uiState.update { it.copy(lastError = "UNSUPPORTED_COMMAND") }
+                    return@launch
+                }
+                Command.Raw(code)
+            } else {
+                Command.Key(button)
+            }
             when (val result = transport.send(device, command)) {
                 is TransportResult.Success ->
                     _uiState.update { it.copy(lastSentLabel = label, lastError = null) }
@@ -100,5 +86,17 @@ class RemoteViewModel @Inject constructor(
                     _uiState.update { it.copy(lastError = result.error.name) }
             }
         }
+    }
+
+    /** يضمن تحميل أكواد IR (يُستدعى من bind ومن send عند الحاجة). */
+    private suspend fun ensureLoaded(device: Device) {
+        if (irCodes.isNotEmpty()) return
+        val file = device.metadata["irFile"] ?: return
+        val entry = irDb.index().firstOrNull { it.file == file } ?: return
+        val irDevice = irDb.loadDevice(entry)
+        irCodes = irDevice.buttons
+            .mapNotNull { b -> runCatching { ButtonId.valueOf(b.id) }.getOrNull()?.let { it to b.code } }
+            .toMap()
+        _uiState.update { it.copy(supported = irCodes.keys, ready = true) }
     }
 }
