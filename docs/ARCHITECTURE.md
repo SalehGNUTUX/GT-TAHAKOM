@@ -80,7 +80,7 @@ com.gnutux.tahakom
 | **م0** | التأسيس: Kotlin/Compose، RTL، Hilt، طبقة Transport، النموذج، IrTransport | ✅ مُنجز |
 | **م1** | الاكتشاف التلقائي: NSD/mDNS + SSDP + شاشة الأجهزة الحيّة | ✅ مُنجز |
 | **م2** | `RokuTransport` (ECP) + شاشة تحكّم ترسل فعلاً + إضافة من القاعدة + أجهزتي | ✅ مُنجز |
-| **م4** | قاعدة IR محلية (46 جهازاً) + `IrTransport` (Pronto) + ضبط شبه آلي + قائمة "المزيد" + تعلّم يدوي | ✅ مُنجز؛ التوسيع متعدّد البروتوكولات لاحقاً |
+| **م4** | قاعدة IR محلية (55 جهازاً) + `IrTransport` (Pronto) + ضبط شبه آلي + قائمة "المزيد" + تعلّم يدوي | ✅ مُنجز؛ التوسيع متعدّد البروتوكولات لاحقاً |
 | **م3** | توسّع الشبكة: `WebosTransport` (LG) + `SamsungTizenTransport` | ✅ LG+Samsung؛ Android TV/Sony لاحقاً |
 | **التصميم** | رموز serene + أيقونات + ترحيب + شاشة تحكّم + إعدادات كاملة + سمة | 🔄 جزئي (يتبقّى Devices/AddDevice) |
 | **التالي** | `AndroidTvTransport` (Remote v2) + لوحة لمس المؤشّر (pointer socket) + Sony | ⏳ |
