@@ -109,7 +109,9 @@ class RemoteViewModel @Inject constructor(
             ButtonId.CH_UP, ButtonId.CH_DOWN, ButtonId.HOME, ButtonId.APPS,
             ButtonId.INFO, ButtonId.PLAY, ButtonId.PAUSE, ButtonId.STOP,
             ButtonId.FFWD, ButtonId.RWD, ButtonId.LIST, ButtonId.SETTINGS,
-            // الاتجاهات تأتي مع pointer socket لاحقاً.
+            // التنقّل عبر pointer input socket (أصبح مدعوماً).
+            ButtonId.NAV_UP, ButtonId.NAV_DOWN, ButtonId.NAV_LEFT, ButtonId.NAV_RIGHT,
+            ButtonId.NAV_OK, ButtonId.BACK, ButtonId.MENU, ButtonId.EXIT,
         )
         TransportType.ROKU -> setOf(
             ButtonId.POWER, ButtonId.NAV_UP, ButtonId.NAV_DOWN, ButtonId.NAV_LEFT,

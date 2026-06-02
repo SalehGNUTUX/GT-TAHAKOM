@@ -54,6 +54,10 @@ class WebosTransport(context: Context) : Transport {
         withContext(Dispatchers.IO) {
             val host = device.address
                 ?: return@withContext TransportResult.Failure(TransportError.NOT_CONNECTED)
+            // أزرار التنقّل والوسائط تُرسَل عبر "pointer input socket" (لا ssap URI).
+            val pointerName = (command as? Command.Key)?.button?.toPointerButton()
+            if (pointerName != null) return@withContext sendPointer(host, pointerName)
+
             val uri = when (command) {
                 is Command.Key -> command.button.toSsap()
                     ?: return@withContext TransportResult.Failure(TransportError.UNSUPPORTED_COMMAND)
@@ -70,6 +74,67 @@ class WebosTransport(context: Context) : Transport {
                 )
             }
         }
+
+    /**
+     * يرسل زر تنقّل عبر pointer input socket في webOS:
+     * يُقرن → يطلب socketPath → يفتح سوكِت ثانياً → يرسل `type:button\nname:<NAME>\n\n`.
+     * (جلسة لكل ضغطة — مقبول للزمن؛ يُحسّن باتصال دائم لاحقاً.)
+     */
+    private suspend fun sendPointer(host: String, buttonName: String): TransportResult<Unit> {
+        val done = CompletableDeferred<TransportResult<Unit>>()
+        var counter = 1
+        val savedKey = keyStore.get(host)
+        var pointerWs: WebSocket? = null
+
+        val main = client.newWebSocket(
+            Request.Builder().url("ws://$host:3000").build(),
+            object : WebSocketListener() {
+                override fun onOpen(ws: WebSocket, r: Response) = ws.send(registerPayload(savedKey, counter++)).let {}
+                override fun onMessage(ws: WebSocket, text: String) {
+                    val msg = runCatching { JSONObject(text) }.getOrNull() ?: return
+                    when (msg.optString("type")) {
+                        "registered" -> {
+                            msg.optJSONObject("payload")?.optString("client-key")?.takeIf { it.isNotEmpty() }
+                                ?.let { keyStore.put(host, it) }
+                            // اطلب مسار pointer socket
+                            ws.send(
+                                JSONObject().put("id", counter++).put("type", "request")
+                                    .put("uri", "ssap://com.webos.service.networkinput/getPointerInputSocket")
+                                    .toString(),
+                            )
+                        }
+                        "response" -> {
+                            val path = msg.optJSONObject("payload")?.optString("socketPath")
+                            if (!path.isNullOrEmpty() && pointerWs == null) {
+                                pointerWs = client.newWebSocket(
+                                    Request.Builder().url(path).build(),
+                                    object : WebSocketListener() {
+                                        override fun onOpen(pws: WebSocket, r: Response) {
+                                            pws.send("type:button\nname:$buttonName\n\n")
+                                            if (!done.isCompleted) done.complete(TransportResult.Success(Unit))
+                                        }
+                                        override fun onFailure(pws: WebSocket, t: Throwable, r: Response?) {
+                                            if (!done.isCompleted) done.complete(TransportResult.Failure(TransportError.NETWORK, t))
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                        "error" -> if (!done.isCompleted)
+                            done.complete(TransportResult.Failure(TransportError.PAIRING_REQUIRED))
+                    }
+                }
+                override fun onFailure(ws: WebSocket, t: Throwable, r: Response?) {
+                    if (!done.isCompleted) done.complete(TransportResult.Failure(TransportError.NETWORK, t))
+                }
+            },
+        )
+        val result = withTimeoutOrNull(if (savedKey == null) 30_000 else 7_000) { done.await() }
+            ?: TransportResult.Failure(TransportError.TIMEOUT)
+        runCatching { pointerWs?.close(1000, null) }
+        runCatching { main.close(1000, null) }
+        return result
+    }
 
     override suspend fun disconnect(device: Device) { /* جلسة لكل أمر — لا اتصال دائم بعد */ }
 
@@ -156,7 +221,21 @@ class WebosTransport(context: Context) : Transport {
             .toString()
     }
 
-    /** يحوّل الزر الدلالي إلى SSAP URI. الأزرار الاتجاهية تحتاج pointer socket (لاحقاً). */
+    /** أزرار التنقّل/الإدخال عبر pointer socket (أسماء webOS القياسية). */
+    private fun ButtonId.toPointerButton(): String? = when (this) {
+        ButtonId.NAV_UP -> "UP"
+        ButtonId.NAV_DOWN -> "DOWN"
+        ButtonId.NAV_LEFT -> "LEFT"
+        ButtonId.NAV_RIGHT -> "RIGHT"
+        ButtonId.NAV_OK -> "ENTER"
+        ButtonId.BACK -> "BACK"
+        ButtonId.EXIT -> "EXIT"
+        ButtonId.MENU -> "MENU"
+        ButtonId.INFO -> "INFO"
+        else -> null
+    }
+
+    /** يحوّل الزر الدلالي إلى SSAP URI (لغير أزرار التنقّل). */
     private fun ButtonId.toSsap(): String? = when (this) {
         ButtonId.POWER, ButtonId.POWER_OFF -> "ssap://system/turnOff"
         ButtonId.VOL_UP -> "ssap://audio/volumeUp"
