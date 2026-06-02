@@ -129,6 +129,7 @@ class SamsungTizenTransport(context: Context) : Transport {
         ButtonId.EXIT -> "KEY_EXIT"
         ButtonId.INFO -> "KEY_INFO"
         ButtonId.GUIDE -> "KEY_GUIDE"
+        ButtonId.TOOLS -> "KEY_TOOLS"
         ButtonId.SOURCE -> "KEY_SOURCE"
         ButtonId.SMART, ButtonId.APPS -> "KEY_HOME"
         ButtonId.LIST -> "KEY_CH_LIST"

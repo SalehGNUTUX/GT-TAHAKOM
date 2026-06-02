@@ -75,6 +75,14 @@ class DevicesViewModel @Inject constructor(
     fun remove(deviceId: String) = viewModelScope.launch { saved.remove(deviceId) }
     fun reorder(ordered: List<Device>) = viewModelScope.launch { saved.reorder(ordered) }
 
+    /** ينقل جهازاً من موضع إلى آخر في قائمة "أجهزتي". */
+    fun move(from: Int, to: Int) = viewModelScope.launch {
+        val list = savedDevices.value.toMutableList()
+        if (from !in list.indices || to !in list.indices) return@launch
+        list.add(to, list.removeAt(from))
+        saved.reorder(list)
+    }
+
     override fun onCleared() {
         scanJob?.cancel()
     }

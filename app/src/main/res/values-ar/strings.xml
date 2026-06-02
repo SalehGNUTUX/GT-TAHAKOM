@@ -11,6 +11,12 @@
     <string name="devices_my">أجهزتي</string>
     <string name="devices_discovered">مُكتشَفة على الشبكة</string>
     <string name="device_delete">حذف</string>
+    <string name="device_delete_title">حذف الجهاز؟</string>
+    <string name="device_delete_confirm">إزالة «%1$s» من أجهزتك؟</string>
+    <string name="device_deleted">حُذف الجهاز</string>
+    <string name="action_undo">تراجع</string>
+    <string name="move_up">نقل لأعلى</string>
+    <string name="move_down">نقل لأسفل</string>
     <string name="exit_hint">اضغط رجوع مرة أخرى للخروج</string>
 
     <!-- تعلّم جهاز تحكّم يدوياً -->
@@ -91,6 +97,8 @@
     <string name="fn_exit">خروج</string>
     <string name="fn_text">تيليتكست</string>
     <string name="fn_search">بحث</string>
+    <string name="fn_tools">أدوات</string>
+    <string name="more_open">أزرار إضافية</string>
     <string name="more_media">الوسائط</string>
     <string name="md_rwd">ترجيع</string>
     <string name="md_play">تشغيل</string>
@@ -121,6 +129,10 @@
     <string name="set_about">حول التطبيق</string>
     <string name="set_version">الإصدار</string>
     <string name="set_license">الترخيص</string>
+    <string name="set_developer">المطوّر</string>
+    <string name="set_developer_name">GNUTUX</string>
+    <string name="set_repo">مستودع المصدر</string>
+    <string name="set_repo_url">github.com/SalehGNUTUX/GT-TAHAKOM</string>
 
     <!-- استيراد/مشاركة حزم جهاز التحكّم -->
     <string name="import_title">استيراد حزمة جهاز تحكّم</string>

@@ -83,6 +83,7 @@ fun MoreControls(
             Triple(ButtonId.SMART, "tv", R.string.fn_smart),
             Triple(ButtonId.APPS, "tv", R.string.fn_smart),
             Triple(ButtonId.SEARCH, "search", R.string.fn_search),
+            Triple(ButtonId.TOOLS, "gear", R.string.fn_tools),
             Triple(ButtonId.SETTINGS, "gear", R.string.fn_settings),
             Triple(ButtonId.SOURCE, "source", R.string.fn_source),
             Triple(ButtonId.EXIT, "close", R.string.fn_exit),

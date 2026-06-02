@@ -37,11 +37,16 @@ class AddDeviceViewModel @Inject constructor(
         reload(q)
     }
 
+    /** ترتيب عرض الفئات: التلفاز أولاً ثم أجهزة الاستقبال ثم الصوت. */
+    private val categoryOrder = listOf("TV", "Cable", "Audio")
+
     private fun reload(query: String) {
         viewModelScope.launch {
             val results = if (query.isBlank()) irDb.index() else irDb.search(query)
             val grouped = results.groupBy { it.category }
-                .toSortedMap()
+                .toList()
+                .sortedBy { (cat, _) -> categoryOrder.indexOf(cat).let { if (it < 0) Int.MAX_VALUE else it } }
+                .toMap(LinkedHashMap())
             _uiState.update { it.copy(irByCategory = grouped) }
         }
     }

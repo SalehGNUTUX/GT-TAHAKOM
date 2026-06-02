@@ -160,8 +160,22 @@ fun RemoteScreen(
             }
         }
 
+        // زر "أزرار إضافية" واضح (إضافةً لزر الثلاث نقاط في الأعلى) — يفتح نفس القائمة.
+        Box(
+            Modifier.fillMaxWidth().padding(top = 4.dp).clip(RoundedCornerShape(50))
+                .background(c.surface).border(1.dp, c.line, RoundedCornerShape(50))
+                .clickable { showMore = true }.padding(vertical = 12.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TahakomIcon("more", c.text, size = 20.dp)
+                Spacer(Modifier.size(8.dp))
+                Text(stringResource(R.string.more_open), color = c.text, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+            }
+        }
+
         state.lastError?.let {
-            Text("⚠ $it", color = c.ir, fontSize = 12.sp, modifier = Modifier.padding(bottom = 8.dp))
+            Text("⚠ $it", color = c.ir, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
         }
         Spacer(Modifier.height(8.dp))
     }

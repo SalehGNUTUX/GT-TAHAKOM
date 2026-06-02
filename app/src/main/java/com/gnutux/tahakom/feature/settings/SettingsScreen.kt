@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -76,7 +77,7 @@ fun SettingsScreen(
                     Text("GT-TAHAKOM", color = c.text, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.app_tagline), color = c.textFaint, fontSize = 13.sp)
                 }
-                Chip("v0.9.0")
+                Chip("v0.9.1")
             }
             Spacer(Modifier.size(20.dp))
 
@@ -116,7 +117,13 @@ fun SettingsScreen(
 
             // قسم حول
             SectionTitle(stringResource(R.string.set_about))
-            InfoRow("info", stringResource(R.string.set_version), "0.9.0")
+            InfoRow("info", stringResource(R.string.set_version), "0.9.1")
+            InfoRow("gear", stringResource(R.string.set_developer), stringResource(R.string.set_developer_name))
+            val uriHandler = LocalUriHandler.current
+            InfoRow(
+                "link", stringResource(R.string.set_repo), stringResource(R.string.set_repo_url),
+                onClick = { uriHandler.openUri("https://github.com/SalehGNUTUX/GT-TAHAKOM") },
+            )
             InfoRow("shield", stringResource(R.string.set_license), "GPLv3", last = true)
         }
     }
@@ -147,10 +154,12 @@ private fun SettingRow(icon: String, label: String, last: Boolean = false, trail
 }
 
 @Composable
-private fun InfoRow(icon: String, label: String, value: String, last: Boolean = false) {
+private fun InfoRow(icon: String, label: String, value: String, last: Boolean = false, onClick: (() -> Unit)? = null) {
     val c = tokens.colors
     Row(
-        Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        Modifier.fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconBox(icon)

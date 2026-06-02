@@ -123,7 +123,7 @@ class RemoteViewModel @Inject constructor(
             ButtonId.POWER, ButtonId.NAV_UP, ButtonId.NAV_DOWN, ButtonId.NAV_LEFT,
             ButtonId.NAV_RIGHT, ButtonId.NAV_OK, ButtonId.BACK, ButtonId.HOME, ButtonId.MENU,
             ButtonId.EXIT, ButtonId.INFO, ButtonId.GUIDE, ButtonId.SOURCE, ButtonId.SMART,
-            ButtonId.LIST, ButtonId.VOL_UP, ButtonId.VOL_DOWN, ButtonId.MUTE,
+            ButtonId.TOOLS, ButtonId.LIST, ButtonId.VOL_UP, ButtonId.VOL_DOWN, ButtonId.MUTE,
             ButtonId.CH_UP, ButtonId.CH_DOWN, ButtonId.PLAY, ButtonId.PAUSE, ButtonId.STOP,
             ButtonId.FFWD, ButtonId.RWD,
             ButtonId.DIGIT_0, ButtonId.DIGIT_1, ButtonId.DIGIT_2, ButtonId.DIGIT_3, ButtonId.DIGIT_4,
