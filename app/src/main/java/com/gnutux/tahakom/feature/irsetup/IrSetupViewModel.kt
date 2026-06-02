@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.gnutux.tahakom.core.irdb.IrCommandResolver
 import com.gnutux.tahakom.core.irdb.IrDatabase
 import com.gnutux.tahakom.core.irdb.IrDevice
+import com.gnutux.tahakom.core.irdb.IrDeviceEntry
 import com.gnutux.tahakom.core.model.ButtonId
 import com.gnutux.tahakom.core.model.Device
 import com.gnutux.tahakom.core.model.DeviceType
@@ -26,6 +27,11 @@ data class IrSetupUiState(
     val brand: String? = null,
     val testButtonLabel: String? = null,
     val ready: Boolean = false,
+    // التنقّل بين أجهزة الفئة نفسها (تالي/السابق) لاختبار المرشّحين بسلاسة.
+    val hasPrev: Boolean = false,
+    val hasNext: Boolean = false,
+    val position: Int = 0, // ترتيب 1-أساسي ضمن الفئة
+    val total: Int = 0,
 )
 
 /**
@@ -47,6 +53,9 @@ class IrSetupViewModel @Inject constructor(
 
     private var loadedDevice: IrDevice? = null
     private var file: String? = null
+    // أجهزة الفئة نفسها بالترتيب، لتنقّل تالي/السابق.
+    private var siblings: List<IrDeviceEntry> = emptyList()
+    private var index: Int = -1
 
     /** يُحمّل الجهاز المختار من القاعدة عبر مسار ملفه. */
     fun load(irFile: String) {
@@ -54,15 +63,45 @@ class IrSetupViewModel @Inject constructor(
         file = irFile
         viewModelScope.launch {
             val ir = registry.forType(TransportType.IR)?.isAvailable() ?: false
-            val entry = db.index().firstOrNull { it.file == irFile }
+            val all = db.index()
+            val entry = all.firstOrNull { it.file == irFile }
             if (entry == null) {
                 _uiState.update { it.copy(irAvailable = ir, ready = true) }
                 return@launch
             }
-            loadedDevice = db.loadDevice(entry)
-            _uiState.update {
-                it.copy(irAvailable = ir, brand = entry.brand, ready = true)
-            }
+            // قائمة المرشّحين = أجهزة الفئة نفسها بترتيب القاعدة.
+            siblings = all.filter { it.category == entry.category }
+            index = siblings.indexOfFirst { it.file == irFile }
+            applyEntry(entry, ir)
+        }
+    }
+
+    /** ينتقل للجهاز التالي/السابق في الفئة (delta = ‎+1‎ أو ‎-1‎) ويعيد التحميل فوراً. */
+    fun step(delta: Int) {
+        val next = index + delta
+        val entry = siblings.getOrNull(next) ?: return
+        index = next
+        file = entry.file
+        viewModelScope.launch {
+            val ir = registry.forType(TransportType.IR)?.isAvailable() ?: false
+            applyEntry(entry, ir)
+        }
+    }
+
+    /** يحمّل جهاز الفئة المحدّد ويحدّث الحالة (يصفّر تسمية آخر اختبار + مؤشّرات التنقّل). */
+    private suspend fun applyEntry(entry: IrDeviceEntry, ir: Boolean) {
+        loadedDevice = db.loadDevice(entry)
+        _uiState.update {
+            it.copy(
+                irAvailable = ir,
+                brand = entry.brand,
+                testButtonLabel = null,
+                ready = true,
+                hasPrev = index > 0,
+                hasNext = index >= 0 && index < siblings.lastIndex,
+                position = if (index >= 0) index + 1 else 0,
+                total = siblings.size,
+            )
         }
     }
 

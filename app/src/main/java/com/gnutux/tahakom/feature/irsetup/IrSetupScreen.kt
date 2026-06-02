@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -75,6 +77,45 @@ fun IrSetupScreen(
                     textAlign = TextAlign.Center,
                 )
                 HorizontalDivider(Modifier.padding(vertical = 8.dp))
+            }
+
+            // شريط التنقّل بين المرشّحين: السابق · «الترتيب/الإجمالي» · التالي.
+            // يتيح تجربة جهاز تلو الآخر دون الرجوع للقائمة (ضبط Unionaire وأمثاله).
+            if (state.total > 1) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    OutlinedButton(
+                        onClick = { viewModel.step(-1) },
+                        enabled = state.hasPrev,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Text(stringResource(R.string.ir_prev), modifier = Modifier.padding(start = 4.dp))
+                    }
+                    Text(
+                        stringResource(R.string.ir_device_counter, state.position, state.total),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    OutlinedButton(
+                        onClick = { viewModel.step(1) },
+                        enabled = state.hasNext,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(stringResource(R.string.ir_next), modifier = Modifier.padding(end = 4.dp))
+                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, modifier = Modifier.size(18.dp))
+                    }
+                }
+                Text(
+                    stringResource(R.string.ir_try_next_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+                HorizontalDivider(Modifier.padding(vertical = 4.dp))
             }
 
             Text(

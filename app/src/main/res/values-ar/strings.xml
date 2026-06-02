@@ -70,6 +70,10 @@
     <string name="ir_sent_signal">أُرسلت إشارة الاختبار: %1$s</string>
     <string name="ir_responded_question">هل استجاب الجهاز؟</string>
     <string name="ir_yes_responded">نعم — اعتمد هذا الجهاز</string>
+    <string name="ir_prev">السابق</string>
+    <string name="ir_next">التالي</string>
+    <string name="ir_device_counter">%1$d / %2$d</string>
+    <string name="ir_try_next_hint">لا يعمل؟ جرّب الجهاز التالي دون مغادرة هذه الشاشة.</string>
 
     <!-- شاشة الترحيب -->
     <string name="ob_skip">تخطّي</string>
