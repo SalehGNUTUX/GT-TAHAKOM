@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -51,8 +52,28 @@ fun SettingsScreen(
     onBack: () -> Unit,
     themeMode: String,
     onThemeMode: (String) -> Unit,
+    onDeviceReady: (com.gnutux.tahakom.core.model.Device) -> Unit = {},
+    addVm: com.gnutux.tahakom.feature.devices.AddDeviceViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
 ) {
     val c = tokens.colors
+    val context = LocalContext.current
+    val importLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null) {
+            com.gnutux.tahakom.core.share.RemotePackSharing.readFromUri(context, uri)?.let { pack ->
+                addVm.importPack(pack, onDeviceReady) {}
+            }
+        }
+    }
+    fun shareApp() {
+        val text = "GT-TAHAKOM — جهاز تحكّم حرّ\nhttps://github.com/SalehGNUTUX/GT-TAHAKOM"
+        val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(android.content.Intent.EXTRA_TEXT, text)
+        }
+        context.startActivity(android.content.Intent.createChooser(intent, null))
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -84,7 +105,7 @@ fun SettingsScreen(
                     Text("GT-TAHAKOM", color = c.text, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.app_tagline), color = c.textFaint, fontSize = 13.sp)
                 }
-                Chip("v0.9.2")
+                Chip("v0.9.3")
             }
             Spacer(Modifier.size(20.dp))
 
@@ -124,7 +145,7 @@ fun SettingsScreen(
 
             // قسم حول
             SectionTitle(stringResource(R.string.set_about))
-            InfoRow("info", stringResource(R.string.set_version), "0.9.2")
+            InfoRow("info", stringResource(R.string.set_version), "0.9.3")
             InfoRow("gear", stringResource(R.string.set_developer), stringResource(R.string.set_developer_name))
             val uriHandler = LocalUriHandler.current
             InfoRow(
@@ -132,8 +153,33 @@ fun SettingsScreen(
                 onClick = { uriHandler.openUri("https://github.com/SalehGNUTUX/GT-TAHAKOM") },
             )
             InfoRow("shield", stringResource(R.string.set_license), "GPLv3", last = true)
+            Spacer(Modifier.size(20.dp))
+
+            // إجراءات: مشاركة التطبيق + استيراد لوحة تحكّم.
+            SectionTitle(stringResource(R.string.set_actions))
+            ActionRow("share", stringResource(R.string.set_share_app)) { shareApp() }
+            ActionRow("link", stringResource(R.string.set_import_remote), last = true) {
+                importLauncher.launch(arrayOf("*/*"))
+            }
+            Spacer(Modifier.size(12.dp))
         }
     }
+}
+
+/** صف إجراء قابل للنقر بأيقونة + سهم. */
+@Composable
+private fun ActionRow(icon: String, label: String, last: Boolean = false, onClick: () -> Unit) {
+    val c = tokens.colors
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconBox(icon)
+        Text(label, color = c.text, fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.weight(1f).padding(start = 12.dp))
+        TahakomIcon("forwardNav", c.textFaint, size = 18.dp)
+    }
+    if (!last) Divider()
 }
 
 @Composable

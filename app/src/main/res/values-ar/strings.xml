@@ -130,6 +130,9 @@
     <string name="set_about">حول التطبيق</string>
     <string name="set_version">الإصدار</string>
     <string name="set_license">الترخيص</string>
+    <string name="set_actions">إجراءات</string>
+    <string name="set_share_app">مشاركة التطبيق</string>
+    <string name="set_import_remote">استيراد لوحة تحكّم</string>
     <string name="set_developer">المطوّر</string>
     <string name="set_developer_name">GNUTUX</string>
     <string name="set_repo">مستودع المصدر</string>

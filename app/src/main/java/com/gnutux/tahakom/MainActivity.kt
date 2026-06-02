@@ -148,6 +148,7 @@ class MainActivity : AppCompatActivity() {
                         onBack = { screen = Screen.Devices },
                         themeMode = themeMode,
                         onThemeMode = devicesVm::setThemeMode,
+                        onDeviceReady = { adopt(it) },
                     )
                     Screen.AddDevice -> AddDeviceScreen(
                         onBack = { screen = Screen.Devices },
