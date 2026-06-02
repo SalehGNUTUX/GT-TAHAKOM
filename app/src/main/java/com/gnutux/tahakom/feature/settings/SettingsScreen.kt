@@ -1,5 +1,6 @@
 package com.gnutux.tahakom.feature.settings
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -73,11 +75,16 @@ fun SettingsScreen(
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(Modifier.weight(1f)) {
+                Image(
+                    painter = painterResource(R.mipmap.ic_launcher),
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)),
+                )
+                Column(Modifier.weight(1f).padding(start = 12.dp)) {
                     Text("GT-TAHAKOM", color = c.text, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.app_tagline), color = c.textFaint, fontSize = 13.sp)
                 }
-                Chip("v0.9.1")
+                Chip("v0.9.2")
             }
             Spacer(Modifier.size(20.dp))
 
@@ -117,7 +124,7 @@ fun SettingsScreen(
 
             // قسم حول
             SectionTitle(stringResource(R.string.set_about))
-            InfoRow("info", stringResource(R.string.set_version), "0.9.1")
+            InfoRow("info", stringResource(R.string.set_version), "0.9.2")
             InfoRow("gear", stringResource(R.string.set_developer), stringResource(R.string.set_developer_name))
             val uriHandler = LocalUriHandler.current
             InfoRow(
@@ -156,6 +163,8 @@ private fun SettingRow(icon: String, label: String, last: Boolean = false, trail
 @Composable
 private fun InfoRow(icon: String, label: String, value: String, last: Boolean = false, onClick: (() -> Unit)? = null) {
     val c = tokens.colors
+    // إن كانت القيمة طويلة (مثل رابط) نضعها سطراً تحت العنوان بدل مزاحمته أفقياً.
+    val stacked = value.length > 18
     Row(
         Modifier.fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
@@ -163,9 +172,18 @@ private fun InfoRow(icon: String, label: String, value: String, last: Boolean = 
         verticalAlignment = Alignment.CenterVertically,
     ) {
         IconBox(icon)
-        Text(label, color = c.text, fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.weight(1f).padding(start = 12.dp))
-        Text(value, color = c.textFaint, fontSize = 13.sp)
+        if (stacked) {
+            Column(Modifier.weight(1f).padding(start = 12.dp)) {
+                Text(label, color = c.text, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                Text(value, color = c.textFaint, fontSize = 12.5.sp, maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 2.dp))
+            }
+        } else {
+            Text(label, color = c.text, fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f).padding(start = 12.dp))
+            Text(value, color = c.textFaint, fontSize = 13.sp, maxLines = 1)
+        }
     }
     if (!last) Divider()
 }

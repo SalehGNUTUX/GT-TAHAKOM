@@ -28,6 +28,7 @@
     <string name="learn_err_name">Please enter a device name.</string>
     <string name="learn_err_codes">Enter at least one valid Pronto code.</string>
     <string name="learn_entry">Learn / enter codes manually</string>
+    <string name="import_file">Import a device file (.tahakom)</string>
     <string name="learn_btn_power">Power</string>
     <string name="learn_btn_vol_up">Volume +</string>
     <string name="learn_btn_vol_down">Volume −</string>

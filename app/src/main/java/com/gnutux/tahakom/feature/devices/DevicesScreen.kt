@@ -113,7 +113,16 @@ fun DevicesScreen(
             if (saved.isEmpty() && discovery.discovered.isEmpty()) {
                 EmptyState(isScanning = discovery.isScanning, modifier = Modifier.fillMaxSize())
             } else {
+                val savedIds = saved.map { it.id }.toSet()
+                val fresh = discovery.discovered.filter { "${it.host}:${it.port}" !in savedIds }
                 LazyColumn(Modifier.fillMaxSize().padding(top = 12.dp)) {
+                    // نتائج البحث (المكتشَفة حديثاً) تظهر في الأعلى.
+                    if (fresh.isNotEmpty()) {
+                        item(key = "h-disc") { SectionHeader(stringResource(R.string.devices_discovered)) }
+                        items(fresh, key = { "d-${it.host}-${it.transport.name}" }) { device ->
+                            DiscoveredRow(device, onClick = { onAdoptDiscovered(device) })
+                        }
+                    }
                     if (saved.isNotEmpty()) {
                         item(key = "h-saved") { SectionHeader(stringResource(R.string.devices_my)) }
                         items(saved, key = { "s-${it.id}" }) { device ->
@@ -128,14 +137,6 @@ fun DevicesScreen(
                                 onMoveUp = { viewModel.move(index, index - 1) },
                                 onMoveDown = { viewModel.move(index, index + 1) },
                             )
-                        }
-                    }
-                    val savedIds = saved.map { it.id }.toSet()
-                    val fresh = discovery.discovered.filter { "${it.host}:${it.port}" !in savedIds }
-                    if (fresh.isNotEmpty()) {
-                        item(key = "h-disc") { SectionHeader(stringResource(R.string.devices_discovered)) }
-                        items(fresh, key = { "d-${it.host}-${it.transport.name}" }) { device ->
-                            DiscoveredRow(device, onClick = { onAdoptDiscovered(device) })
                         }
                     }
                 }

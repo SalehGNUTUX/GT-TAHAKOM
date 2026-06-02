@@ -73,6 +73,10 @@ object RemotePackSharing {
         return intent.getStringExtra(Intent.EXTRA_TEXT)
     }
 
+    /** يقرأ حزمة من Uri مختار عبر منتقي الملفات (زر "استيراد ملف"). */
+    fun readFromUri(context: Context, uri: Uri): RemotePack? =
+        readUri(context, uri)?.let { RemotePackCodec.decode(it) }
+
     private fun readUri(context: Context, uri: Uri): String? = runCatching {
         context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
     }.getOrNull()

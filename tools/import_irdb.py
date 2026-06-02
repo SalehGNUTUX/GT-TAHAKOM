@@ -41,6 +41,98 @@ NAME_MAP = {
 }
 
 NEC_FREQ = 38000  # Hz
+RC_FREQ = 36000   # Hz — تردد بروتوكولات RC5/RC6 (فيليبس وكثير من الأوروبية/الصينية)
+
+
+def _durations_to_pronto(freq, durations_us):
+    """يحوّل قائمة مدد (ميكروثانية، تبدأ بـ ON وتتناوب) إلى كود Pronto hex.
+    قيمة كلمة Pronto = عدد دورات الحامل = مدة×التردد/1e6 (نفس دلالة Pronto القياسية)."""
+    carrier = round(1_000_000 / (freq * 0.241246))
+    durs = list(durations_us)
+    if len(durs) % 2 == 1:
+        durs.append(round(50 * 889))  # فجوة فاصلة بين الإطارات
+    words = [round(d * freq / 1_000_000) for d in durs]
+    n = len(words) // 2
+    head = [0x0000, carrier, 0x0000, n]
+    return " ".join(f"{w:04x}" for w in head + words)
+
+
+def _manchester_durations(bits, half_us, rc6=False, toggle_index=None):
+    """يبني مدد إشارة من بتّات مانشستر.
+    RC5: '1' = فضاء ثم نبضة ؛ '0' = نبضة ثم فضاء.
+    RC6: العكس ('1' = نبضة ثم فضاء)؛ وبت التبديل (toggle) مزدوج العرض.
+    يُرجع مدداً تبدأ بـ ON (تُسقَط أي بادئة OFF)."""
+    levels = []  # 1=نبضة(on) 0=فضاء(off)، عند دقّة نصف-بت
+    for i, b in enumerate(bits):
+        wide = (toggle_index is not None and i == toggle_index)
+        rep = 2 if wide else 1
+        if rc6:
+            first, second = (1, 0) if b else (0, 1)
+        else:
+            first, second = (0, 1) if b else (1, 0)
+        levels += [first] * rep + [second] * rep
+    # دمج المتتاليات (RLE)
+    runs = []
+    cur, cnt = levels[0], 1
+    for l in levels[1:]:
+        if l == cur:
+            cnt += 1
+        else:
+            runs.append((cur, cnt)); cur, cnt = l, 1
+    runs.append((cur, cnt))
+    if runs and runs[0][0] == 0:
+        runs = runs[1:]  # أسقط بادئة OFF (لا تُرسَل)
+    return [c * half_us for (_lvl, c) in runs]
+
+
+def rc5_to_pronto(device, function):
+    """RC5: 14 بت = S1 S2 T A4..A0 C5..C0. نصف-البت 889μs، 36kHz."""
+    # S2 = مكمّل البت السابع للأمر (لدعم أوامر 64-127 = RC5X)
+    s2 = 0 if function > 63 else 1
+    t = 0
+    bits = [1, s2, t]
+    for i in range(4, -1, -1):
+        bits.append((device >> i) & 1)
+    for i in range(5, -1, -1):
+        bits.append((function >> i) & 1)
+    durs = _manchester_durations(bits, 889, rc6=False)
+    return _durations_to_pronto(RC_FREQ, durs)
+
+
+def rc6_to_pronto(device, function):
+    """RC6 mode 0: قائد (6t نبضة + 2t فضاء) + بت بدء(1) + 3 بت وضع(000)
+    + بت تبديل مزدوج + 8 عنوان + 8 أمر. وحدة t=444μs، 36kHz، مانشستر معكوس."""
+    t_us = 444
+    # القائد: نبضة 6t ثم فضاء 2t (مدد صريحة قبل المانشستر)
+    lead = [6 * t_us, 2 * t_us]
+    bits = [1] + [0, 0, 0]  # بت بدء + وضع 0
+    toggle_idx = len(bits)   # بت التبديل (مزدوج العرض)
+    bits += [0]              # toggle = 0
+    for i in range(7, -1, -1):
+        bits.append((device >> i) & 1)
+    for i in range(7, -1, -1):
+        bits.append((function >> i) & 1)
+    man = _manchester_durations(bits, t_us, rc6=True, toggle_index=toggle_idx - 0)
+    # القائد نبضة، ثم المانشستر يبدأ ببت البدء '1' = نبضة → ادمج أول نبضة مع القائد؟
+    # نُبقيها منفصلة: lead = [on6t, off2t] ثم man يبدأ بـ on. ندمج off2t مع بداية man؟
+    # man يبدأ بـ on (بعد إسقاط أي off). نضع lead ثم man مباشرة (lead ينتهي بـ off، man يبدأ بـ on) ✓
+    return _durations_to_pronto(RC_FREQ, lead + man)
+
+
+def encode(protocol, device, subdevice, function):
+    """يحوّل (بروتوكول، عنوان، فرعي، أمر) إلى Pronto حسب البروتوكول المدعوم."""
+    p = protocol.upper()
+    return when_protocol(p, device, subdevice, function)
+
+
+def when_protocol(p, device, subdevice, function):
+    if p.startswith("NEC"):
+        return nec_to_pronto(device, subdevice, function)
+    if p == "RC5" or p == "RC5X":
+        return rc5_to_pronto(device, function)
+    if p == "RC6":
+        return rc6_to_pronto(device, function)
+    return None
 
 
 def nec_to_pronto(device, subdevice, function):
@@ -84,17 +176,18 @@ def convert(csv_text):
     buttons = []
     reader = csv.DictReader(io.StringIO(csv_text))
     for row in reader:
-        proto = (row.get("protocol") or "").strip().upper()
-        if not proto.startswith("NEC"):
-            continue  # ندعم NEC/NECx الآن؛ بروتوكولات أخرى لاحقاً
+        proto = (row.get("protocol") or "").strip()
         try:
             dev = int(row["device"]); sub = int(row["subdevice"]); fn = int(row["function"])
         except (ValueError, KeyError):
             continue
+        code = encode(proto, dev, sub, fn)
+        if code is None:
+            continue  # بروتوكول غير مدعوم (Panasonic/SIRC… لاحقاً)
         name = (row.get("functionname") or "").strip().upper()
         bid = NAME_MAP.get(name, "UNKNOWN")
-        code = nec_to_pronto(dev, sub, fn)
-        buttons.append({"id": bid, "label": name, "code": code, "freq": NEC_FREQ})
+        freq = RC_FREQ if proto.upper().startswith("RC") else NEC_FREQ
+        buttons.append({"id": bid, "label": name, "code": code, "freq": freq})
     return buttons
 
 

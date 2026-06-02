@@ -7,9 +7,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.FileOpen
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,6 +25,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import com.gnutux.tahakom.core.model.Device
+import com.gnutux.tahakom.core.share.RemotePackSharing
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -41,9 +50,23 @@ fun AddDeviceScreen(
     onBack: () -> Unit,
     onPickIrDevice: (IrDeviceEntry) -> Unit,
     onLearn: () -> Unit = {},
+    onDeviceReady: (Device) -> Unit = {},
     viewModel: AddDeviceViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    var importError by remember { mutableStateOf(false) }
+
+    // منتقي ملف .tahakom: يقرأ الحزمة، فإن طابقت جهازاً في القاعدة اعتُمد مباشرة،
+    // وإلا أُنشئ جهاز من معلومات الحزمة (الاسم/الفئة).
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val pack = RemotePackSharing.readFromUri(context, uri)
+        if (pack == null) { importError = true; return@rememberLauncherForActivityResult }
+        viewModel.importPack(pack, onDeviceReady) { importError = true }
+    }
 
     Scaffold(
         topBar = {
@@ -68,10 +91,25 @@ fun AddDeviceScreen(
             // مدخل التعلّم اليدوي للأجهزة غير المدرجة (مثل Unionaire).
             OutlinedButton(
                 onClick = onLearn,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             ) {
                 Icon(Icons.Outlined.Add, contentDescription = null)
                 Text(stringResource(R.string.learn_entry), modifier = Modifier.padding(start = 8.dp))
+            }
+            // استيراد ملف جهاز/طراز (.tahakom): يُعتمد مباشرة إن كان مسجّلاً، وإلا يُنشأ من معلوماته.
+            OutlinedButton(
+                onClick = { importLauncher.launch(arrayOf("*/*")) },
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 4.dp),
+            ) {
+                Icon(Icons.Outlined.FileOpen, contentDescription = null)
+                Text(stringResource(R.string.import_file), modifier = Modifier.padding(start = 8.dp))
+            }
+            if (importError) {
+                Text(
+                    stringResource(R.string.import_error),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
             }
 
             LazyColumn(Modifier.fillMaxSize()) {

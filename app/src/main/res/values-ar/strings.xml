@@ -28,6 +28,7 @@
     <string name="learn_err_name">أدخل اسم الجهاز.</string>
     <string name="learn_err_codes">أدخل كود Pronto صالحاً واحداً على الأقل.</string>
     <string name="learn_entry">تعلّم / إدخال الأكواد يدوياً</string>
+    <string name="import_file">استيراد ملف جهاز (‎.tahakom‎)</string>
     <string name="learn_btn_power">الطاقة</string>
     <string name="learn_btn_vol_up">الصوت +</string>
     <string name="learn_btn_vol_down">الصوت −</string>

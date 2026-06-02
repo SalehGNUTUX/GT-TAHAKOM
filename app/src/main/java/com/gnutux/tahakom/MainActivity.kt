@@ -7,10 +7,12 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -64,7 +66,28 @@ class MainActivity : AppCompatActivity() {
             TahakomTheme(darkTheme = dark) {
                 val context = LocalContext.current
                 val onboardingDone by devicesVm.onboardingDone.collectAsStateWithLifecycle()
-                var screen by remember { mutableStateOf<Screen>(Screen.Devices) }
+                // مسار محفوظ يصمد لإعادة إنشاء النشاط (عند تبديل اللغة) — يُبقي شاشة
+                // الإعدادات كما هي بدل العودة للرئيسية. الشاشات الحاملة لبيانات (Remote)
+                // لا تُحفظ فتعود للرئيسية (مقبول؛ اللغة تُغيَّر من الإعدادات فقط).
+                var route by rememberSaveable { mutableStateOf("devices") }
+                var screen by remember {
+                    mutableStateOf<Screen>(
+                        when (route) {
+                            "settings" -> Screen.Settings
+                            "add" -> Screen.AddDevice
+                            "learn" -> Screen.Learn
+                            else -> Screen.Devices
+                        },
+                    )
+                }
+                LaunchedEffect(screen) {
+                    route = when (screen) {
+                        Screen.Settings -> "settings"
+                        Screen.AddDevice -> "add"
+                        Screen.Learn -> "learn"
+                        else -> "devices"
+                    }
+                }
 
                 // شاشة الترحيب عند أول تشغيل (تنتظر تحميل الحالة لتفادي وميض).
                 if (onboardingDone == false) {
@@ -130,6 +153,7 @@ class MainActivity : AppCompatActivity() {
                         onBack = { screen = Screen.Devices },
                         onPickIrDevice = { screen = Screen.IrSetup(it.file) },
                         onLearn = { screen = Screen.Learn },
+                        onDeviceReady = { adopt(it) },
                     )
                     Screen.Learn -> LearnScreen(
                         onBack = { screen = Screen.AddDevice },
