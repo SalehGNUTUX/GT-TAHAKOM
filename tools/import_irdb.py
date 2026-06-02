@@ -38,6 +38,19 @@ NAME_MAP = {
     "REWIND": "RWD", "RECORD": "RECORD", "SLEEP": "SLEEP", "LIST": "LIST",
     "RED": "RED", "GREEN": "GREEN", "YELLOW": "YELLOW", "BLUE": "BLUE",
     "SUBTITLE": "CC", "TEXT": "TEXT", "FAVORITE": "FAV", "FAV": "FAV",
+    # مرادفات LIRC الشائعة (بعد تجريد بادئة KEY_) — كثير من ملفات probonopd بهذه الأسماء
+    "POWER": "POWER", "POWERON": "POWER_ON", "POWEROFF": "POWER_OFF", "OFF": "POWER",
+    "POWERTOGGLE": "POWER", "POWER2": "POWER",
+    "VOLUMEUP": "VOL_UP", "VOLUMEDOWN": "VOL_DOWN",
+    "CHANNELUP": "CH_UP", "CHANNELDOWN": "CH_DOWN",
+    "VOL_P": "VOL_UP", "VOL_M": "VOL_DOWN", "PROG_P": "CH_UP", "PROG_M": "CH_DOWN",
+    "CH_P": "CH_UP", "CH_M": "CH_DOWN",
+    "VOLUME_UP": "VOL_UP", "VOLUME_DOWN": "VOL_DOWN",
+    "CHANNEL_UP": "CH_UP", "CHANNEL_DOWN": "CH_DOWN",
+    "REWIND": "RWD", "FORWARD": "FFWD", "FASTFORWARD": "FFWD", "NEXT": "FFWD", "PREVIOUS": "RWD",
+    "RED": "RED", "GREEN": "GREEN", "YELLOW": "YELLOW", "BLUE": "BLUE",
+    "EPG": "GUIDE", "TVGUIDE": "GUIDE", "AUX": "SOURCE", "TV": "SOURCE", "VIDEO": "SOURCE",
+    "PIP": "PIP", "TOOLS": "TOOLS", "SMART": "SMART", "APPS": "SMART",
 }
 
 NEC_FREQ = 38000  # Hz
@@ -185,10 +198,29 @@ def convert(csv_text):
         if code is None:
             continue  # بروتوكول غير مدعوم (Panasonic/SIRC… لاحقاً)
         name = (row.get("functionname") or "").strip().upper()
-        bid = NAME_MAP.get(name, "UNKNOWN")
+        bid = _normalize_button(name)
         freq = RC_FREQ if proto.upper().startswith("RC") else NEC_FREQ
         buttons.append({"id": bid, "label": name, "code": code, "freq": freq})
     return buttons
+
+
+def _normalize_button(name):
+    """يطابق اسم زر probonopd مع ButtonId. يتسامح مع بادئة LIRC ‏KEY_‎ والفواصل."""
+    if name in NAME_MAP:
+        return NAME_MAP[name]
+    core = name
+    for pre in ("KEY_", "KEY ", "BTN_"):
+        if core.startswith(pre):
+            core = core[len(pre):]
+            break
+    core = core.strip()
+    if core in NAME_MAP:
+        return NAME_MAP[core]
+    if core.isdigit() and len(core) == 1:
+        return f"DIGIT_{core}"
+    # تطبيع الفواصل: مسافات/شرطات → شرطة سفلية ثم محاولة أخيرة
+    alt = re.sub(r"[\s\-]+", "_", core)
+    return NAME_MAP.get(alt, "UNKNOWN")
 
 
 def slugify(name):

@@ -108,6 +108,10 @@ fun AddNetworkScreen(
                 label = { Text(stringResource(R.string.net_ip_label)) },
                 placeholder = { Text("192.168.1.20") },
                 singleLine = true,
+                // عنوان IP أرقام ونقاط فقط → لوحة رقمية عشرية (تتضمّن مفتاح النقطة) لا حرفية.
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                    keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal,
+                ),
                 modifier = Modifier.fillMaxWidth().padding(top = 14.dp),
             )
 
