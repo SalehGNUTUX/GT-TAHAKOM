@@ -1,6 +1,6 @@
 # حالة المشروع — GT-TAHAKOM
 
-> آخر تحديث: 2026-06-02 · الإصدار الحالي: **0.9.4** (versionCode 14) · الترخيص: GPLv3
+> آخر تحديث: 2026-06-02 · الإصدار الحالي: **0.9.5** (versionCode 15) · الترخيص: GPLv3
 > الموقع والنموذج الحي: https://salehgnutux.github.io/GT-TAHAKOM/
 > المستودع: https://github.com/SalehGNUTUX/GT-TAHAKOM
 

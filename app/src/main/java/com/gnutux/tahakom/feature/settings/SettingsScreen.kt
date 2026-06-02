@@ -105,7 +105,7 @@ fun SettingsScreen(
                     Text("GT-TAHAKOM", color = c.text, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.app_tagline), color = c.textFaint, fontSize = 13.sp)
                 }
-                Chip("v0.9.4")
+                Chip("v0.9.5")
             }
             Spacer(Modifier.size(20.dp))
 
@@ -145,7 +145,7 @@ fun SettingsScreen(
 
             // قسم حول
             SectionTitle(stringResource(R.string.set_about))
-            InfoRow("info", stringResource(R.string.set_version), "0.9.4")
+            InfoRow("info", stringResource(R.string.set_version), "0.9.5")
             InfoRow("gear", stringResource(R.string.set_developer), stringResource(R.string.set_developer_name))
             val uriHandler = LocalUriHandler.current
             InfoRow(

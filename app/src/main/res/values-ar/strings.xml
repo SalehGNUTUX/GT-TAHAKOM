@@ -29,6 +29,13 @@
     <string name="learn_err_codes">أدخل كود Pronto صالحاً واحداً على الأقل.</string>
     <string name="learn_entry">تعلّم / إدخال الأكواد يدوياً</string>
     <string name="import_file">استيراد ملف جهاز (‎.tahakom‎)</string>
+    <string name="net_entry">إضافة جهاز شبكي بالـ IP</string>
+    <string name="net_title">إضافة جهاز شبكي</string>
+    <string name="net_hint">إن لم يظهر التلفاز الذكي في المسح، أضِفه يدوياً بعنوان IP (على نفس شبكة WiFi).</string>
+    <string name="net_protocol">البروتوكول</string>
+    <string name="net_ip_label">عنوان IP</string>
+    <string name="net_connect">اتصل وافتح جهاز التحكّم</string>
+    <string name="net_pairing_note">أول اتصال قد يطلب القبول على شاشة التلفاز (LG/Samsung).</string>
     <string name="learn_btn_power">الطاقة</string>
     <string name="learn_btn_vol_up">الصوت +</string>
     <string name="learn_btn_vol_down">الصوت −</string>

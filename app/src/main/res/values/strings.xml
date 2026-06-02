@@ -29,6 +29,13 @@
     <string name="learn_err_codes">Enter at least one valid Pronto code.</string>
     <string name="learn_entry">Learn / enter codes manually</string>
     <string name="import_file">Import a device file (.tahakom)</string>
+    <string name="net_entry">Add a network device by IP</string>
+    <string name="net_title">Add network device</string>
+    <string name="net_hint">If a smart TV didn\'t appear in the scan, add it manually by its IP address (same WiFi network).</string>
+    <string name="net_protocol">Protocol</string>
+    <string name="net_ip_label">IP address</string>
+    <string name="net_connect">Connect &amp; open remote</string>
+    <string name="net_pairing_note">First connection may prompt you to accept on the TV (LG/Samsung).</string>
     <string name="learn_btn_power">Power</string>
     <string name="learn_btn_vol_up">Volume +</string>
     <string name="learn_btn_vol_down">Volume −</string>

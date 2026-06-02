@@ -23,6 +23,7 @@ import com.gnutux.tahakom.core.share.PackScope
 import com.gnutux.tahakom.core.share.RemotePack
 import com.gnutux.tahakom.core.share.RemotePackSharing
 import com.gnutux.tahakom.feature.devices.AddDeviceScreen
+import com.gnutux.tahakom.feature.devices.AddNetworkScreen
 import com.gnutux.tahakom.feature.devices.DevicesScreen
 import com.gnutux.tahakom.feature.devices.DevicesViewModel
 import com.gnutux.tahakom.feature.irsetup.IrSetupScreen
@@ -39,6 +40,7 @@ private sealed interface Screen {
     data object Devices : Screen
     data object Settings : Screen
     data object AddDevice : Screen
+    data object AddNetwork : Screen
     data object Learn : Screen
     data class IrSetup(val irFile: String) : Screen
     data class Remote(val device: Device) : Screen
@@ -121,7 +123,7 @@ class MainActivity : AppCompatActivity() {
                 BackHandler(enabled = true) {
                     if (screen != Screen.Devices) {
                         screen = when (screen) {
-                            is Screen.IrSetup, Screen.Learn -> Screen.AddDevice
+                            is Screen.IrSetup, Screen.Learn, Screen.AddNetwork -> Screen.AddDevice
                             else -> Screen.Devices
                         }
                     } else {
@@ -154,6 +156,11 @@ class MainActivity : AppCompatActivity() {
                         onBack = { screen = Screen.Devices },
                         onPickIrDevice = { screen = Screen.IrSetup(it.file) },
                         onLearn = { screen = Screen.Learn },
+                        onAddNetwork = { screen = Screen.AddNetwork },
+                        onDeviceReady = { adopt(it) },
+                    )
+                    Screen.AddNetwork -> AddNetworkScreen(
+                        onBack = { screen = Screen.AddDevice },
                         onDeviceReady = { adopt(it) },
                     )
                     Screen.Learn -> LearnScreen(

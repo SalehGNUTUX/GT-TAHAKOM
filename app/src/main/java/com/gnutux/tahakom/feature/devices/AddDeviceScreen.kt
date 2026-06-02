@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.FileOpen
+import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,6 +51,7 @@ fun AddDeviceScreen(
     onBack: () -> Unit,
     onPickIrDevice: (IrDeviceEntry) -> Unit,
     onLearn: () -> Unit = {},
+    onAddNetwork: () -> Unit = {},
     onDeviceReady: (Device) -> Unit = {},
     viewModel: AddDeviceViewModel = hiltViewModel(),
 ) {
@@ -88,6 +90,14 @@ fun AddDeviceScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
             )
+            // إضافة جهاز شبكي بالـ IP (تلفاز ذكي لم يظهر في المسح).
+            OutlinedButton(
+                onClick = onAddNetwork,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            ) {
+                Icon(Icons.Outlined.Wifi, contentDescription = null)
+                Text(stringResource(R.string.net_entry), modifier = Modifier.padding(start = 8.dp))
+            }
             // مدخل التعلّم اليدوي للأجهزة غير المدرجة (مثل Unionaire).
             OutlinedButton(
                 onClick = onLearn,
