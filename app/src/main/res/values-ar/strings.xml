@@ -75,6 +75,18 @@
     <string name="ir_device_counter">%1$d / %2$d</string>
     <string name="ir_try_next_hint">لا يعمل؟ جرّب الجهاز التالي دون مغادرة هذه الشاشة.</string>
 
+    <!-- البحث الشبكي عن أجهزة التحكّم (probonopd/irdb) -->
+    <string name="online_search_entry">ابحث عن جهاز عبر الإنترنت</string>
+    <string name="online_search_title">بحث عبر الإنترنت</string>
+    <string name="online_search_hint">غير موجود في القائمة المحلية؟ ابحث في قاعدة probonopd المفتوحة. تنزيل الأكواد يحتاج اتصالاً.</string>
+    <string name="online_search_field">اسم العلامة (Samsung، LG، Toshiba…)</string>
+    <string name="online_codeset_meta">%1$s · %2$s · %3$d زراً</string>
+    <string name="online_unsupported_tag">البروتوكول غير مدعوم بعد</string>
+    <string name="online_no_results">لا توجد أطقم لـ «%1$s» في القاعدة المفتوحة.</string>
+    <string name="online_saved">أُضيف «%1$s» — جارٍ اختباره</string>
+    <string name="online_unsupported_msg">البروتوكول %1$s غير مدعوم بعد.</string>
+    <string name="online_fetch_error">تعذّر الجلب: %1$s</string>
+
     <!-- شاشة الترحيب -->
     <string name="ob_skip">تخطّي</string>
     <string name="ob_next">التالي</string>

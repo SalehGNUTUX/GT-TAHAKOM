@@ -7,6 +7,7 @@ import com.gnutux.tahakom.core.discovery.MdnsDiscovery
 import com.gnutux.tahakom.core.discovery.MulticastLockHolder
 import com.gnutux.tahakom.core.discovery.SsdpDiscovery
 import com.gnutux.tahakom.core.irdb.IrDatabase
+import com.gnutux.tahakom.core.irdb.online.OnlineIrRepository
 import com.gnutux.tahakom.core.store.SavedDevicesRepository
 import com.gnutux.tahakom.core.transport.Transport
 import com.gnutux.tahakom.core.transport.TransportRegistry
@@ -70,4 +71,11 @@ object AppModule {
     fun provideSavedDevicesRepository(
         @ApplicationContext context: Context,
     ): SavedDevicesRepository = SavedDevicesRepository(context)
+
+    @Provides
+    @Singleton
+    fun provideOnlineIrRepository(
+        @ApplicationContext context: Context,
+        db: IrDatabase,
+    ): OnlineIrRepository = OnlineIrRepository(context, db)
 }

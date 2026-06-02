@@ -59,6 +59,7 @@ fun AddDeviceScreen(
     onPickIrDevice: (IrDeviceEntry) -> Unit,
     onLearn: () -> Unit = {},
     onAddNetwork: () -> Unit = {},
+    onSearchOnline: () -> Unit = {},
     onDeviceReady: (Device) -> Unit = {},
     viewModel: AddDeviceViewModel = hiltViewModel(),
 ) {
@@ -117,7 +118,9 @@ fun AddDeviceScreen(
             )
 
             Spacer(Modifier.size(10.dp))
-            // مداخل بديلة: جهاز شبكي بالـ IP · تعلّم يدوي · استيراد ملف.
+            // مداخل بديلة: بحث شبكي · جهاز شبكي بالـ IP · تعلّم يدوي · استيراد ملف.
+            SecondaryAction("scan", stringResource(R.string.online_search_entry), onSearchOnline)
+            Spacer(Modifier.size(8.dp))
             SecondaryAction("wifi", stringResource(R.string.net_entry), onAddNetwork)
             Spacer(Modifier.size(8.dp))
             SecondaryAction("plus", stringResource(R.string.learn_entry), onLearn)

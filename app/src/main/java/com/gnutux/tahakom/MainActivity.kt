@@ -27,6 +27,7 @@ import com.gnutux.tahakom.feature.devices.AddNetworkScreen
 import com.gnutux.tahakom.feature.devices.DevicesScreen
 import com.gnutux.tahakom.feature.devices.DevicesViewModel
 import com.gnutux.tahakom.feature.irsetup.IrSetupScreen
+import com.gnutux.tahakom.feature.online.OnlineSearchScreen
 import com.gnutux.tahakom.feature.learn.LearnScreen
 import com.gnutux.tahakom.feature.onboarding.OnboardingScreen
 import com.gnutux.tahakom.feature.remote.RemoteScreen
@@ -42,6 +43,7 @@ private sealed interface Screen {
     data object AddDevice : Screen
     data object AddNetwork : Screen
     data object Learn : Screen
+    data object OnlineSearch : Screen
     data class IrSetup(val irFile: String) : Screen
     data class Remote(val device: Device) : Screen
 }
@@ -123,7 +125,7 @@ class MainActivity : AppCompatActivity() {
                 BackHandler(enabled = true) {
                     if (screen != Screen.Devices) {
                         screen = when (screen) {
-                            is Screen.IrSetup, Screen.Learn, Screen.AddNetwork -> Screen.AddDevice
+                            is Screen.IrSetup, Screen.Learn, Screen.AddNetwork, Screen.OnlineSearch -> Screen.AddDevice
                             else -> Screen.Devices
                         }
                     } else {
@@ -157,7 +159,13 @@ class MainActivity : AppCompatActivity() {
                         onPickIrDevice = { screen = Screen.IrSetup(it.file) },
                         onLearn = { screen = Screen.Learn },
                         onAddNetwork = { screen = Screen.AddNetwork },
+                        onSearchOnline = { screen = Screen.OnlineSearch },
                         onDeviceReady = { adopt(it) },
+                    )
+                    Screen.OnlineSearch -> OnlineSearchScreen(
+                        onBack = { screen = Screen.AddDevice },
+                        // بعد جلب جهاز جديد وحفظه محلياً، افتحه في شاشة الضبط لاختباره فوراً.
+                        onOpenSetup = { screen = Screen.IrSetup(it) },
                     )
                     Screen.AddNetwork -> AddNetworkScreen(
                         onBack = { screen = Screen.AddDevice },
