@@ -139,6 +139,7 @@
     <string name="set_license">الترخيص</string>
     <string name="set_actions">إجراءات</string>
     <string name="set_share_app">مشاركة التطبيق</string>
+    <string name="share_app_text">تَحَكُّمْ — GT-TAHAKOM\nجهاز تحكّم حرّ ومفتوح المصدر للتلفاز والأجهزة عبر WiFi والأشعة تحت الحمراء وجسر WiFi-IR. يعمل بلا إنترنت.\n\nA free, open-source remote for TVs and devices over WiFi, Infrared and a WiFi-IR bridge. Works offline.\n\n🌐 https://salehgnutux.github.io/GT-TAHAKOM/\n⬇ https://github.com/SalehGNUTUX/GT-TAHAKOM/releases</string>
     <string name="set_import_remote">استيراد لوحة تحكّم</string>
     <string name="set_developer">المطوّر</string>
     <string name="set_developer_name">GNUTUX</string>

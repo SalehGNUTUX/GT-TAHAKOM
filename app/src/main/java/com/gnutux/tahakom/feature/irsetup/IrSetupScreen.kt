@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -81,18 +83,24 @@ fun IrSetupScreen(
                 textAlign = TextAlign.Center,
             )
 
-            // إشارات الاختبار — مع أيقونات تعبيرية تسهّل الفهم.
+            // إشارات الاختبار — بأيقونات Material حقيقية (لا رموز نصّية قد لا يدعمها الخط).
             Button(
                 onClick = { viewModel.sendTest(PowerState.OFF) },
                 enabled = state.irAvailable,
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("⏻  " + stringResource(R.string.ir_test_power)) }
+            ) {
+                Icon(Icons.Filled.PowerSettingsNew, contentDescription = null, modifier = Modifier.size(20.dp))
+                Text(stringResource(R.string.ir_test_power), modifier = Modifier.padding(start = 8.dp))
+            }
 
             OutlinedButton(
                 onClick = { viewModel.sendTest(PowerState.ON) },
                 enabled = state.irAvailable,
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("🔊  " + stringResource(R.string.ir_test_volume)) }
+            ) {
+                Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = null, modifier = Modifier.size(20.dp))
+                Text(stringResource(R.string.ir_test_volume), modifier = Modifier.padding(start = 8.dp))
+            }
 
             state.testButtonLabel?.let {
                 Text(
