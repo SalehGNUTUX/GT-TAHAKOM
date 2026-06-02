@@ -18,6 +18,10 @@
   <img src="https://img.shields.io/badge/Android-8.0%2B-3ddc84?style=for-the-badge&logo=android&logoColor=white" alt="Android"/>
 </p>
 
+<p align="center">
+  🌐 <b>الموقع والنموذج الحي:</b> <a href="https://salehgnutux.github.io/GT-TAHAKOM/">salehgnutux.github.io/GT-TAHAKOM</a>
+</p>
+
 ---
 
 ## الفكرة
