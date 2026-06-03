@@ -30,14 +30,27 @@ def is_supported(proto):
             or p in ("JVC", "MITSUBISHI", "DENON", "PIONEER", "PROTON"))
 
 
-def categorize(type_folder):
-    """يستنتج فئة موحّدة (TV/Cable/Audio/Other) من اسم مجلّد نوع الجهاز."""
+# علامات معروفة لمستقبلات الأقمار/الكابل (لتصنيفها Cable حتى لو كان مجلّد النوع مبهماً).
+SAT_BRANDS = {
+    "humax", "echostar", "pace", "strong", "topfield", "kaon", "starsat", "dish network",
+    "directv", "dishnetwork", "echolink", "openbox", "skybox", "amiko", "octagon", "vu+",
+    "dreambox", "technomate", "gigablue", "arion", "thomson", "nokia", "technicolor",
+    "general instrument", "g.i.", "scientific atlanta", "motorola", "cisco", "bell",
+    "bell expressvu", "dish", "hughes", "sky", "freesat", "manhattan", "triax",
+}
+SAT_KW = ("SAT", "CABLE", "STB", "DVB", "TUNER", "DTV", "HDTV", "DECODER", "RECEIVER",
+          "IRD", "FTA", "DBS", "DISH", "FREESAT")
+AUDIO_KW = ("AUDIO", "AMP", "CD", "DVD", "BLU", "SOUND", "SPEAKER", "STEREO", "AV ", "HIFI", "HI-FI")
+
+
+def categorize(type_folder, brand):
+    """يستنتج فئة موحّدة (TV/Cable/Audio/Other) من نوع الجهاز والعلامة."""
     t = type_folder.upper()
-    if "TV" in t:
+    if "TV" in t and "ATV" not in t:
         return "TV"
-    if any(k in t for k in ("SAT", "CABLE", "STB", "DVB", "TUNER", "DTV", "HDTV", "DECODER", "RECEIVER STB")):
+    if brand.lower() in SAT_BRANDS or any(k in t for k in SAT_KW):
         return "Cable"
-    if any(k in t for k in ("AUDIO", "AMP", "CD", "DVD", "BLU", "SOUND", "SPEAKER", "STEREO", "RECEIVER", "AV ")):
+    if any(k in t for k in AUDIO_KW):
         return "Audio"
     return "Other"
 
@@ -86,7 +99,7 @@ def main():
                 continue
             devices.append({
                 "brand": brand,
-                "category": categorize(type_folder),
+                "category": categorize(type_folder, brand),
                 "type": type_folder,
                 "path": rel,
                 "protocol": proto,

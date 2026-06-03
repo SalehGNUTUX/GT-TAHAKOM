@@ -28,7 +28,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,6 +61,7 @@ fun OnlineSearchScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val event by viewModel.events.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
+    var catFilter by remember { mutableStateOf<String?>(null) } // null=الكل · TV/Cable/Audio
 
     val savedMsg = stringResource(R.string.online_saved, "%s")
     val unsupportedFmt = stringResource(R.string.online_unsupported_msg, "%s")
@@ -115,9 +118,19 @@ fun OnlineSearchScreen(
                 stringResource(R.string.online_search_hint), color = c.textFaint, fontSize = 12.5.sp,
                 modifier = Modifier.padding(top = 8.dp, start = 4.dp, end = 4.dp),
             )
+            Spacer(Modifier.size(10.dp))
+
+            // مرشّح نوع الجهاز: الكل/تلفاز/استقبال/صوت — لحصر النتائج حسب الهدف.
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(stringResource(R.string.filter_all), catFilter == null) { catFilter = null }
+                FilterChip(stringResource(R.string.cat_tv_short), catFilter == "TV") { catFilter = "TV" }
+                FilterChip(stringResource(R.string.cat_cable_short), catFilter == "Cable") { catFilter = "Cable" }
+                FilterChip(stringResource(R.string.cat_audio_short), catFilter == "Audio") { catFilter = "Audio" }
+            }
             Spacer(Modifier.size(8.dp))
 
-            if (state.searched && state.results.isEmpty()) {
+            val shown = state.results.filter { catFilter == null || it.category == catFilter }
+            if (state.searched && shown.isEmpty()) {
                 Text(
                     stringResource(R.string.online_no_results, state.query), color = c.textDim, fontSize = 14.sp,
                     modifier = Modifier.padding(top = 24.dp, start = 4.dp),
@@ -127,7 +140,7 @@ fun OnlineSearchScreen(
                     Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    items(state.results, key = { it.path }) { entry ->
+                    items(shown, key = { it.path }) { entry ->
                         OnlineRow(
                             entry = entry,
                             fetching = state.fetchingPath == entry.path,
@@ -138,6 +151,23 @@ fun OnlineSearchScreen(
                 }
             }
         }
+    }
+}
+
+/** شريحة مرشّح (مفعّلة = لون الإبراز). */
+@Composable
+private fun FilterChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    val c = tokens.colors
+    Box(
+        Modifier.clip(RoundedCornerShape(50))
+            .background(if (selected) c.accent else c.surface)
+            .border(1.dp, if (selected) c.accent else c.line, RoundedCornerShape(50))
+            .clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 8.dp),
+    ) {
+        Text(
+            label, color = if (selected) c.accentText else c.textDim,
+            fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
+        )
     }
 }
 

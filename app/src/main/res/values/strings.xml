@@ -93,6 +93,10 @@
     <string name="online_search_title">Search online</string>
     <string name="online_search_hint">Not in the local list? Search the open probonopd database. Downloading codes needs internet.</string>
     <string name="online_search_field">Brand name (Samsung, LG, Toshiba…)</string>
+    <string name="filter_all">All</string>
+    <string name="cat_tv_short">TV</string>
+    <string name="cat_cable_short">Receiver</string>
+    <string name="cat_audio_short">Audio</string>
     <string name="online_codeset_meta">%1$s · %2$s · %3$d buttons</string>
     <string name="online_unsupported_tag">Protocol not supported yet</string>
     <string name="online_no_results">No codesets for \"%1$s\" in the open database.</string>

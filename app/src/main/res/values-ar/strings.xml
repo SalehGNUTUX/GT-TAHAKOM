@@ -64,7 +64,7 @@
     <string name="add_device_search_ir">ابحث عن علامة / طراز (Samsung، LG، Sony…)</string>
     <string name="add_device_buttons_count">%1$d زراً</string>
     <string name="cat_tv">أجهزة التلفاز</string>
-    <string name="cat_cable">أجهزة الاستقبال الرقمي / الستلايت</string>
+    <string name="cat_cable">أجهزة الاستقبال الرقمي / الأقمار الصناعية</string>
     <string name="cat_audio">أجهزة الصوت</string>
     <string name="ir_pick_other">اختر علامة أخرى</string>
     <string name="cat_device_count">%1$d جهازاً</string>
@@ -93,6 +93,10 @@
     <string name="online_search_title">بحث عبر الإنترنت</string>
     <string name="online_search_hint">غير موجود في القائمة المحلية؟ ابحث في قاعدة probonopd المفتوحة. تنزيل الأكواد يحتاج اتصالاً.</string>
     <string name="online_search_field">اسم العلامة (Samsung، LG، Toshiba…)</string>
+    <string name="filter_all">الكل</string>
+    <string name="cat_tv_short">تلفاز</string>
+    <string name="cat_cable_short">استقبال</string>
+    <string name="cat_audio_short">صوت</string>
     <string name="online_codeset_meta">%1$s · %2$s · %3$d زراً</string>
     <string name="online_unsupported_tag">البروتوكول غير مدعوم بعد</string>
     <string name="online_no_results">لا توجد أطقم لـ «%1$s» في القاعدة المفتوحة.</string>
