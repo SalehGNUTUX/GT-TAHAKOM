@@ -19,7 +19,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   **android-36** (لا 35) → `compileSdk=targetSdk=36`، AGP 8.9.2، Gradle 8.11.1، JDK 17، minSdk 26.
 - التوقيع: `signingConfig` يقرأ من `keystore.properties` بالجذر (مُتجاهَل في git). إن غاب
   يبني release بلا توقيع. الإصدارات تُنشر على GitHub Releases (prerelease) + نسخة في `release/`.
-- بعد كل أمر `convert_ir_db.py`/`import_irdb.py` يُعاد توليد `app/src/main/assets/irdb/`.
+- `convert_ir_db.py`/`import_irdb.py` يعيدان توليد `app/src/main/assets/irdb/` (القاعدة
+  المدمجة). `tools/build_online_index.py` يولّد `assets/online_index.json` (فهرس البحث
+  الشبكي) بتنزيل أرشيف probonopd مرة واحدة.
 
 ## المعمارية — الجوهر
 
@@ -32,8 +34,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 `RemoteViewModel.supportedForTransport()`. **لا تلمس** الواجهة أو نموذج `Command`.
 
 الوسائل المسجّلة حالياً: `IrTransport` (ConsumerIrManager/Pronto)، `RokuTransport`
-(ECP/HTTP)، `WebosTransport` (LG SSAP WebSocket)، `SamsungTizenTransport` (WebSocket).
-المعلّق: `AndroidTvTransport` (Remote v2 معقّد)، touchpad (pointer socket).
+(ECP/HTTP)، `WebosTransport` (LG SSAP WebSocket + pointer input socket للتنقّل)،
+`SamsungTizenTransport` (WebSocket). المعلّق: `AndroidTvTransport` (Remote v2 معقّد)،
+`SonyBraviaTransport`، `BroadlinkTransport` (جسر WiFi-IR).
 
 ### تدفّقات أساسية تتطلّب قراءة عدة ملفات
 - **الإرسال الفعلي:** `RemoteScreen` → `RemoteViewModel.send()`. لأجهزة IR يحمّل
@@ -42,7 +45,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   الشبكية يمرّر `Command.Key` والـ Transport يترجمه. الأزرار المعروضة = `state.supported`.
 - **قاعدة IR:** `assets/irdb/` (index.json + ملف/جهاز، أكواد Pronto). `IrDatabase` يدمج
   أجهزة assets (للقراءة) مع الريموتات المتعلَّمة من `LearnedRemoteStore` (بادئة `learned:`).
-  مولّدة بـ `tools/convert_ir_db.py` (من IRRemote) و`tools/import_irdb.py` (من probonopd، NEC→Pronto).
+  مولّدة بـ `tools/convert_ir_db.py` (من IRRemote) و`tools/import_irdb.py` (من probonopd، NEC/RC5/RC6→Pronto).
+- **البحث الشبكي (الطبقة التوسعية):** `core/irdb/online/` — `OnlineIrRepository` يبحث في
+  فهرس `assets/online_index.json` (مشحون، فالبحث أوفلاين)، ثم يجلب أكواد الطقم المختار من
+  raw.githubusercontent.com ويحوّلها إلى Pronto **على الهاتف** عبر `IrCodeConverter`، ويحفظها
+  كجهاز محلي عبر `saveLearned` (فتُدمج كأي ريموت متعلَّم). الجلب فقط يحتاج إنترنت.
 - **الاكتشاف:** `discovery/` — `MdnsDiscovery` (NsdManager) + `SsdpDiscovery` (UDP
   multicast) → `DiscoveryManager` يدمجهما (مع MulticastLock) → `ServiceFingerprint` يستنتج
   البروتوكول/العلامة. أوفلاين بالكامل.
@@ -67,7 +74,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   تنهار وقت التشغيل. استُبدل بـ Material Icons.
 - اكتشاف IR التلقائي **مستحيل فيزيائياً** (أحادي الاتجاه) → ضبط شبه آلي بمنطق حالة الطاقة
   (مطفأ→Power، مشغّل→Vol/Ch) في `IrSetupViewModel`.
-- بروتوكولات probonopd معظمها RC5/RC6 لا NEC؛ محوّلنا يدعم NEC فقط حالياً.
+- محوّل الأكواد يدعم **NEC/RC5/RC6 فقط**؛ بقية بروتوكولات probonopd (Sony SIRC،
+  Panasonic، RCA، Sharp، Aiwa…) تُتخطّى أو تُعلَّم «غير مدعوم بعد» في البحث الشبكي.
+- **منطق التحويل مكرّر في موضعين يجب أن يتطابقا بايتاً ببايت:** `tools/import_irdb.py`
+  (Python، وقت البناء) و`core/irdb/online/IrCodeConverter.kt` (Kotlin، على الهاتف).
+  أي تعديل على NAME_MAP أو دوال nec/rc5/rc6 يجب نسخه للموضعين، وإلا اختلفت أكواد الجهاز
+  المجلوب عن المدمج. (انتبه: `round` في Python مصرفي و`roundToInt` في Kotlin نصف-لأعلى —
+  متطابقان عملياً هنا لكن لا تعتمد على حالة .5 الصريحة.)
 
 ## مرجع IRRemote (الإلهام المعماري، GPLv3)
 مفكوك في `_study/IRRemote-libre/` (مُتجاهَل في git): `ir/io/KitKatTransmitter.java`،

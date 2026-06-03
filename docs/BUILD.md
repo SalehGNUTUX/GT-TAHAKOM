@@ -42,7 +42,7 @@ keytool -genkeypair -v -keystore gt-tahakom-release.jks \
 
 **عبر USB:**
 ```bash
-adb install -r release/GT-TAHAKOM-<version>-*.apk   # مثال: GT-TAHAKOM-0.9.0-samsung-settings.apk
+adb install -r release/GT-TAHAKOM-<version>-*.apk   # مثال: GT-TAHAKOM-0.9.9-online.apk
 ```
 
 **يدوياً:** انقل ملف الـ APK إلى الهاتف وافتحه (فعّل "تثبيت من مصادر غير معروفة").
