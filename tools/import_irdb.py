@@ -60,6 +60,7 @@ NEC_FREQ = 38000  # Hz
 RC_FREQ = 36000   # Hz — تردد بروتوكولات RC5/RC6 (فيليبس وكثير من الأوروبية/الصينية)
 SIRC_FREQ = 40000 # Hz — Sony SIRC
 PANA_FREQ = 37000 # Hz — Panasonic/Kaseikyo
+MITS_FREQ = 32600 # Hz — Mitsubishi
 
 
 def _durations_to_pronto(freq, durations_us):
@@ -155,7 +156,49 @@ def when_protocol(p, device, subdevice, function):
         return sony_to_pronto(nbits, device, subdevice, function)
     if p == "PANASONIC":
         return panasonic_to_pronto(device, subdevice, function)
+    if p == "JVC":
+        return jvc_to_pronto(device, function)
+    if p == "MITSUBISHI":
+        return mitsubishi_to_pronto(device, function)
+    if p == "DENON":
+        return denon_to_pronto(device, function)
     return None
+
+
+def jvc_to_pronto(device, function):
+    """JVC: {38k,525} ترميز مسافة-النبضة، قائد 16/8 وحدة، D:8 ثم F:8 (LSB)، بلا مكمّلات."""
+    durs = [8400, 4200]  # 16 وحدة ON + 8 OFF
+    for b in (device & 0xFF, function & 0xFF):
+        for i in range(8):
+            durs += [525, 1575] if (b >> i) & 1 else [525, 525]
+    durs += [525, 23625]  # بت توقّف + فاصل (45 وحدة)
+    return _durations_to_pronto(38000, durs)
+
+
+def mitsubishi_to_pronto(device, function):
+    """Mitsubishi: {32.6k,300}، بلا قائد، D:8 ثم F:8 (LSB)، 0=1,-3 و1=1,-7."""
+    durs = []
+    for b in (device & 0xFF, function & 0xFF):
+        for i in range(8):
+            durs += [300, 2100] if (b >> i) & 1 else [300, 900]
+    durs += [300, 24000]  # بت توقّف + فاصل (80 وحدة)
+    return _durations_to_pronto(MITS_FREQ, durs)
+
+
+def denon_to_pronto(device, function):
+    """Denon: {38k,264}، إطاران: (D:5,F:8,0:2) ثم (D:5,~F:8,3:2)، كلٌّ ببت توقّف وفاصل 165 وحدة."""
+    def bits(val, n):
+        return [(val >> i) & 1 for i in range(n)]  # LSB أولاً
+
+    def frame(seq):
+        d = []
+        for bit in seq:
+            d += [264, 1848] if bit else [264, 792]
+        d += [264, 43560]  # توقّف + فاصل (165 وحدة)
+        return d
+    f1 = bits(device, 5) + bits(function & 0xFF, 8) + bits(0, 2)
+    f2 = bits(device, 5) + bits((~function) & 0xFF, 8) + bits(3, 2)
+    return _durations_to_pronto(38000, frame(f1) + frame(f2))
 
 
 def sony_to_pronto(nbits, device, subdevice, function):
@@ -253,7 +296,9 @@ def _freq_for(proto_upper):
         return SIRC_FREQ
     if proto_upper == "PANASONIC":
         return PANA_FREQ
-    return NEC_FREQ
+    if proto_upper == "MITSUBISHI":
+        return MITS_FREQ
+    return NEC_FREQ  # NEC/JVC/Denon = 38kHz
 
 
 def _normalize_button(name):

@@ -16,12 +16,14 @@ object IrCodeConverter {
     private const val RC_FREQ = 36000
     private const val SIRC_FREQ = 40000
     private const val PANA_FREQ = 37000
+    private const val MITS_FREQ = 32600
 
     /** بروتوكولات مدعومة (يطابق online_index.json supported flag وأداة build_online_index.py). */
     fun isSupported(protocol: String): Boolean {
         val p = protocol.uppercase()
         return p.startsWith("NEC") || p == "RC5" || p == "RC5X" || p == "RC6" ||
-            p.startsWith("SONY") || p == "SIRC" || p == "PANASONIC"
+            p.startsWith("SONY") || p == "SIRC" || p == "PANASONIC" ||
+            p == "JVC" || p == "MITSUBISHI" || p == "DENON"
     }
 
     /** يحوّل نص CSV كامل إلى قائمة أزرار (يتخطّى البروتوكولات غير المدعومة والصفوف التالفة). */
@@ -48,7 +50,8 @@ object IrCodeConverter {
         p.startsWith("RC") -> RC_FREQ
         p.startsWith("SONY") || p == "SIRC" -> SIRC_FREQ
         p == "PANASONIC" -> PANA_FREQ
-        else -> NEC_FREQ
+        p == "MITSUBISHI" -> MITS_FREQ
+        else -> NEC_FREQ // NEC/JVC/Denon = 38kHz
     }
 
     private fun encode(protocol: String, device: Int, subdevice: Int, function: Int): String? {
@@ -62,8 +65,47 @@ object IrCodeConverter {
                 sonyToPronto(nbits, device, subdevice, function)
             }
             p == "PANASONIC" -> panasonicToPronto(device, subdevice, function)
+            p == "JVC" -> jvcToPronto(device, function)
+            p == "MITSUBISHI" -> mitsubishiToPronto(device, function)
+            p == "DENON" -> denonToPronto(device, function)
             else -> null
         }
+    }
+
+    private fun jvcToPronto(device: Int, function: Int): String {
+        val durs = ArrayList<Int>()
+        durs.add(8400); durs.add(4200) // قائد 16/8 وحدة
+        for (b in intArrayOf(device and 0xFF, function and 0xFF)) {
+            for (i in 0 until 8) {
+                durs.add(525); durs.add(if ((b shr i) and 1 == 1) 1575 else 525)
+            }
+        }
+        durs.add(525); durs.add(23625) // توقّف + فاصل
+        return durationsToPronto(38000, durs)
+    }
+
+    private fun mitsubishiToPronto(device: Int, function: Int): String {
+        val durs = ArrayList<Int>()
+        for (b in intArrayOf(device and 0xFF, function and 0xFF)) {
+            for (i in 0 until 8) {
+                durs.add(300); durs.add(if ((b shr i) and 1 == 1) 2100 else 900)
+            }
+        }
+        durs.add(300); durs.add(24000)
+        return durationsToPronto(MITS_FREQ, durs)
+    }
+
+    private fun denonToPronto(device: Int, function: Int): String {
+        fun bits(value: Int, n: Int): List<Int> = (0 until n).map { (value shr it) and 1 }
+        fun frame(seq: List<Int>): List<Int> {
+            val d = ArrayList<Int>()
+            for (bit in seq) { d.add(264); d.add(if (bit == 1) 1848 else 792) }
+            d.add(264); d.add(43560)
+            return d
+        }
+        val f1 = bits(device, 5) + bits(function and 0xFF, 8) + bits(0, 2)
+        val f2 = bits(device, 5) + bits(function.inv() and 0xFF, 8) + bits(3, 2)
+        return durationsToPronto(38000, frame(f1) + frame(f2))
     }
 
     private fun sonyToPronto(nbits: Int, device: Int, subdevice: Int, function: Int): String {

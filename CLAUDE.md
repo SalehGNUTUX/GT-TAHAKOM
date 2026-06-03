@@ -74,8 +74,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   تنهار وقت التشغيل. استُبدل بـ Material Icons.
 - اكتشاف IR التلقائي **مستحيل فيزيائياً** (أحادي الاتجاه) → ضبط شبه آلي بمنطق حالة الطاقة
   (مطفأ→Power، مشغّل→Vol/Ch) في `IrSetupViewModel`.
-- محوّل الأكواد يدعم **NEC/RC5/RC6/Sony SIRC/Panasonic**؛ بقية بروتوكولات probonopd
-  (JVC، Aiwa، RCA، Sharp، Denon، Pioneer…) تُتخطّى أو تُعلَّم «غير مدعوم بعد» في البحث الشبكي.
+- محوّل الأكواد يدعم **NEC/RC5/RC6/Sony SIRC/Panasonic/JVC/Mitsubishi/Denon**؛ بقية
+  بروتوكولات probonopd (Aiwa، RCA، Pioneer، RECS80، Dish…) تُتخطّى أو تُعلَّم «غير مدعوم بعد».
 - **منطق التحويل مكرّر في موضعين يجب أن يتطابقا بايتاً ببايت:** `tools/import_irdb.py`
   (Python، وقت البناء) و`core/irdb/online/IrCodeConverter.kt` (Kotlin، على الهاتف).
   أي تعديل على NAME_MAP أو دوال nec/rc5/rc6 يجب نسخه للموضعين، وإلا اختلفت أكواد الجهاز
