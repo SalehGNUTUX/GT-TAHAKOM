@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gnutux.tahakom.R
-import com.gnutux.tahakom.core.discovery.DiscoveredDevice
 import com.gnutux.tahakom.core.model.Device
 import com.gnutux.tahakom.core.transport.TransportType
 import com.gnutux.tahakom.ui.icons.TahakomIcon
@@ -61,14 +60,13 @@ import kotlinx.coroutines.launch
 fun DevicesScreen(
     onOpenSettings: () -> Unit = {},
     onAddManual: () -> Unit = {},
+    onScan: () -> Unit = {},
     onOpenDevice: (Device) -> Unit = {},
-    onAdoptDiscovered: (DiscoveredDevice) -> Unit = {},
     onShareDevice: (Device) -> Unit = {},
     viewModel: DevicesViewModel = hiltViewModel(),
 ) {
     val c = tokens.colors
     val saved by viewModel.savedDevices.collectAsStateWithLifecycle()
-    val discovery by viewModel.discovery.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var pendingDelete by remember { mutableStateOf<Device?>(null) }
@@ -94,12 +92,11 @@ fun DevicesScreen(
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
-            // إجراء المسح الأساسي (بارز بلون الإبراز) + إضافة يدوية ثانوية.
+            // المسح صار صفحة مستقلة (رادار + نتائج حيّة) + إضافة يدوية ثانوية.
             PrimaryAction(
-                label = if (discovery.isScanning) stringResource(R.string.devices_scanning)
-                else stringResource(R.string.devices_scan),
-                scanning = discovery.isScanning,
-                onClick = if (discovery.isScanning) viewModel::stopScan else viewModel::startScan,
+                label = stringResource(R.string.devices_scan),
+                scanning = false,
+                onClick = onScan,
             )
             Spacer(Modifier.size(8.dp))
             SecondaryAction(
@@ -108,37 +105,26 @@ fun DevicesScreen(
                 onClick = onAddManual,
             )
 
-            if (saved.isEmpty() && discovery.discovered.isEmpty()) {
-                EmptyState(isScanning = discovery.isScanning, modifier = Modifier.fillMaxSize())
+            if (saved.isEmpty()) {
+                EmptyState(modifier = Modifier.fillMaxSize())
             } else {
-                val savedIds = saved.map { it.id }.toSet()
-                val fresh = discovery.discovered.filter { "${it.host}:${it.port}" !in savedIds }
                 LazyColumn(
                     Modifier.fillMaxSize().padding(top = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    // نتائج البحث (المكتشَفة حديثاً) تظهر في الأعلى.
-                    if (fresh.isNotEmpty()) {
-                        item(key = "h-disc") { SectionHeader(stringResource(R.string.devices_discovered)) }
-                        items(fresh, key = { "d-${it.host}-${it.transport.name}" }) { device ->
-                            DiscoveredRow(device, onClick = { onAdoptDiscovered(device) })
-                        }
-                    }
-                    if (saved.isNotEmpty()) {
-                        item(key = "h-saved") { SectionHeader(stringResource(R.string.devices_my)) }
-                        items(saved, key = { "s-${it.id}" }) { device ->
-                            val index = saved.indexOf(device)
-                            SavedDeviceRow(
-                                device = device,
-                                canMoveUp = index > 0,
-                                canMoveDown = index < saved.lastIndex,
-                                onOpen = { onOpenDevice(device) },
-                                onShare = { onShareDevice(device) },
-                                onDelete = { pendingDelete = device },
-                                onMoveUp = { viewModel.move(index, index - 1) },
-                                onMoveDown = { viewModel.move(index, index + 1) },
-                            )
-                        }
+                    item(key = "h-saved") { SectionHeader(stringResource(R.string.devices_my)) }
+                    items(saved, key = { "s-${it.id}" }) { device ->
+                        val index = saved.indexOf(device)
+                        SavedDeviceRow(
+                            device = device,
+                            canMoveUp = index > 0,
+                            canMoveDown = index < saved.lastIndex,
+                            onOpen = { onOpenDevice(device) },
+                            onShare = { onShareDevice(device) },
+                            onDelete = { pendingDelete = device },
+                            onMoveUp = { viewModel.move(index, index - 1) },
+                            onMoveDown = { viewModel.move(index, index + 1) },
+                        )
                     }
                     item(key = "tail") { Spacer(Modifier.size(8.dp)) }
                 }
@@ -293,35 +279,7 @@ private fun ActionIcon(icon: String, tint: Color, desc: String, onClick: () -> U
 }
 
 @Composable
-private fun DiscoveredRow(device: DiscoveredDevice, onClick: () -> Unit) {
-    val c = tokens.colors
-    Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(tokens.shape.lg)).background(c.surface)
-            .border(1.dp, c.line, RoundedCornerShape(tokens.shape.lg))
-            .clickable(onClick = onClick).padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        TransportIconBox(device.transport)
-        Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-            Text(device.name, color = c.text, fontSize = 15.5.sp, fontWeight = FontWeight.SemiBold,
-                maxLines = 1, overflow = TextOverflow.Ellipsis)
-            val subtitle = buildString {
-                device.brand?.let { append(it).append(" · ") }
-                append(device.host)
-            }
-            Text(subtitle, color = c.textFaint, fontSize = 12.5.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        }
-        // شارة "إضافة" تلمّح للنقر للاعتماد.
-        Box(
-            Modifier.clip(RoundedCornerShape(50)).background(c.accentSoft)
-                .padding(horizontal = 10.dp, vertical = 6.dp),
-            contentAlignment = Alignment.Center,
-        ) { TahakomIcon("plus", c.accent, size = 18.dp) }
-    }
-}
-
-@Composable
-private fun EmptyState(isScanning: Boolean, modifier: Modifier = Modifier) {
+private fun EmptyState(modifier: Modifier = Modifier) {
     val c = tokens.colors
     Column(
         modifier = modifier,
@@ -336,7 +294,7 @@ private fun EmptyState(isScanning: Boolean, modifier: Modifier = Modifier) {
         Text(stringResource(R.string.devices_empty_title), color = c.text, fontSize = 19.sp,
             fontWeight = FontWeight.Bold)
         Text(
-            stringResource(if (isScanning) R.string.devices_scanning_hint else R.string.devices_empty_subtitle),
+            stringResource(R.string.devices_empty_subtitle),
             color = c.textFaint, fontSize = 13.5.sp, textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp, start = 24.dp, end = 24.dp),
         )

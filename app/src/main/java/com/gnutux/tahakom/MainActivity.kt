@@ -26,6 +26,7 @@ import com.gnutux.tahakom.feature.devices.AddDeviceScreen
 import com.gnutux.tahakom.feature.devices.AddNetworkScreen
 import com.gnutux.tahakom.feature.devices.DevicesScreen
 import com.gnutux.tahakom.feature.devices.DevicesViewModel
+import com.gnutux.tahakom.feature.devices.ScanScreen
 import com.gnutux.tahakom.feature.irsetup.IrSetupScreen
 import com.gnutux.tahakom.feature.online.OnlineSearchScreen
 import com.gnutux.tahakom.feature.learn.LearnScreen
@@ -44,6 +45,7 @@ private sealed interface Screen {
     data object AddNetwork : Screen
     data object Learn : Screen
     data object OnlineSearch : Screen
+    data object Scan : Screen
     data class IrSetup(val irFile: String) : Screen
     data class Remote(val device: Device) : Screen
 }
@@ -143,9 +145,15 @@ class MainActivity : AppCompatActivity() {
                     Screen.Devices -> DevicesScreen(
                         onOpenSettings = { screen = Screen.Settings },
                         onAddManual = { screen = Screen.AddDevice },
+                        onScan = { screen = Screen.Scan },
                         onOpenDevice = { screen = Screen.Remote(it) },
-                        onAdoptDiscovered = { adopt(it.toDevice()) },
                         onShareDevice = { shareDevice(it) },
+                        viewModel = devicesVm,
+                    )
+                    Screen.Scan -> ScanScreen(
+                        onBack = { screen = Screen.Devices },
+                        // الإضافة من المسح تحفظ في «أجهزتي» وتُبقي الصفحة لإضافة المزيد.
+                        onAdopt = { devicesVm.save(it.toDevice()) },
                         viewModel = devicesVm,
                     )
                     Screen.Settings -> SettingsScreen(

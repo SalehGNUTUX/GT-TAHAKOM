@@ -4,7 +4,14 @@
     <!-- شاشة الأجهزة -->
     <string name="devices_empty_title">لا توجد أجهزة بعد</string>
     <string name="devices_empty_subtitle">سيُضاف الاكتشاف التلقائي للأجهزة (mDNS/SSDP) في المرحلة 1.</string>
-    <string name="devices_scan">ابحث عن الأجهزة</string>
+    <string name="devices_scan">ابحث عن أجهزة على الشبكة المحلية</string>
+    <string name="scan_title">ابحث عن الأجهزة القريبة</string>
+    <string name="scan_searching">يبحث في محيطك…</string>
+    <string name="scan_stop">إيقاف</string>
+    <string name="scan_again">ابحث من جديد</string>
+    <string name="scan_found">الأجهزة المكتشَفة</string>
+    <string name="scan_none">لم يُعثر على أجهزة بعد. تأكّد أن التلفاز على شبكة WiFi نفسها.</string>
+    <string name="device_added">أُضيف «%1$s» إلى أجهزتك</string>
     <string name="devices_scanning">جارٍ البحث… (انقر للإيقاف)</string>
     <string name="devices_scanning_hint">يجري البحث عن الأجهزة على شبكة WiFi لديك…</string>
     <string name="devices_add_manual">إضافة بالاسم / الطراز</string>
