@@ -121,6 +121,16 @@
     <string name="rm_active_path">Active path</string>
     <string name="rm_touchpad">Touchpad</string>
     <string name="rm_touchpad_hint">Swipe to navigate · tap to select</string>
+    <string name="experimental">Experimental</string>
+    <string name="atv_needs_pairing">Android TV needs pairing (experimental).</string>
+    <string name="atv_pair">Pair</string>
+    <string name="atv_pair_title">Pair with Android TV</string>
+    <string name="atv_pair_hint">A 6-digit code should appear on the TV. Enter it below. (Experimental — under development.)</string>
+    <string name="atv_pair_code">6-digit code</string>
+    <string name="atv_pair_connect">Pair</string>
+    <string name="atv_pair_connecting">Connecting to the TV…</string>
+    <string name="atv_pair_ok">Paired successfully</string>
+    <string name="atv_pair_failed">Pairing failed. Check the code and that the TV is on the same network.</string>
     <string name="tr_wifi">WiFi network</string>
     <string name="tr_ir">Infrared</string>
     <string name="tr_bridge">WiFi-IR bridge</string>

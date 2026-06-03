@@ -6,6 +6,7 @@ import com.gnutux.tahakom.core.irdb.IrDatabase
 import com.gnutux.tahakom.core.model.ButtonId
 import com.gnutux.tahakom.core.model.Command
 import com.gnutux.tahakom.core.model.Device
+import com.gnutux.tahakom.core.transport.TransportError
 import com.gnutux.tahakom.core.transport.TransportRegistry
 import com.gnutux.tahakom.core.transport.TransportResult
 import com.gnutux.tahakom.core.transport.TransportType
@@ -24,6 +25,8 @@ data class RemoteUiState(
     /** المعرّفات الدلالية المدعومة فعلياً لهذا الجهاز (لإظهار الأزرار المتاحة فقط). */
     val supported: Set<ButtonId> = ButtonId.entries.toSet(),
     val ready: Boolean = false,
+    /** Android TV (تجريبي): يحتاج إقراناً برمز 6 خانات قبل التحكّم. */
+    val needsPairing: Boolean = false,
 )
 
 /**
@@ -53,6 +56,15 @@ class RemoteViewModel @Inject constructor(
             // الأجهزة الشبكية: الأزرار المدعومة حسب البروتوكول (مدفوع بالبيانات، عام).
             _uiState.update {
                 RemoteUiState(supported = supportedForTransport(device.transport), ready = true)
+            }
+            // Android TV (تجريبي): افحص إن كان يحتاج إقراناً ليُظهِر التطبيق دعوة الإقران.
+            if (device.transport == TransportType.ANDROID_TV) {
+                viewModelScope.launch {
+                    val r = registry.forDevice(device)?.connect(device)
+                    if (r is TransportResult.Failure && r.error == TransportError.PAIRING_REQUIRED) {
+                        _uiState.update { it.copy(needsPairing = true) }
+                    }
+                }
             }
             return
         }
@@ -131,6 +143,15 @@ class RemoteViewModel @Inject constructor(
             ButtonId.DIGIT_0, ButtonId.DIGIT_1, ButtonId.DIGIT_2, ButtonId.DIGIT_3, ButtonId.DIGIT_4,
             ButtonId.DIGIT_5, ButtonId.DIGIT_6, ButtonId.DIGIT_7, ButtonId.DIGIT_8, ButtonId.DIGIT_9,
             ButtonId.RED, ButtonId.GREEN, ButtonId.YELLOW, ButtonId.BLUE,
+        )
+        TransportType.ANDROID_TV -> setOf(
+            ButtonId.POWER, ButtonId.HOME, ButtonId.BACK, ButtonId.MENU,
+            ButtonId.NAV_UP, ButtonId.NAV_DOWN, ButtonId.NAV_LEFT, ButtonId.NAV_RIGHT, ButtonId.NAV_OK,
+            ButtonId.VOL_UP, ButtonId.VOL_DOWN, ButtonId.MUTE, ButtonId.CH_UP, ButtonId.CH_DOWN,
+            ButtonId.PLAY, ButtonId.PAUSE, ButtonId.STOP, ButtonId.FFWD, ButtonId.RWD,
+            ButtonId.INFO, ButtonId.GUIDE, ButtonId.SOURCE,
+            ButtonId.DIGIT_0, ButtonId.DIGIT_1, ButtonId.DIGIT_2, ButtonId.DIGIT_3, ButtonId.DIGIT_4,
+            ButtonId.DIGIT_5, ButtonId.DIGIT_6, ButtonId.DIGIT_7, ButtonId.DIGIT_8, ButtonId.DIGIT_9,
         )
         // بروتوكولات أخرى مستقبلاً: مجموعتها الخاصة. مؤقتاً كل الأزرار.
         else -> ButtonId.entries.toSet()

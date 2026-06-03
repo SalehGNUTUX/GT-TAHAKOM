@@ -61,6 +61,7 @@ import com.gnutux.tahakom.ui.theme.tokens
 fun RemoteScreen(
     device: Device,
     onBack: () -> Unit,
+    onPair: (Device) -> Unit = {},
     viewModel: RemoteViewModel = hiltViewModel(),
 ) {
     val t = tokens; val c = t.colors
@@ -92,6 +93,29 @@ fun RemoteScreen(
         }
 
         TransportPill(device)
+
+        // Android TV (تجريبي): شارة «تحت التطوير» + دعوة الإقران إن لزم.
+        if (device.transport.name == "ANDROID_TV") {
+            Spacer(Modifier.height(8.dp))
+            Row(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(t.shape.md)).background(c.bridgeSoft)
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TahakomIcon("info", c.bridge, size = 18.dp)
+                Spacer(Modifier.size(8.dp))
+                Text(
+                    stringResource(if (state.needsPairing) R.string.atv_needs_pairing else R.string.experimental),
+                    color = c.bridge, fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f),
+                )
+                if (state.needsPairing) {
+                    Box(
+                        Modifier.clip(RoundedCornerShape(50)).background(c.bridge)
+                            .clickable { onPair(device) }.padding(horizontal = 14.dp, vertical = 6.dp),
+                    ) { Text(stringResource(R.string.atv_pair), color = c.bg, fontSize = 12.5.sp, fontWeight = FontWeight.Bold) }
+                }
+            }
+        }
         Spacer(Modifier.height(12.dp))
 
         // مجموعة علوية: طاقة · رئيسية · قائمة · رجوع

@@ -121,6 +121,16 @@
     <string name="rm_active_path">وسيلة الإرسال النشطة</string>
     <string name="rm_touchpad">لوحة اللمس</string>
     <string name="rm_touchpad_hint">اسحب للتنقّل · انقر للاختيار</string>
+    <string name="experimental">تجريبي</string>
+    <string name="atv_needs_pairing">يحتاج Android TV إلى إقران (تجريبي).</string>
+    <string name="atv_pair">إقران</string>
+    <string name="atv_pair_title">إقران مع Android TV</string>
+    <string name="atv_pair_hint">سيظهر رمز من 6 خانات على التلفاز. أدخله أدناه. (تجريبي — تحت التطوير.)</string>
+    <string name="atv_pair_code">الرمز (6 خانات)</string>
+    <string name="atv_pair_connect">إقران</string>
+    <string name="atv_pair_connecting">جارٍ الاتصال بالتلفاز…</string>
+    <string name="atv_pair_ok">تمّ الإقران بنجاح</string>
+    <string name="atv_pair_failed">فشل الإقران. تحقّق من الرمز ومن أن التلفاز على الشبكة نفسها.</string>
     <string name="tr_wifi">شبكة WiFi</string>
     <string name="tr_ir">أشعة تحت الحمراء</string>
     <string name="tr_bridge">جسر WiFi-IR</string>

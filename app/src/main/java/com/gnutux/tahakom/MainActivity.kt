@@ -27,6 +27,7 @@ import com.gnutux.tahakom.feature.devices.AddNetworkScreen
 import com.gnutux.tahakom.feature.devices.DevicesScreen
 import com.gnutux.tahakom.feature.devices.DevicesViewModel
 import com.gnutux.tahakom.feature.devices.ScanScreen
+import com.gnutux.tahakom.feature.androidtv.AndroidTvPairScreen
 import com.gnutux.tahakom.feature.irsetup.IrSetupScreen
 import com.gnutux.tahakom.feature.online.OnlineSearchScreen
 import com.gnutux.tahakom.feature.learn.LearnScreen
@@ -48,6 +49,7 @@ private sealed interface Screen {
     data object Scan : Screen
     data class IrSetup(val irFile: String) : Screen
     data class Remote(val device: Device) : Screen
+    data class AndroidTvPair(val device: Device) : Screen
 }
 
 /**
@@ -126,8 +128,9 @@ class MainActivity : AppCompatActivity() {
                 val exitHint = stringResource(R.string.exit_hint)
                 BackHandler(enabled = true) {
                     if (screen != Screen.Devices) {
-                        screen = when (screen) {
+                        screen = when (val cur = screen) {
                             is Screen.IrSetup, Screen.Learn, Screen.AddNetwork, Screen.OnlineSearch -> Screen.AddDevice
+                            is Screen.AndroidTvPair -> Screen.Remote(cur.device)
                             else -> Screen.Devices
                         }
                     } else {
@@ -195,6 +198,12 @@ class MainActivity : AppCompatActivity() {
                     is Screen.Remote -> RemoteScreen(
                         device = s.device,
                         onBack = { screen = Screen.Devices },
+                        onPair = { screen = Screen.AndroidTvPair(it) },
+                    )
+                    is Screen.AndroidTvPair -> AndroidTvPairScreen(
+                        host = s.device.address ?: "",
+                        onBack = { screen = Screen.Remote(s.device) },
+                        onPaired = { screen = Screen.Remote(s.device) },
                     )
                 }
             }

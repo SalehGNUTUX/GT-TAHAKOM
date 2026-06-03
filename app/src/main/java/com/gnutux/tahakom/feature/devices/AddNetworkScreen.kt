@@ -46,6 +46,7 @@ private val NETWORK_OPTIONS = listOf(
     Triple(TransportType.LG_WEBOS, "LG (webOS)", "wifi"),
     Triple(TransportType.SAMSUNG_TIZEN, "Samsung (Tizen)", "wifi"),
     Triple(TransportType.ROKU, "Roku", "wifi"),
+    Triple(TransportType.ANDROID_TV, "Android TV (تجريبي)", "wifi"),
 )
 
 /**
