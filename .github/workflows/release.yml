@@ -30,6 +30,8 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          validate-wrappers: false
 
       # يعيد بناء keystore.properties + ملف المفتاح من الأسرار إن وُجدت (التوقيع اختياري).
       - name: Prepare signing (optional)
