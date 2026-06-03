@@ -1,0 +1,1 @@
+First stable release (1.0.0). One remote hub for your TV and devices over WiFi, Infrared, and a WiFi-IR bridge — offline-first, bilingual Arabic/English. Smart discovery, a local IR database plus online search, manual code entry, sharing, and a touchpad. Android TV and the Broadlink bridge are included as experimental.

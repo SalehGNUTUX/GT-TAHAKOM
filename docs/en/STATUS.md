@@ -2,7 +2,7 @@
 
 > English · [العربية](../STATUS.md)
 
-> Last updated: 2026-06-03 · Current version: **0.9.19** (versionCode 29) · License: GPLv3
+> Last updated: 2026-06-03 · Current version: **1.0.0** (versionCode 30) · License: GPLv3
 > Website & live demo: https://salehgnutux.github.io/GT-TAHAKOM/
 > Repo: https://github.com/SalehGNUTUX/GT-TAHAKOM
 
