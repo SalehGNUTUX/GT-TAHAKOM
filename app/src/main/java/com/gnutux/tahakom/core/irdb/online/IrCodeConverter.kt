@@ -17,13 +17,15 @@ object IrCodeConverter {
     private const val SIRC_FREQ = 40000
     private const val PANA_FREQ = 37000
     private const val MITS_FREQ = 32600
+    private const val PIONEER_FREQ = 40000
 
     /** بروتوكولات مدعومة (يطابق online_index.json supported flag وأداة build_online_index.py). */
     fun isSupported(protocol: String): Boolean {
         val p = protocol.uppercase()
         return p.startsWith("NEC") || p == "RC5" || p == "RC5X" || p == "RC6" ||
             p.startsWith("SONY") || p == "SIRC" || p == "PANASONIC" ||
-            p == "JVC" || p == "MITSUBISHI" || p == "DENON"
+            p == "JVC" || p == "MITSUBISHI" || p == "DENON" ||
+            p == "PIONEER" || p == "PROTON"
     }
 
     /** يحوّل نص CSV كامل إلى قائمة أزرار (يتخطّى البروتوكولات غير المدعومة والصفوف التالفة). */
@@ -51,7 +53,8 @@ object IrCodeConverter {
         p.startsWith("SONY") || p == "SIRC" -> SIRC_FREQ
         p == "PANASONIC" -> PANA_FREQ
         p == "MITSUBISHI" -> MITS_FREQ
-        else -> NEC_FREQ // NEC/JVC/Denon = 38kHz
+        p == "PIONEER" -> PIONEER_FREQ
+        else -> NEC_FREQ // NEC/JVC/Denon/Proton = 38kHz
     }
 
     private fun encode(protocol: String, device: Int, subdevice: Int, function: Int): String? {
@@ -68,8 +71,41 @@ object IrCodeConverter {
             p == "JVC" -> jvcToPronto(device, function)
             p == "MITSUBISHI" -> mitsubishiToPronto(device, function)
             p == "DENON" -> denonToPronto(device, function)
+            p == "PIONEER" -> pioneerToPronto(device, subdevice, function)
+            p == "PROTON" -> protonToPronto(device, function)
             else -> null
         }
+    }
+
+    private fun pioneerToPronto(device: Int, subdevice: Int, function: Int): String {
+        // بنية NEC نفسها على حامل 40kHz.
+        val carrier = (1_000_000.0 / (PIONEER_FREQ * 0.241246)).roundToInt()
+        val sub = if (subdevice < 0) device.inv() and 0xFF else subdevice and 0xFF
+        val bytes = intArrayOf(device and 0xFF, sub, function and 0xFF, function.inv() and 0xFF)
+        val unit = (562.5 / (carrier * 0.241246)).roundToInt()
+        val pairs = ArrayList<Int>()
+        pairs.add(16 * unit); pairs.add(8 * unit)
+        for (b in bytes) {
+            for (i in 0 until 8) {
+                if ((b shr i) and 1 == 1) { pairs.add(unit); pairs.add(3 * unit) }
+                else { pairs.add(unit); pairs.add(unit) }
+            }
+        }
+        pairs.add(unit); pairs.add(39 * unit)
+        val n = pairs.size / 2
+        val words = ArrayList<Int>(); words.add(0); words.add(carrier); words.add(0); words.add(n); words.addAll(pairs)
+        return words.joinToString(" ") { it.toString(16).padStart(4, '0') }
+    }
+
+    private fun protonToPronto(device: Int, function: Int): String {
+        val u = 500
+        val durs = ArrayList<Int>()
+        durs.add(8 * u); durs.add(8 * u) // قائد
+        for (i in 0 until 8) { durs.add(u); durs.add(if ((device shr i) and 1 == 1) 3 * u else u) }
+        durs.add(u); durs.add(8 * u) // فجوة منتصف الإطار
+        for (i in 0 until 8) { durs.add(u); durs.add(if ((function shr i) and 1 == 1) 3 * u else u) }
+        durs.add(u); durs.add(40 * u) // توقّف + فاصل
+        return durationsToPronto(38000, durs)
     }
 
     private fun jvcToPronto(device: Int, function: Int): String {

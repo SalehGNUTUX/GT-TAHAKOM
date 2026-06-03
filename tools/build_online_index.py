@@ -27,7 +27,7 @@ def is_supported(proto):
     p = proto.upper()
     return (p.startswith("NEC") or p in ("RC5", "RC5X", "RC6")
             or p.startswith("SONY") or p == "SIRC" or p == "PANASONIC"
-            or p in ("JVC", "MITSUBISHI", "DENON"))
+            or p in ("JVC", "MITSUBISHI", "DENON", "PIONEER", "PROTON"))
 
 
 def categorize(type_folder):
