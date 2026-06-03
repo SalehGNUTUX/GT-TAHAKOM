@@ -12,10 +12,14 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/الإصدار-0.9.9-21E6C1?style=for-the-badge" alt="Version"/>
+  <img src="https://img.shields.io/github/v/release/SalehGNUTUX/GT-TAHAKOM?include_prereleases&label=الإصدار&color=21E6C1&style=for-the-badge" alt="Version"/>
   <img src="https://img.shields.io/badge/الترخيص-GPLv3-FF7A1A?style=for-the-badge" alt="License"/>
   <img src="https://img.shields.io/badge/Kotlin-Compose-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin"/>
   <img src="https://img.shields.io/badge/Android-8.0%2B-3ddc84?style=for-the-badge&logo=android&logoColor=white" alt="Android"/>
+</p>
+
+<p align="center">
+  <b>العربية</b> · <a href="README.en.md">English</a>
 </p>
 
 <p align="center">
@@ -44,6 +48,7 @@
 - **اكتشاف ذكي للأجهزة:** تلقائي كامل للأجهزة الشبكية (mDNS/SSDP)، وشبه آلي لأجهزة IR. **يعمل بلا إنترنت** ([docs/DISCOVERY.md](docs/DISCOVERY.md) · [docs/DATABASE.md](docs/DATABASE.md)).
 - **بحث بالاسم والطراز** في القاعدة المحلية، إضافةً إلى الاكتشاف التلقائي.
 - **بحث شبكي عن أجهزة التحكّم:** إن لم يكن الجهاز في القاعدة المحلية، ابحث في قاعدة [probonopd/irdb](https://github.com/probonopd/irdb) المفتوحة مباشرةً من التطبيق — يُنزَّل الطقم المختار، يُحوَّل إلى Pronto على الهاتف، ويُضاف لقاعدتك المحلية. (الفهرس مشحون فالبحث أوفلاين؛ التنزيل فقط يحتاج اتصالاً.)
+- **لوحة لمس** للتلفاز الذكي: اسحب للتنقّل، انقر للاختيار.
 - **عربي + إنجليزي** مع تبديل فوري من الإعدادات (per-app locale).
 - **مشاركة حزم جهاز التحكّم** (`.tahakom`): شارك إعداد علامة كاملة أو طراز محدّد؛ وعند نقر المستلِم على الملف يفتح **مباشرة** في التطبيق. التفاصيل في [docs/SHARING.md](docs/SHARING.md).
 - واجهة Material 3 بألوان الهوية (سماوي/برتقالي) مع داكن/فاتح و RTL.
@@ -53,11 +58,12 @@
 ## الحالة الراهنة
 
 - **التحكّم الشبكي ✅** — اكتشاف حيّ (mDNS/SSDP) + `RokuTransport` + `WebosTransport` (LG webOS/SSAP، بما فيه التنقّل عبر pointer socket) + `SamsungTizenTransport`.
-- **قاعدة IR محلية ✅** — 60 جهازاً (تلفاز/استقبال/صوت) أوفلاين + إرسال فعلي (Pronto) + ضبط شبه آلي بتنقّل تالي/السابق + **تعلّم بالإدخال اليدوي**.
-- **البحث الشبكي ✅** — جلب أجهزة التحكّم من قاعدة probonopd المفتوحة (فهرس 3244 طقماً مشحون) وتحويلها إلى Pronto على الهاتف.
-- **المزايا ✅** — تبديل اللغة، مشاركة `.tahakom`، قائمة "أجهزتي"، شاشة ترحيب، جهاز تحكّم عام لكل جهاز بقائمة "المزيد"، إعدادات كاملة + سمة فاتح/داكن.
-- **التصميم ✅** — كل الشاشات بسمة serene. الإصدار الحالي **0.9.9**.
-- **التالي** — Android TV (Remote v2) + جسر Broadlink + توسيع المحوّل لبروتوكولات أكثر. الحالة الكاملة في [docs/STATUS.md](docs/STATUS.md).
+- **قاعدة IR محلية ✅** — 67 جهازاً (تلفاز/استقبال/صوت) أوفلاين + إرسال فعلي (Pronto) + ضبط شبه آلي بتنقّل تالي/السابق + **تعلّم بالإدخال اليدوي**.
+- **البحث الشبكي ✅** — جلب أجهزة التحكّم من قاعدة probonopd المفتوحة (فهرس 3244 طقماً مشحون) وتحويلها إلى Pronto على الهاتف (NEC/RC5/RC6/Sony/Panasonic/JVC/Mitsubishi/Denon/Pioneer/Proton).
+- **المزايا ✅** — لوحة لمس، تبديل اللغة، مشاركة `.tahakom`، قائمة "أجهزتي"، شاشة ترحيب، إعدادات كاملة + سمة فاتح/داكن.
+- **البناء الآلي ✅** — GitHub Actions: بناء + lint عند كل دفع، وإصدار آلي عند الوسم ([docs/CI.md](docs/CI.md)).
+- **تجريبي 🧪** — Android TV (Remote v2) وجسر Broadlink: مضافان وموسومان «تحت التطوير» (يحتاجان اختباراً على جهاز فعلي).
+- **التالي** — اختصارات التطبيقات + نشر F-Droid نحو **1.0.0**. الحالة الكاملة في [docs/STATUS.md](docs/STATUS.md).
 
 خطة المراحل الكاملة في [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#خطة-المراحل).
 

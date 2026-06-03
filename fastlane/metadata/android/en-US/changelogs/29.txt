@@ -1,0 +1,1 @@
+Pre-1.0 polish: shared .tahakom files now actually save the device on open; fixed two potential crashes; friendly error messages; consistent "experimental" labels for in-development transports (Android TV, Broadlink bridge).

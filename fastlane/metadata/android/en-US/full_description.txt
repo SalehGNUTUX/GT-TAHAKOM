@@ -1,0 +1,21 @@
+GT-TAHAKOM (تَحَكُّمْ) is a free, open-source universal remote that turns your phone into one control hub for your TV and electronics — whatever the brand or how they connect.
+
+Unlike traditional remote apps that rely on a built-in IR blaster (rare on modern phones), GT-TAHAKOM automatically picks the right path for each device:
+
+• WiFi network — smart TVs and boxes: Android TV/Google TV, Roku, Samsung (Tizen), LG (webOS), and Android/Chinese boxes.
+• Infrared — any legacy IR device, on phones that have an IR emitter.
+• WiFi-IR bridge — control IR devices from ANY phone via a Broadlink bridge.
+
+Key features:
+
+• Works offline — core control and the bundled IR database need no internet.
+• Smart discovery — auto-detects network devices (mDNS/SSDP) with a live radar scan; semi-automatic setup for IR.
+• Built-in IR database plus online search of the open probonopd/irdb catalog: find your device by brand, fetch its codes, and they are converted on your phone and saved locally.
+• Manual code entry (Learn) for undocumented devices.
+• A touchpad for smart TVs: swipe to navigate, tap to select.
+• Share device packs (.tahakom): send a brand or model setup; the recipient opens it directly in the app.
+• Bilingual Arabic/English with full RTL, light/dark themes.
+
+Some smart-TV protocols (Android TV, Broadlink bridge) are included as experimental, clearly marked "under development".
+
+Licensed under GPLv3. Architecture inspired by the IRRemote project, generalized from IR-only to multiple transports, with Arabic/RTL added.
