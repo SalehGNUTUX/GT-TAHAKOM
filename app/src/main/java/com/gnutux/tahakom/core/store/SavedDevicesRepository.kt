@@ -36,6 +36,11 @@ class SavedDevicesRepository(private val context: Context) {
         context.dataStore.edit { it[onboardingKey] = true }
     }
 
+    /** يعيد ضبط شاشة الترحيب لتُعرَض من جديد (زر في الإعدادات). */
+    suspend fun resetOnboarding() {
+        context.dataStore.edit { it[onboardingKey] = false }
+    }
+
     /** وضع السمة: system / light / dark. */
     val themeMode: Flow<String> = context.dataStore.data.map { it[themeKey] ?: "system" }
 

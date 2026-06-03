@@ -9,6 +9,7 @@ import java.net.DatagramPacket
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.MulticastSocket
+import java.net.NetworkInterface
 import kotlin.coroutines.coroutineContext
 
 /**
@@ -22,15 +23,24 @@ class SsdpDiscovery : DeviceDiscovery {
     override val source = DiscoverySource.SSDP
 
     override fun discover(): Flow<DiscoveredDevice> = flow {
-        val group = InetAddress.getByName(MULTICAST_ADDR)
-        val socket = MulticastSocket().apply {
-            reuseAddress = true
-            soTimeout = SOCKET_TIMEOUT_MS
-        }
+        // إنشاء السوكِت قد يفشل بلا شبكة — لا تَنهَر، أنهِ التدفّق بهدوء (مسح فارغ).
+        val socket = runCatching {
+            MulticastSocket().apply {
+                reuseAddress = true
+                soTimeout = SOCKET_TIMEOUT_MS
+            }
+        }.getOrNull() ?: return@flow
 
         try {
+            val group = InetAddress.getByName(MULTICAST_ADDR)
             val search = buildMSearch().toByteArray()
-            socket.send(DatagramPacket(search, search.size, InetSocketAddress(group, SSDP_PORT)))
+            val target = InetSocketAddress(group, SSDP_PORT)
+            // أرسِل عبر كل واجهة شبكة صالحة (WiFi غالباً) لا الواجهة الافتراضية فقط؛
+            // مع تفعيل بيانات الجوّال قد تخرج الحزمة من الخلوي فلا يصل LG/Samsung.
+            val sentOnIface = sendOnAllInterfaces(socket, search, target)
+            if (!sentOnIface) {
+                runCatching { socket.send(DatagramPacket(search, search.size, target)) }
+            }
 
             val buffer = ByteArray(2048)
             // نستمر بالاستقبال حتى يُلغى التدفّق أو تنتهي مهلة السوكِت تكراراً.
@@ -44,10 +54,34 @@ class SsdpDiscovery : DeviceDiscovery {
                 val response = String(packet.data, 0, packet.length)
                 parseResponse(response, packet.address.hostAddress)?.let { emit(it) }
             }
+        } catch (e: Exception) {
+            // أي خطأ شبكي (أوفلاين/تعذّر الإرسال) → أنهِ التدفّق بهدوء بلا انهيار.
         } finally {
             runCatching { socket.close() }
         }
     }.flowOn(Dispatchers.IO)
+
+    /**
+     * يرسل M-SEARCH عبر كل واجهة شبكة فاعلة تدعم multicast (WiFi/إيثرنت). يُرجع true إن
+     * أُرسِل على واحدة على الأقل. هذا يضمن وصول البحث للتلفاز على WiFi حتى مع تفعيل
+     * بيانات الجوّال (التي قد تكون الواجهة الافتراضية).
+     */
+    private fun sendOnAllInterfaces(socket: MulticastSocket, data: ByteArray, target: InetSocketAddress): Boolean {
+        var sent = false
+        val ifaces = runCatching { NetworkInterface.getNetworkInterfaces() }.getOrNull() ?: return false
+        for (ni in ifaces) {
+            val usable = runCatching { ni.isUp && !ni.isLoopback && ni.supportsMulticast() }.getOrDefault(false)
+            if (!usable) continue
+            val hasIpv4 = ni.inetAddresses.toList().any { !it.isLoopbackAddress && it.address.size == 4 }
+            if (!hasIpv4) continue
+            runCatching {
+                socket.networkInterface = ni
+                socket.send(DatagramPacket(data, data.size, target))
+                sent = true
+            }
+        }
+        return sent
+    }
 
     private fun buildMSearch(): String = buildString {
         append("M-SEARCH * HTTP/1.1\r\n")

@@ -60,6 +60,12 @@
     <string name="cat_cable">Cable / Satellite boxes</string>
     <string name="cat_audio">Audio devices</string>
     <string name="ir_pick_other">Choose another brand</string>
+    <string name="cat_device_count">%1$d devices</string>
+    <string name="add_act_online">Online</string>
+    <string name="add_act_network">Network</string>
+    <string name="add_act_learn">Learn</string>
+    <string name="add_act_import">File</string>
+    <string name="add_search_in">Search in %1$s</string>
 
     <!-- ضبط جهاز IR شبه الآلي -->
     <string name="ir_setup_title">Set up IR device</string>
@@ -157,6 +163,7 @@
     <string name="set_share_app">Share the app</string>
     <string name="share_app_text">GT-TAHAKOM — TAHAKOM\nA free, open-source remote for TVs and devices over WiFi, Infrared and a WiFi-IR bridge. Works offline.\n\nتَحَكُّمْ — جهاز تحكّم حرّ ومفتوح المصدر للتلفاز والأجهزة عبر WiFi والأشعة تحت الحمراء وجسر WiFi-IR. يعمل بلا إنترنت.\n\n🌐 https://salehgnutux.github.io/GT-TAHAKOM/\n⬇ https://github.com/SalehGNUTUX/GT-TAHAKOM/releases</string>
     <string name="set_import_remote">Import a remote file</string>
+    <string name="set_replay_onboarding">Replay the welcome screens</string>
     <string name="set_developer">Developer</string>
     <string name="set_developer_name">GNUTUX</string>
     <string name="set_repo">Source repository</string>

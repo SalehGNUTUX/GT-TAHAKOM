@@ -52,6 +52,7 @@ fun SettingsScreen(
     onBack: () -> Unit,
     themeMode: String,
     onThemeMode: (String) -> Unit,
+    onReplayOnboarding: () -> Unit = {},
     onDeviceReady: (com.gnutux.tahakom.core.model.Device) -> Unit = {},
     addVm: com.gnutux.tahakom.feature.devices.AddDeviceViewModel = androidx.hilt.navigation.compose.hiltViewModel(),
 ) {
@@ -106,7 +107,7 @@ fun SettingsScreen(
                     Text("GT-TAHAKOM", color = c.text, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                     Text(stringResource(R.string.app_tagline), color = c.textFaint, fontSize = 13.sp)
                 }
-                Chip("v0.9.9")
+                Chip("v0.9.10")
             }
             Spacer(Modifier.size(20.dp))
 
@@ -146,7 +147,7 @@ fun SettingsScreen(
 
             // قسم حول
             SectionTitle(stringResource(R.string.set_about))
-            InfoRow("info", stringResource(R.string.set_version), "0.9.9")
+            InfoRow("info", stringResource(R.string.set_version), "0.9.10")
             InfoRow("gear", stringResource(R.string.set_developer), stringResource(R.string.set_developer_name))
             val uriHandler = LocalUriHandler.current
             InfoRow(
@@ -159,9 +160,10 @@ fun SettingsScreen(
             // إجراءات: مشاركة التطبيق + استيراد لوحة تحكّم.
             SectionTitle(stringResource(R.string.set_actions))
             ActionRow("share", stringResource(R.string.set_share_app)) { shareApp() }
-            ActionRow("link", stringResource(R.string.set_import_remote), last = true) {
+            ActionRow("link", stringResource(R.string.set_import_remote)) {
                 importLauncher.launch(arrayOf("*/*"))
             }
+            ActionRow("homeBtn", stringResource(R.string.set_replay_onboarding), last = true) { onReplayOnboarding() }
             Spacer(Modifier.size(12.dp))
         }
     }

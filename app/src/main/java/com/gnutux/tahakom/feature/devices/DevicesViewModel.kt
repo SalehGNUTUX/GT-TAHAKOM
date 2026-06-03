@@ -43,6 +43,8 @@ class DevicesViewModel @Inject constructor(
 
     fun completeOnboarding() = viewModelScope.launch { saved.setOnboardingDone() }
 
+    fun resetOnboarding() = viewModelScope.launch { saved.resetOnboarding() }
+
     /** وضع السمة (system/light/dark) — يُطبَّق في MainActivity. */
     val themeMode: StateFlow<String> =
         saved.themeMode.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "system")

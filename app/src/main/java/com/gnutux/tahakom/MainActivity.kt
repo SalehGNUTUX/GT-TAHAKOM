@@ -152,6 +152,10 @@ class MainActivity : AppCompatActivity() {
                         onBack = { screen = Screen.Devices },
                         themeMode = themeMode,
                         onThemeMode = devicesVm::setThemeMode,
+                        onReplayOnboarding = {
+                            devicesVm.resetOnboarding()
+                            screen = Screen.Devices // الترحيب يُعرَض تلقائياً عند صفر العَلَم
+                        },
                         onDeviceReady = { adopt(it) },
                     )
                     Screen.AddDevice -> AddDeviceScreen(
