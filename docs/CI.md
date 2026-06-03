@@ -1,5 +1,7 @@
 # CI — البناء والإصدار الآلي (GitHub Actions)
 
+> العربية · [English](en/CI.md)
+
 سيرَا عمل في `.github/workflows/`:
 
 ## 1. `build.yml` — بناء + lint

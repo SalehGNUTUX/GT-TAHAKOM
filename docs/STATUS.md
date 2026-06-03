@@ -1,5 +1,7 @@
 # حالة المشروع — GT-TAHAKOM
 
+> العربية · [English](en/STATUS.md)
+
 > آخر تحديث: 2026-06-03 · الإصدار الحالي: **0.9.19** (versionCode 29) · الترخيص: GPLv3
 > الموقع والنموذج الحي: https://salehgnutux.github.io/GT-TAHAKOM/
 > المستودع: https://github.com/SalehGNUTUX/GT-TAHAKOM
