@@ -3,6 +3,8 @@ package com.gnutux.tahakom.feature.remote
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +35,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -108,6 +112,21 @@ fun RemoteScreen(
                 onLeft = { key(ButtonId.NAV_LEFT, "Left") },
                 onRight = { key(ButtonId.NAV_RIGHT, "Right") },
                 onOk = { key(ButtonId.NAV_OK, "OK") },
+            )
+            Spacer(Modifier.height(16.dp))
+        }
+
+        // لوحة اللمس — للأجهزة الشبكية (لا IR) التي تدعم التنقّل: اسحب للتنقّل، انقر للاختيار.
+        // تُرسل NAV_* / NAV_OK عبر مسار الوسيلة نفسه (pointer socket في webOS).
+        if (device.transport.name != "IR" && has(ButtonId.NAV_OK) &&
+            listOf(ButtonId.NAV_UP, ButtonId.NAV_DOWN, ButtonId.NAV_LEFT, ButtonId.NAV_RIGHT).any(has)
+        ) {
+            Touchpad(
+                onUp = { key(ButtonId.NAV_UP, "Up") },
+                onDown = { key(ButtonId.NAV_DOWN, "Down") },
+                onLeft = { key(ButtonId.NAV_LEFT, "Left") },
+                onRight = { key(ButtonId.NAV_RIGHT, "Right") },
+                onTap = { key(ButtonId.NAV_OK, "OK") },
             )
             Spacer(Modifier.height(16.dp))
         }
@@ -297,6 +316,54 @@ private fun OkKey(onClick: () -> Unit) {
         Modifier.size(76.dp).clip(CircleShape).background(c.accent).clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) { Text("OK", color = c.accentText, fontSize = 18.sp, fontWeight = FontWeight.Black) }
+}
+
+/**
+ * مساحة لمس للتنقّل: السحب يطلق اتجاهات NAV_* (خطوة لكل عتبة، فالسحب المتواصل يتنقّل
+ * عدة خطوات)، والنقر دون سحب = اختيار (NAV_OK). الاتجاهات فيزيائية → نُجبر LTR.
+ */
+@Composable
+private fun Touchpad(
+    onUp: () -> Unit, onDown: () -> Unit, onLeft: () -> Unit, onRight: () -> Unit, onTap: () -> Unit,
+) {
+    val t = tokens; val c = t.colors
+    val stepPx = with(LocalDensity.current) { 44.dp.toPx() }
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Column(
+            Modifier.fillMaxWidth().height(190.dp).clip(RoundedCornerShape(t.shape.lg))
+                .background(c.surface).border(1.dp, c.line, RoundedCornerShape(t.shape.lg))
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { onTap() })
+                }
+                .pointerInput(Unit) {
+                    var accX = 0f; var accY = 0f
+                    detectDragGestures(
+                        onDragStart = { accX = 0f; accY = 0f },
+                        onDrag = { change, drag ->
+                            change.consume()
+                            accX += drag.x; accY += drag.y
+                            // أطلق على المحور الغالب كلما تجاوز التراكم عتبة الخطوة.
+                            while (kotlin.math.abs(accX) >= stepPx || kotlin.math.abs(accY) >= stepPx) {
+                                if (kotlin.math.abs(accX) >= kotlin.math.abs(accY)) {
+                                    if (accX > 0) onRight() else onLeft()
+                                    accX -= if (accX > 0) stepPx else -stepPx
+                                } else {
+                                    if (accY > 0) onDown() else onUp()
+                                    accY -= if (accY > 0) stepPx else -stepPx
+                                }
+                            }
+                        },
+                    )
+                },
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            TahakomIcon("scan", c.textFaint, size = 30.dp)
+            Spacer(Modifier.height(8.dp))
+            Text(stringResource(R.string.rm_touchpad), color = c.textDim, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.rm_touchpad_hint), color = c.textFaint, fontSize = 11.5.sp)
+        }
+    }
 }
 
 @Composable

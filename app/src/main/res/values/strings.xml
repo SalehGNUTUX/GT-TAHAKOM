@@ -108,6 +108,8 @@
     <string name="rm_volume">VOL</string>
     <string name="rm_channel">CH</string>
     <string name="rm_active_path">Active path</string>
+    <string name="rm_touchpad">Touchpad</string>
+    <string name="rm_touchpad_hint">Swipe to navigate · tap to select</string>
     <string name="tr_wifi">WiFi network</string>
     <string name="tr_ir">Infrared</string>
     <string name="tr_bridge">WiFi-IR bridge</string>

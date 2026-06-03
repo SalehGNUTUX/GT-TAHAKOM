@@ -14,11 +14,14 @@ object IrCodeConverter {
 
     private const val NEC_FREQ = 38000
     private const val RC_FREQ = 36000
+    private const val SIRC_FREQ = 40000
+    private const val PANA_FREQ = 37000
 
-    /** بروتوكولات مدعومة (يطابق online_index.json supported flag). */
+    /** بروتوكولات مدعومة (يطابق online_index.json supported flag وأداة build_online_index.py). */
     fun isSupported(protocol: String): Boolean {
         val p = protocol.uppercase()
-        return p.startsWith("NEC") || p == "RC5" || p == "RC5X" || p == "RC6"
+        return p.startsWith("NEC") || p == "RC5" || p == "RC5X" || p == "RC6" ||
+            p.startsWith("SONY") || p == "SIRC" || p == "PANASONIC"
     }
 
     /** يحوّل نص CSV كامل إلى قائمة أزرار (يتخطّى البروتوكولات غير المدعومة والصفوف التالفة). */
@@ -36,10 +39,16 @@ object IrCodeConverter {
             val sub = cols[3].trim().toIntOrNull() ?: continue
             val fn = cols[4].trim().toIntOrNull() ?: continue
             val code = encode(proto, dev, sub, fn) ?: continue
-            val freq = if (proto.uppercase().startsWith("RC")) RC_FREQ else NEC_FREQ
-            out.add(IrButton(id = normalizeButton(name), code = code, freq = freq, label = name))
+            out.add(IrButton(id = normalizeButton(name), code = code, freq = freqFor(proto.uppercase()), label = name))
         }
         return out
+    }
+
+    private fun freqFor(p: String): Int = when {
+        p.startsWith("RC") -> RC_FREQ
+        p.startsWith("SONY") || p == "SIRC" -> SIRC_FREQ
+        p == "PANASONIC" -> PANA_FREQ
+        else -> NEC_FREQ
     }
 
     private fun encode(protocol: String, device: Int, subdevice: Int, function: Int): String? {
@@ -48,8 +57,44 @@ object IrCodeConverter {
             p.startsWith("NEC") -> necToPronto(device, subdevice, function)
             p == "RC5" || p == "RC5X" -> rc5ToPronto(device, function)
             p == "RC6" -> rc6ToPronto(device, function)
+            p.startsWith("SONY") || p == "SIRC" -> {
+                val nbits = if (p.endsWith("15")) 15 else if (p.endsWith("20")) 20 else 12
+                sonyToPronto(nbits, device, subdevice, function)
+            }
+            p == "PANASONIC" -> panasonicToPronto(device, subdevice, function)
             else -> null
         }
+    }
+
+    private fun sonyToPronto(nbits: Int, device: Int, subdevice: Int, function: Int): String {
+        val value = when (nbits) {
+            15 -> (function and 0x7F) or ((device and 0xFF) shl 7)
+            20 -> (function and 0x7F) or ((device and 0x1F) shl 7) or ((subdevice and 0xFF) shl 12)
+            else -> (function and 0x7F) or ((device and 0x1F) shl 7)
+        }
+        val durs = ArrayList<Int>()
+        durs.add(2400); durs.add(600) // قائد: 4 وحدات ON + وحدة OFF
+        for (i in 0 until nbits) {
+            durs.add(if ((value shr i) and 1 == 1) 1200 else 600); durs.add(600)
+        }
+        // مدّ الفضاء الأخير لإكمال الإطار 45ms.
+        val burst = durs.dropLast(1).sum()
+        durs[durs.size - 1] = maxOf(600, 45000 - burst)
+        return durationsToPronto(SIRC_FREQ, durs)
+    }
+
+    private fun panasonicToPronto(device: Int, subdevice: Int, function: Int): String {
+        val chk = (device xor subdevice xor function) and 0xFF
+        val data = intArrayOf(0x02, 0x20, device and 0xFF, subdevice and 0xFF, function and 0xFF, chk)
+        val durs = ArrayList<Int>()
+        durs.add(3456); durs.add(1728) // قائد: 8 وحدات ON + 4 OFF
+        for (b in data) {
+            for (i in 0 until 8) {
+                durs.add(432); durs.add(if ((b shr i) and 1 == 1) 1296 else 432)
+            }
+        }
+        durs.add(432); durs.add(74736) // ذيل
+        return durationsToPronto(PANA_FREQ, durs)
     }
 
     private fun necToPronto(device: Int, subdevice: Int, function: Int): String {

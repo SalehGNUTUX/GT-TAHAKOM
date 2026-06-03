@@ -108,6 +108,8 @@
     <string name="rm_volume">الصوت</string>
     <string name="rm_channel">القناة</string>
     <string name="rm_active_path">وسيلة الإرسال النشطة</string>
+    <string name="rm_touchpad">لوحة اللمس</string>
+    <string name="rm_touchpad_hint">اسحب للتنقّل · انقر للاختيار</string>
     <string name="tr_wifi">شبكة WiFi</string>
     <string name="tr_ir">أشعة تحت الحمراء</string>
     <string name="tr_bridge">جسر WiFi-IR</string>

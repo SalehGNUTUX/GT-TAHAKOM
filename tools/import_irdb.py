@@ -58,6 +58,8 @@ NAME_MAP = {
 
 NEC_FREQ = 38000  # Hz
 RC_FREQ = 36000   # Hz — تردد بروتوكولات RC5/RC6 (فيليبس وكثير من الأوروبية/الصينية)
+SIRC_FREQ = 40000 # Hz — Sony SIRC
+PANA_FREQ = 37000 # Hz — Panasonic/Kaseikyo
 
 
 def _durations_to_pronto(freq, durations_us):
@@ -148,7 +150,43 @@ def when_protocol(p, device, subdevice, function):
         return rc5_to_pronto(device, function)
     if p == "RC6":
         return rc6_to_pronto(device, function)
+    if p.startswith("SONY") or p == "SIRC":
+        nbits = 15 if p.endswith("15") else (20 if p.endswith("20") else 12)
+        return sony_to_pronto(nbits, device, subdevice, function)
+    if p == "PANASONIC":
+        return panasonic_to_pronto(device, subdevice, function)
     return None
+
+
+def sony_to_pronto(nbits, device, subdevice, function):
+    """Sony SIRC (12/15/20 بت): ترميز عرض-النبضة، 40kHz، وحدة 600μs، LSB أولاً.
+    12: أمر7+عنوان5 · 15: أمر7+عنوان8 · 20: أمر7+عنوان5+ملحق8."""
+    if nbits == 15:
+        value = (function & 0x7F) | ((device & 0xFF) << 7)
+    elif nbits == 20:
+        value = (function & 0x7F) | ((device & 0x1F) << 7) | ((subdevice & 0xFF) << 12)
+    else:
+        value = (function & 0x7F) | ((device & 0x1F) << 7)
+    durs = [2400, 600]  # قائد: 4 وحدات ON + وحدة OFF
+    for i in range(nbits):
+        durs += [1200 if (value >> i) & 1 else 600, 600]  # 1=وحدتان ON، 0=وحدة ON؛ فاصل وحدة
+    # مدّ الفضاء الأخير لإكمال الإطار 45ms (فاصل بين الإطارات).
+    burst = sum(durs[:-1])
+    durs[-1] = max(600, 45000 - burst)
+    return _durations_to_pronto(SIRC_FREQ, durs)
+
+
+def panasonic_to_pronto(device, subdevice, function):
+    """Panasonic/Kaseikyo 48 بت: ترميز مسافة-النبضة، ~37kHz، وحدة 432μs، LSB أولاً.
+    البتّات: 0x02 0x20 (مورّد Panasonic) + D + S + F + (D^S^F) تحقّق."""
+    chk = (device ^ subdevice ^ function) & 0xFF
+    data = [0x02, 0x20, device & 0xFF, subdevice & 0xFF, function & 0xFF, chk]
+    durs = [3456, 1728]  # قائد: 8 وحدات ON + 4 OFF
+    for b in data:
+        for i in range(8):
+            durs += [432, 1296] if (b >> i) & 1 else [432, 432]  # 1=وحدة+3، 0=وحدة+1
+    durs += [432, 74736]  # ذيل: وحدة ON ثم فاصل ~173 وحدة
+    return _durations_to_pronto(PANA_FREQ, durs)
 
 
 def nec_to_pronto(device, subdevice, function):
@@ -202,9 +240,20 @@ def convert(csv_text):
             continue  # بروتوكول غير مدعوم (Panasonic/SIRC… لاحقاً)
         name = (row.get("functionname") or "").strip().upper()
         bid = _normalize_button(name)
-        freq = RC_FREQ if proto.upper().startswith("RC") else NEC_FREQ
+        freq = _freq_for(proto.upper())
         buttons.append({"id": bid, "label": name, "code": code, "freq": freq})
     return buttons
+
+
+def _freq_for(proto_upper):
+    """التردد الحامل حسب عائلة البروتوكول (يُخزَّن مع الزر)."""
+    if proto_upper.startswith("RC"):
+        return RC_FREQ
+    if proto_upper.startswith("SONY") or proto_upper == "SIRC":
+        return SIRC_FREQ
+    if proto_upper == "PANASONIC":
+        return PANA_FREQ
+    return NEC_FREQ
 
 
 def _normalize_button(name):

@@ -23,12 +23,10 @@ TARBALL = "https://github.com/probonopd/irdb/archive/refs/heads/master.tar.gz"
 OUT = "app/src/main/assets/online_index.json"
 
 # بروتوكولات يدعمها محوّل الهاتف (IrCodeConverter.kt) — يجب أن يطابق when_protocol هناك.
-SUPPORTED = ("NEC", "RC5", "RC5X", "RC6")
-
-
 def is_supported(proto):
     p = proto.upper()
-    return p.startswith("NEC") or p in ("RC5", "RC5X", "RC6")
+    return (p.startswith("NEC") or p in ("RC5", "RC5X", "RC6")
+            or p.startswith("SONY") or p == "SIRC" or p == "PANASONIC")
 
 
 def categorize(type_folder):
