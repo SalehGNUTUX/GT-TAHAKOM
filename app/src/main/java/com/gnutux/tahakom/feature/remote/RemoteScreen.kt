@@ -96,8 +96,8 @@ fun RemoteScreen(
 
         TransportPill(device)
 
-        // Android TV (تجريبي): شارة «تحت التطوير» + دعوة الإقران إن لزم.
-        if (device.transport.name == "ANDROID_TV") {
+        // وسائل تجريبية (Android TV / جسر Broadlink): شارة «تحت التطوير» + دعوة الإقران إن لزم.
+        if (device.transport.name == "ANDROID_TV" || device.transport.name == "BROADLINK") {
             Spacer(Modifier.height(8.dp))
             Row(
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(t.shape.md)).background(c.bridgeSoft)

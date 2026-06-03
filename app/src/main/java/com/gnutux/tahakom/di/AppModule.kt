@@ -12,6 +12,7 @@ import com.gnutux.tahakom.core.store.SavedDevicesRepository
 import com.gnutux.tahakom.core.transport.Transport
 import com.gnutux.tahakom.core.transport.TransportRegistry
 import com.gnutux.tahakom.core.transport.impl.AndroidTvTransport
+import com.gnutux.tahakom.core.transport.impl.BroadlinkTransport
 import com.gnutux.tahakom.core.transport.impl.IrTransport
 import com.gnutux.tahakom.core.transport.impl.RokuTransport
 import com.gnutux.tahakom.core.transport.impl.SamsungTizenTransport
@@ -44,7 +45,8 @@ object AppModule {
             WebosTransport(context),
             SamsungTizenTransport(context),
             AndroidTvTransport(), // تجريبي — تحت التطوير (Remote v2، يحتاج إقراناً)
-            // التالي: SonyBravia · م5: BroadlinkTransport (جسر WiFi-IR)
+            BroadlinkTransport(), // تجريبي — تحت التطوير (جسر WiFi-IR)
+            // التالي: SonyBravia
         )
         return TransportRegistry(transports)
     }

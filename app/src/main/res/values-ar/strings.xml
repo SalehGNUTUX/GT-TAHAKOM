@@ -85,6 +85,7 @@
     <string name="ir_sent_signal">أُرسلت إشارة الاختبار: %1$s</string>
     <string name="ir_responded_question">هل استجاب الجهاز؟</string>
     <string name="ir_yes_responded">نعم — اعتمد هذا الجهاز</string>
+    <string name="ir_via_broadlink">عبر جسر Broadlink (تجريبي)</string>
     <string name="ir_prev">السابق</string>
     <string name="ir_next">التالي</string>
     <string name="ir_device_counter">%1$d / %2$d</string>

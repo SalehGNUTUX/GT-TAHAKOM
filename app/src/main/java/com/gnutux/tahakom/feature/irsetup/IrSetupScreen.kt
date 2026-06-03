@@ -181,6 +181,14 @@ fun IrSetupScreen(
                     onClick = onBack,
                 )
             }
+
+            // خيار تجريبي: اعتماد الجهاز لكن عبر جسر Broadlink بدل باعث الهاتف.
+            OutlinedButton(
+                onClick = { viewModel.confirmViaBroadlink()?.let(onDeviceReady) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.ir_via_broadlink), textAlign = TextAlign.Center)
+            }
         }
     }
 }

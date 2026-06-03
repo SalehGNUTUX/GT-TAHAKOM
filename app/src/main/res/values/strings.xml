@@ -85,6 +85,7 @@
     <string name="ir_sent_signal">Sent test signal: %1$s</string>
     <string name="ir_responded_question">Did the device respond?</string>
     <string name="ir_yes_responded">Yes — use this device</string>
+    <string name="ir_via_broadlink">Use via Broadlink bridge (experimental)</string>
     <string name="ir_prev">Previous</string>
     <string name="ir_next">Next</string>
     <string name="ir_device_counter">%1$d / %2$d</string>

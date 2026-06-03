@@ -128,6 +128,17 @@ class IrSetupViewModel @Inject constructor(
     /** يثبّت الجهاز كجاهز للاستخدام (بعد أن استجاب). */
     fun confirmDevice(): Device? = loadedDevice?.let { buildDevice(it) }
 
+    /**
+     * يثبّت الجهاز نفسه لكن عبر **جسر Broadlink** (تجريبي): نفس أكواد IR لكن تُرسَل عبر
+     * الشبكة فيبثّها الجسر. الجسر يُكتشَف تلقائياً (لا حاجة لإدخال IP).
+     */
+    fun confirmViaBroadlink(): Device? = loadedDevice?.let { d ->
+        buildDevice(d).copy(
+            id = "bl-${d.category}-${d.brand}",
+            transport = TransportType.BROADLINK,
+        )
+    }
+
     private fun buildDevice(d: IrDevice): Device = Device(
         id = "ir-${d.category}-${d.brand}",
         name = d.brand,

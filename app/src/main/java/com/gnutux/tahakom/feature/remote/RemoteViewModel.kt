@@ -52,7 +52,9 @@ class RemoteViewModel @Inject constructor(
         if (boundDeviceId == device.id) return
         boundDeviceId = device.id
 
-        if (device.transport != TransportType.IR) {
+        // IR والجسر (Broadlink) كلاهما يرسل أكواد Pronto من irFile.
+        val usesIrCodes = device.transport == TransportType.IR || device.transport == TransportType.BROADLINK
+        if (!usesIrCodes) {
             // الأجهزة الشبكية: الأزرار المدعومة حسب البروتوكول (مدفوع بالبيانات، عام).
             _uiState.update {
                 RemoteUiState(supported = supportedForTransport(device.transport), ready = true)
@@ -79,12 +81,12 @@ class RemoteViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            // لأجهزة IR: تأكّد أن الأكواد حُمِّلت قبل الإرسال (يحلّ مشكلة "النقر مرتين"؛
-            // أول نقرة كانت تسبق اكتمال التحميل غير المتزامن فتفشل صامتةً).
-            if (device.transport == TransportType.IR && irCodes.isEmpty()) {
+            val usesIrCodes = device.transport == TransportType.IR || device.transport == TransportType.BROADLINK
+            // لأجهزة IR/الجسر: تأكّد أن الأكواد حُمِّلت قبل الإرسال (يحلّ مشكلة "النقر مرتين").
+            if (usesIrCodes && irCodes.isEmpty()) {
                 ensureLoaded(device)
             }
-            val command: Command = if (device.transport == TransportType.IR) {
+            val command: Command = if (usesIrCodes) {
                 val code = irCodes[button] ?: run {
                     _uiState.update { it.copy(lastError = "UNSUPPORTED_COMMAND") }
                     return@launch

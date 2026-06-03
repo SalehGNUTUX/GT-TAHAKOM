@@ -35,9 +35,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 الوسائل المسجّلة حالياً: `IrTransport` (ConsumerIrManager/Pronto)، `RokuTransport`
 (ECP/HTTP)، `WebosTransport` (LG SSAP WebSocket + pointer input socket للتنقّل)،
-`SamsungTizenTransport` (WebSocket)، `AndroidTvTransport` (Remote v2 — **هيكل تجريبي
-«تحت التطوير»**، protobuf+TLS+إقران، غير مُتحقَّق على جهاز). المعلّق: `SonyBraviaTransport`،
-`BroadlinkTransport` (جسر WiFi-IR).
+`SamsungTizenTransport` (WebSocket). **هياكل تجريبية «تحت التطوير» (غير مُتحقَّقة على جهاز):**
+`AndroidTvTransport` (Remote v2: protobuf+TLS+إقران)، `BroadlinkTransport` (جسر WiFi-IR:
+اكتشاف+مصادقة AES + Pronto→حزمة Broadlink). المعلّق: `SonyBraviaTransport`.
 
 ### تدفّقات أساسية تتطلّب قراءة عدة ملفات
 - **الإرسال الفعلي:** `RemoteScreen` → `RemoteViewModel.send()`. لأجهزة IR يحمّل
