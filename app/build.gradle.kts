@@ -22,8 +22,8 @@ android {
         applicationId = "com.gnutux.tahakom"
         minSdk = 26
         targetSdk = 36
-        versionCode = 26
-        versionName = "0.9.16"
+        versionCode = 27
+        versionName = "0.9.17"
 
         vectorDrawables { useSupportLibrary = true }
         // اللغات المدعومة: الإنجليزية (افتراضي) + العربية

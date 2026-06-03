@@ -11,10 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,10 +39,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gnutux.tahakom.R
+import com.gnutux.tahakom.core.discovery.toDevice
 import com.gnutux.tahakom.core.model.Device
 import com.gnutux.tahakom.core.model.DeviceType
 import com.gnutux.tahakom.core.transport.TransportType
+import com.gnutux.tahakom.ui.icons.TahakomIcon
 import com.gnutux.tahakom.ui.theme.tokens
 
 /** بروتوكولات الشبكة التي يمكن إضافتها يدوياً بالـ IP (المنفّذة فعلاً). */
@@ -58,11 +66,21 @@ private val NETWORK_OPTIONS = listOf(
 fun AddNetworkScreen(
     onBack: () -> Unit,
     onDeviceReady: (Device) -> Unit,
+    scanVm: DevicesViewModel = hiltViewModel(),
 ) {
     val c = tokens.colors
     var selected by remember { mutableStateOf(TransportType.LG_WEBOS) }
     var ip by remember { mutableStateOf("") }
     val ipValid = ip.matches(Regex("""\d{1,3}(\.\d{1,3}){3}"""))
+
+    var scanning by remember { mutableStateOf(false) }
+    val discovery by scanVm.discovery.collectAsStateWithLifecycle()
+    // مسح مخصّص للنوع المحدّد: نعرض المكتشَف المطابق لوسيلته فقط.
+    val matches = discovery.discovered.filter { it.transport == selected }
+    DisposableEffect(scanning) {
+        if (scanning) scanVm.startScan() else scanVm.stopScan()
+        onDispose { scanVm.stopScan() }
+    }
 
     Scaffold(
         topBar = {
@@ -76,7 +94,7 @@ fun AddNetworkScreen(
             )
         },
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).padding(16.dp)) {
+        Column(Modifier.fillMaxSize().padding(padding).padding(16.dp).verticalScroll(rememberScrollState())) {
             Text(
                 stringResource(R.string.net_hint),
                 color = c.textDim, fontSize = 14.sp,
@@ -103,6 +121,40 @@ fun AddNetworkScreen(
                 }
             }
 
+            // مسح مخصّص للنوع المحدّد على الشبكة (قبل إدخال IP يدوياً).
+            val selectedLabel = NETWORK_OPTIONS.first { it.first == selected }.second
+            Spacer(Modifier.size(10.dp))
+            Row(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(tokens.shape.md)).background(c.surface)
+                    .border(1.dp, c.line, RoundedCornerShape(tokens.shape.md))
+                    .clickable { scanning = !scanning }.padding(vertical = 13.dp, horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (scanning) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = c.accent)
+                else TahakomIcon("scan", c.accent, size = 20.dp)
+                Text(
+                    if (scanning) stringResource(R.string.net_scanning) else stringResource(R.string.net_scan_for, selectedLabel),
+                    color = c.text, fontSize = 14.sp, fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f).padding(start = 10.dp),
+                )
+            }
+            // الأجهزة المكتشَفة المطابقة للنوع — النقر يفتح ريموتها مباشرة.
+            matches.forEach { d ->
+                Row(
+                    Modifier.fillMaxWidth().padding(top = 8.dp).clip(RoundedCornerShape(tokens.shape.md))
+                        .background(c.accentSoft).clickable { onDeviceReady(d.toDevice()) }.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TahakomIcon("wifi", c.accent, size = 20.dp)
+                    Column(Modifier.weight(1f).padding(start = 10.dp)) {
+                        Text(d.name, color = c.text, fontSize = 14.5.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                        Text(d.host, color = c.textFaint, fontSize = 12.sp)
+                    }
+                    TahakomIcon("plus", c.accent, size = 18.dp)
+                }
+            }
+
+            Spacer(Modifier.size(16.dp))
             OutlinedTextField(
                 value = ip,
                 onValueChange = { ip = it.trim() },

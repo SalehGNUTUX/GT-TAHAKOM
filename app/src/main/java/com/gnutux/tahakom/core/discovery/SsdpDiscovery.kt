@@ -27,32 +27,37 @@ class SsdpDiscovery : DeviceDiscovery {
         val socket = runCatching {
             MulticastSocket().apply {
                 reuseAddress = true
-                soTimeout = SOCKET_TIMEOUT_MS
+                soTimeout = 1200 // مهلة استقبال قصيرة لنعيد الإرسال ضمن النافذة الكلّية
             }
         }.getOrNull() ?: return@flow
 
         try {
-            val group = InetAddress.getByName(MULTICAST_ADDR)
-            val search = buildMSearch().toByteArray()
-            val target = InetSocketAddress(group, SSDP_PORT)
-            // أرسِل عبر كل واجهة شبكة صالحة (WiFi غالباً) لا الواجهة الافتراضية فقط؛
-            // مع تفعيل بيانات الجوّال قد تخرج الحزمة من الخلوي فلا يصل LG/Samsung.
-            val sentOnIface = sendOnAllInterfaces(socket, search, target)
-            if (!sentOnIface) {
-                runCatching { socket.send(DatagramPacket(search, search.size, target)) }
+            val target = InetSocketAddress(InetAddress.getByName(MULTICAST_ADDR), SSDP_PORT)
+            // استعلامات M-SEARCH متعدّدة: ssdp:all + أهداف ST خاصّة بالتلفازات الذكية،
+            // لأن كثيراً منها لا يردّ إلا على نوع خدمته تحديداً (LG/Samsung/Roku/DIAL).
+            val queries = ST_TARGETS.map { buildMSearch(it).toByteArray() }
+            fun blast() = queries.forEach { q ->
+                if (!sendOnAllInterfaces(socket, q, target)) {
+                    runCatching { socket.send(DatagramPacket(q, q.size, target)) }
+                }
             }
+            blast()
 
             val buffer = ByteArray(2048)
-            // نستمر بالاستقبال حتى يُلغى التدفّق أو تنتهي مهلة السوكِت تكراراً.
-            while (coroutineContext.isActive) {
+            val seen = HashSet<String>()
+            val deadline = System.currentTimeMillis() + SCAN_WINDOW_MS
+            var lastBlast = System.currentTimeMillis()
+            // نبقى نستقبل حتى نهاية النافذة، ونعيد البثّ دورياً (UDP غير موثوق).
+            while (coroutineContext.isActive && System.currentTimeMillis() < deadline) {
                 val packet = DatagramPacket(buffer, buffer.size)
                 try {
                     socket.receive(packet)
+                    val device = parseResponse(String(packet.data, 0, packet.length), packet.address.hostAddress)
+                    if (device != null && seen.add("${device.host}:${device.transport.name}")) emit(device)
                 } catch (e: java.net.SocketTimeoutException) {
-                    break // لا مزيد من الردود
+                    // لا ردّ في هذه النافذة القصيرة — أعِد البثّ كل ~1.5s واستمر.
+                    if (System.currentTimeMillis() - lastBlast > 1500) { blast(); lastBlast = System.currentTimeMillis() }
                 }
-                val response = String(packet.data, 0, packet.length)
-                parseResponse(response, packet.address.hostAddress)?.let { emit(it) }
             }
         } catch (e: Exception) {
             // أي خطأ شبكي (أوفلاين/تعذّر الإرسال) → أنهِ التدفّق بهدوء بلا انهيار.
@@ -83,12 +88,12 @@ class SsdpDiscovery : DeviceDiscovery {
         return sent
     }
 
-    private fun buildMSearch(): String = buildString {
+    private fun buildMSearch(st: String): String = buildString {
         append("M-SEARCH * HTTP/1.1\r\n")
         append("HOST: $MULTICAST_ADDR:$SSDP_PORT\r\n")
         append("MAN: \"ssdp:discover\"\r\n")
         append("MX: 2\r\n")
-        append("ST: ssdp:all\r\n")
+        append("ST: $st\r\n")
         append("\r\n")
     }
 
@@ -124,6 +129,15 @@ class SsdpDiscovery : DeviceDiscovery {
     private companion object {
         const val MULTICAST_ADDR = "239.255.255.250"
         const val SSDP_PORT = 1900
-        const val SOCKET_TIMEOUT_MS = 3000
+        const val SCAN_WINDOW_MS = 6000L // نافذة استقبال كلّية (التلفازات قد تردّ متأخّرة)
+        // أهداف ST: العام + خدمات التلفازات الذكية الشائعة (تردّ بموثوقية أعلى من ssdp:all وحده).
+        val ST_TARGETS = listOf(
+            "ssdp:all",
+            "urn:dial-multiscreen-org:service:dial:1",
+            "urn:lge-com:service:webos-second-screen:1",
+            "urn:samsung.com:device:RemoteControlReceiver:1",
+            "urn:schemas-upnp-org:device:MediaRenderer:1",
+            "roku:ecp",
+        )
     }
 }

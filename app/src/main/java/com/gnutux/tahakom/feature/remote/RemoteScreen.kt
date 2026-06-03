@@ -8,6 +8,8 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,7 +58,7 @@ import com.gnutux.tahakom.ui.theme.tokens
  * الأزرار التي يدعمها فقط. الأزرار الأساسية في الشاشة، والبقية في قائمة "المزيد".
  * أزرار الاتجاهات قابلة للنقر فعلياً (إضافةً للسحب).
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun RemoteScreen(
     device: Device,
@@ -157,9 +159,11 @@ fun RemoteScreen(
 
         // صف سياقي: القائمة الذكية/التطبيقات + قائمة القنوات + بحث (يظهر المدعوم فقط)
         if (listOf(ButtonId.APPS, ButtonId.SMART, ButtonId.LIST, ButtonId.GUIDE, ButtonId.SEARCH).any(has)) {
-            Row(
+            // FlowRow: الأزرار تلتفّ لسطر جديد بدل أن تُحشر/تتشوّه على الشاشات الضيّقة.
+            FlowRow(
                 Modifier.fillMaxWidth().padding(vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 if (has(ButtonId.APPS) || has(ButtonId.SMART)) {
                     PillBtn("tv", stringResource(R.string.fn_smart)) {
@@ -218,7 +222,15 @@ fun RemoteScreen(
         }
 
         state.lastError?.let {
-            Text("⚠ $it", color = c.ir, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+            val msg = when (it) {
+                "transport_unavailable", "NOT_AVAILABLE", "NOT_CONNECTED" -> stringResource(R.string.err_transport_unavailable)
+                "NETWORK", "TIMEOUT" -> stringResource(R.string.err_network)
+                "PAIRING_REQUIRED" -> stringResource(R.string.err_pairing_required)
+                "PAIRING_FAILED" -> stringResource(R.string.atv_pair_failed)
+                "UNSUPPORTED_COMMAND" -> stringResource(R.string.err_unsupported)
+                else -> it
+            }
+            Text("⚠ $msg", color = c.ir, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
         }
         Spacer(Modifier.height(8.dp))
     }

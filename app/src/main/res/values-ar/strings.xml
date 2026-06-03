@@ -42,6 +42,8 @@
     <string name="net_protocol">البروتوكول</string>
     <string name="net_ip_label">عنوان IP</string>
     <string name="net_connect">اتصل وافتح جهاز التحكّم</string>
+    <string name="net_scan_for">ابحث في الشبكة عن %1$s</string>
+    <string name="net_scanning">جارٍ البحث في الشبكة… (انقر للإيقاف)</string>
     <string name="net_pairing_note">أول اتصال قد يطلب القبول على شاشة التلفاز (LG/Samsung).</string>
     <string name="learn_btn_power">الطاقة</string>
     <string name="learn_btn_vol_up">الصوت +</string>
@@ -131,6 +133,10 @@
     <string name="atv_pair_connecting">جارٍ الاتصال بالتلفاز…</string>
     <string name="atv_pair_ok">تمّ الإقران بنجاح</string>
     <string name="atv_pair_failed">فشل الإقران. تحقّق من الرمز ومن أن التلفاز على الشبكة نفسها.</string>
+    <string name="err_transport_unavailable">لا يمكن التحكّم بهذا الجهاز (لا وسيلة عاملة).</string>
+    <string name="err_network">تعذّر الوصول إلى الجهاز. تأكّد أنه على شبكة WiFi نفسها.</string>
+    <string name="err_pairing_required">يحتاج هذا الجهاز إلى إقران أولاً.</string>
+    <string name="err_unsupported">هذا الزر غير مدعوم على هذا الجهاز.</string>
     <string name="tr_wifi">شبكة WiFi</string>
     <string name="tr_ir">أشعة تحت الحمراء</string>
     <string name="tr_bridge">جسر WiFi-IR</string>

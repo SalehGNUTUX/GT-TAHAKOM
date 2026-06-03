@@ -42,6 +42,8 @@
     <string name="net_protocol">Protocol</string>
     <string name="net_ip_label">IP address</string>
     <string name="net_connect">Connect &amp; open remote</string>
+    <string name="net_scan_for">Scan the network for %1$s</string>
+    <string name="net_scanning">Searching the network… (tap to stop)</string>
     <string name="net_pairing_note">First connection may prompt you to accept on the TV (LG/Samsung).</string>
     <string name="learn_btn_power">Power</string>
     <string name="learn_btn_vol_up">Volume +</string>
@@ -131,6 +133,10 @@
     <string name="atv_pair_connecting">Connecting to the TV…</string>
     <string name="atv_pair_ok">Paired successfully</string>
     <string name="atv_pair_failed">Pairing failed. Check the code and that the TV is on the same network.</string>
+    <string name="err_transport_unavailable">This device can\'t be controlled (no working path).</string>
+    <string name="err_network">Couldn\'t reach the device. Check it\'s on the same WiFi.</string>
+    <string name="err_pairing_required">This device needs pairing first.</string>
+    <string name="err_unsupported">This button isn\'t supported on this device.</string>
     <string name="tr_wifi">WiFi network</string>
     <string name="tr_ir">Infrared</string>
     <string name="tr_bridge">WiFi-IR bridge</string>
