@@ -138,6 +138,7 @@
     <string name="err_network">Couldn\'t reach the device. Check it\'s on the same WiFi.</string>
     <string name="err_pairing_required">This device needs pairing first.</string>
     <string name="err_unsupported">This button isn\'t supported on this device.</string>
+    <string name="err_generic">Something went wrong. Please try again.</string>
     <string name="tr_wifi">WiFi network</string>
     <string name="tr_ir">Infrared</string>
     <string name="tr_bridge">WiFi-IR bridge</string>

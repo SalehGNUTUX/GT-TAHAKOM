@@ -228,7 +228,7 @@ fun RemoteScreen(
                 "PAIRING_REQUIRED" -> stringResource(R.string.err_pairing_required)
                 "PAIRING_FAILED" -> stringResource(R.string.atv_pair_failed)
                 "UNSUPPORTED_COMMAND" -> stringResource(R.string.err_unsupported)
-                else -> it
+                else -> stringResource(R.string.err_generic)
             }
             Text("⚠ $msg", color = c.ir, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
         }

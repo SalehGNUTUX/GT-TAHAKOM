@@ -1,5 +1,6 @@
 package com.gnutux.tahakom.feature.share
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,21 +18,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
+import com.gnutux.tahakom.MainActivity
 import com.gnutux.tahakom.R
+import com.gnutux.tahakom.core.irdb.IrDatabase
+import com.gnutux.tahakom.core.model.Device
+import com.gnutux.tahakom.core.model.DeviceType
 import com.gnutux.tahakom.core.share.PackScope
 import com.gnutux.tahakom.core.share.RemotePack
 import com.gnutux.tahakom.core.share.RemotePackSharing
+import com.gnutux.tahakom.core.store.SavedDevicesRepository
+import com.gnutux.tahakom.core.transport.TransportType
 import com.gnutux.tahakom.ui.theme.TahakomTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
- * يستقبل ملف/رابط `.tahakom` المشترَك ويعرض معاينة الاستيراد.
- *
- * عند نقر المستخدم على ملف مشترَك من شخص لديه نفس التطبيق، يفتح هنا مباشرة.
- * منطق الحفظ الفعلي في Room يُربط في م2 (عند توفّر مستودع الريموتات).
+ * يستقبل ملف/رابط `.tahakom` المشترَك ويعرض معاينة الاستيراد. عند التأكيد يُحفظ الجهاز
+ * في «أجهزتي» (مطابقاً قاعدة IR إن أمكن) ويُفتح التطبيق.
  */
 @AndroidEntryPoint
 class ImportActivity : ComponentActivity() {
+
+    @Inject lateinit var irDb: IrDatabase
+    @Inject lateinit var saved: SavedDevicesRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -45,14 +57,42 @@ class ImportActivity : ComponentActivity() {
                 } else {
                     ImportPreview(
                         pack = pack,
-                        onConfirm = {
-                            // TODO(م2): حفظ الحزمة في مستودع الريموتات (Room) ثم فتح الجهاز.
-                            finish()
-                        },
+                        onConfirm = { importAndOpen(pack) },
                         onCancel = { finish() },
                     )
                 }
             }
+        }
+    }
+
+    /** يبني جهازاً من الحزمة (مطابقاً القاعدة إن أمكن)، يحفظه، ثم يفتح التطبيق. */
+    private fun importAndOpen(pack: RemotePack) {
+        lifecycleScope.launch {
+            val match = runCatching {
+                irDb.index().firstOrNull {
+                    it.brand.equals(pack.brand, ignoreCase = true) ||
+                        (pack.model != null && it.brand.equals(pack.model, ignoreCase = true))
+                }
+            }.getOrNull()
+            val device = if (match != null) {
+                Device(
+                    id = "ir-${match.category}-${match.brand}", name = match.brand,
+                    type = DeviceType.TV, transport = TransportType.IR,
+                    metadata = mapOf("brand" to match.brand, "category" to match.category, "irFile" to match.file),
+                )
+            } else {
+                val name = pack.model ?: pack.brand
+                Device(
+                    id = "import-$name", name = name, type = DeviceType.TV, transport = TransportType.IR,
+                    metadata = mapOf("brand" to pack.brand, "category" to "TV"),
+                )
+            }
+            runCatching { saved.add(device) }
+            startActivity(
+                Intent(this@ImportActivity, MainActivity::class.java)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+            )
+            finish()
         }
     }
 }

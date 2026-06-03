@@ -61,11 +61,13 @@ class AndroidTvTransport : Transport {
         if (socket?.isConnected != true || host != device.address) {
             when (val c = connect(device)) { is TransportResult.Failure -> return@withContext c; else -> {} }
         }
+        val out = socket?.takeIf { it.isConnected }?.outputStream
+            ?: return@withContext TransportResult.Failure(TransportError.NOT_CONNECTED)
         try {
             // RemoteMessage{ remote_key_inject=10 { direction=1 (SHORT=3), key_code=2 } }
             val inject = ProtoWriter().int32Field(1, 3).int32Field(2, keyCode)
             val msg = ProtoWriter().messageField(10, inject)
-            AtvFrames.write(socket!!.outputStream, msg.toByteArray())
+            AtvFrames.write(out, msg.toByteArray())
             TransportResult.Success(Unit)
         } catch (e: Exception) {
             TransportResult.Failure(TransportError.NETWORK, e)
