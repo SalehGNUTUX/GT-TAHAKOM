@@ -15,6 +15,7 @@ Each entry: device + transport + what happened + analysis + next-release actions
 |---|---|---|---|---|---|
 | 1 | SENIC (Android receiver) | AndroidTvTransport (experimental) | 1.0.0 | Code-entry field appeared, but no code shown on the TV | Under analysis |
 | 2 | LG (webOS) @192.168.1.17 | WebosTransport (SSAP) | 1.0.0 | Basic control works; apps/smart-menu and navigation/touchpad don't; general scan misses it | Diagnosed (two app bugs) |
+| 3 | General (UX test) | Add-from-scan + list ordering | 1.0.0 | Add-from-scan didn't open the remote; newest not shown on top | ✅ Fixed |
 
 ---
 
@@ -145,3 +146,32 @@ a lost UDP reply, or the scan stopping early. ← Needs investigation (see actio
 - `core/store/WebosKeyStore.kt` — stores `client-key` (no delete UI yet).
 - `core/discovery/SsdpDiscovery.kt` — ST queries (bug C).
 - `feature/remote/RemoteScreen.kt` — `Touchpad` (converts drags into NAV_* steps).
+
+---
+
+## #3 — UX: add-from-scan + "My devices" ordering · v1.0.0 · ✅ Fixed
+
+**Date:** 2026-06-04
+
+### Two observations
+1. **Add-from-scan doesn't open the remote:** in "Search for devices on the network", finding a
+   device and adding it **stayed on the search page** instead of going straight to the device's
+   remote control.
+2. **Ordering:** newly-added devices should appear at the **top** of "My devices".
+
+### Cause (from reading the code)
+1. Every other add path (manual/network/online/IR/import) calls `adopt()` in `MainActivity` =
+   **save + open `Screen.Remote`**; the scan path was `onAdopt = { devicesVm.save(...) }` which
+   **only saves** (with an intentional "keep the page to add more" comment). Inconsistent with the rest.
+2. `SavedDevicesRepository.add()` appended to the **end**: `current + device`.
+
+### Fix (applied in this build)
+1. `MainActivity`: the scan path is now `onAdopt = { adopt(it.toDevice()) }` → opens the remote
+   directly like every other path.
+2. `SavedDevicesRepository.add()`: now prepends → `listOf(device) + current.filterNot {…}`
+   (newest first, for all add paths). Manual drag-reorder is unaffected.
+
+### Related files
+- `MainActivity.kt` — `adopt()` and the `ScanScreen.onAdopt` wiring.
+- `core/store/SavedDevicesRepository.kt` — `add()` (head instead of tail).
+- `feature/devices/ScanScreen.kt` — `onAdopt` is invoked on card/"+" tap.

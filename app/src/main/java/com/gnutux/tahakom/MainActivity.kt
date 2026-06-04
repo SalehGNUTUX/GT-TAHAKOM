@@ -155,8 +155,8 @@ class MainActivity : AppCompatActivity() {
                     )
                     Screen.Scan -> ScanScreen(
                         onBack = { screen = Screen.Devices },
-                        // الإضافة من المسح تحفظ في «أجهزتي» وتُبقي الصفحة لإضافة المزيد.
-                        onAdopt = { devicesVm.save(it.toDevice()) },
+                        // الإضافة من المسح: تحفظ في «أجهزتي» وتفتح ريموت الجهاز مباشرةً (كبقية المسارات).
+                        onAdopt = { adopt(it.toDevice()) },
                         viewModel = devicesVm,
                     )
                     Screen.Settings -> SettingsScreen(

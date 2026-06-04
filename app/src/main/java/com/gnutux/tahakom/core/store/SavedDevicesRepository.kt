@@ -53,9 +53,9 @@ class SavedDevicesRepository(private val context: Context) {
         decode(prefs[key] ?: "[]")
     }
 
-    /** يضيف جهازاً (أو يحدّثه إن كان موجوداً بنفس المعرّف) في نهاية القائمة. */
+    /** يضيف جهازاً (أو يحدّثه إن كان موجوداً بنفس المعرّف) في **رأس** القائمة (الأحدث أولاً). */
     suspend fun add(device: Device) = update { current ->
-        current.filterNot { it.id == device.id } + device
+        listOf(device) + current.filterNot { it.id == device.id }
     }
 
     suspend fun remove(deviceId: String) = update { current ->
