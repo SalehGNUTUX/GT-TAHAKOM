@@ -2,7 +2,7 @@
 
 > English · [العربية](../STATUS.md)
 
-> Last updated: 2026-06-03 · Current version: **1.0.0** (versionCode 30) · License: GPLv3
+> Last updated: 2026-06-04 · Current version: **1.0.0** (versionCode 30) · License: GPLv3
 > Website & live demo: https://salehgnutux.github.io/GT-TAHAKOM/
 > Repo: https://github.com/SalehGNUTUX/GT-TAHAKOM
 
@@ -71,6 +71,17 @@ architectural core is an **abstract `Transport` layer** that picks the right pat
 - `build.yml`: debug build + lint on every push/PR (proves a clean source build).
 - `release.yml`: on a `v*` tag, builds release, creates the release and attaches the APK
   (optional automatic signing via Secrets). ([CI.md](CI.md)).
+
+### Polish & distribution (m5) — ✅ done
+- **First stable release `v1.0.0`** (versionCode 30) published via CI with the signed build attached.
+- **Full CI** (build+lint on every push, automatic release on tag) — above.
+- **Final bilingual docs**: every `docs/` file has an `docs/en/` counterpart; cross-linked
+  Arabic/English READMEs with a dynamic version badge.
+- **Website & live demo**: a self-contained landing page (Settings-style brand + a demo that
+  mirrors the real remote screen with Material effects) + direct-download / releases buttons. ([WEBSITE.md](WEBSITE.md)).
+- **F-Droid prep**: build recipe `fdroid/com.gnutux.tahakom.yml` + fastlane metadata
+  (title/description/changelogs ar+en + icon + 4 screenshots) + submission guide
+  ([FDROID.md](FDROID.md)). One action remains for the owner: open the RFP/MR on GitLab.
 
 ---
 
