@@ -84,7 +84,7 @@ architectural core is an **abstract `Transport` layer** that picks the right pat
 - **More converter protocols**: 2584/3244 supported (10 families). Largest remaining: Aiwa, Dish,
   RECS80, MCE, RCA (needs MSB bit order) — added carefully after verifying a reference.
 - **App shortcuts** (Netflix/YouTube) — rely on network protocols.
-- **F-Droid publishing** (CI ✅ done).
+- **F-Droid publishing** — build recipe + fastlane metadata ready ([FDROID.md](FDROID.md)); awaiting the owner's RFP/MR submission on GitLab.
 - Low priority: Glance widget, drag-reorder devices, custom Arabic fonts, visual editor.
 
 ---
