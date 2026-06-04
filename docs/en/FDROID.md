@@ -6,6 +6,9 @@ How to get **GT-TAHAKOM** listed on the free **F-Droid** store. Everything neede
 already in the repo; the one remaining action only the project owner can do is
 **opening the inclusion request from their own GitLab account**.
 
+> ✅ **Submission status:** RFP opened on 2026-06-04 — track it at
+> **https://gitlab.com/fdroid/rfp/-/work_items/3972** (#3972). Now awaiting F-Droid volunteers.
+
 ## Why the app qualifies (verified)
 - **Free license:** GPLv3 (`LICENSE`).
 - **No proprietary deps or trackers:** no Google Play Services, no Firebase, no non-free
