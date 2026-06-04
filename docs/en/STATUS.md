@@ -90,6 +90,7 @@ architectural core is an **abstract `Transport` layer** that picks the right pat
 - **`AndroidTvTransport`** (Remote v2 + TLS pairing) — **added as an experimental "under development"
   scaffold** (v0.9.16): hand-written minimal protobuf + TLS client cert + 6-digit polo pairing +
   RemoteKeyInject. **Needs testing/tuning on real hardware** — shown to the user tagged "experimental".
+  📋 First field test (SENIC device) logged in [TEST_NOTES.md](TEST_NOTES.md#1).
 - **`BroadlinkTransport`** (WiFi-IR bridge) — **experimental scaffold** (v0.9.18): discovery + AES
   auth + Pronto→Broadlink packet + UDP send. Untested on real hardware.
 - **More converter protocols**: 2584/3244 supported (10 families). Largest remaining: Aiwa, Dish,
