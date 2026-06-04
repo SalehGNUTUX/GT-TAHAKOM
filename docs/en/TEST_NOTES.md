@@ -14,6 +14,7 @@ Each entry: device + transport + what happened + analysis + next-release actions
 | # | Device | Transport | Version | Result | State |
 |---|---|---|---|---|---|
 | 1 | SENIC (Android receiver) | AndroidTvTransport (experimental) | 1.0.0 | Code-entry field appeared, but no code shown on the TV | Under analysis |
+| 2 | LG (webOS) @192.168.1.17 | WebosTransport (SSAP) | 1.0.0 | Basic control works; apps/smart-menu and navigation/touchpad don't; general scan misses it | Diagnosed (two app bugs) |
 
 ---
 
@@ -71,3 +72,76 @@ the TV screen**, so pairing could not be completed.
 - `core/transport/impl/androidtv/AndroidTvPairing.kt` (polo sequence + port 6467)
 - `core/transport/impl/androidtv/AndroidTvCrypto.kt` (TLS + secret computation)
 - `feature/androidtv/AndroidTvPairViewModel.kt` (pairing stages)
+
+---
+
+## #2 — LG (webOS) · WebosTransport (SSAP) · v1.0.0
+
+**Date:** 2026-06-04
+**Device:** LG TV running webOS — address `192.168.1.17`.
+**Transport:** WiFi → `WebosTransport` (SSAP, WebSocket on port 3000).
+
+### Observations (three)
+1. **Discovery:** "Search for nearby devices" (general scan/radar) **does not find the TV**;
+   but "Add by name/model → network → LG (webOS)" **does** (LG @192.168.1.17).
+2. **Pairing:** after adding, the accept prompt appeared with "No" as default; moving to "Yes"
+   and tapping, then it returning to "No", repeated once or twice, then disappeared and control
+   became possible.
+3. **Partial control:** **power + volume + channel change + media play/pause** work; but
+   **apps/smart-menu/home/settings** and **navigation (D-pad) and the touchpad** don't work at all.
+
+### Analysis (from reading the code) — two confirmed app bugs
+
+**Pairing succeeded** — the proof is that any control works at all means the TV accepted the
+registration and a `client-key` was saved in `WebosKeyStore`. The repeated "No/Yes" is the TV's
+accept prompt (its default is decline, so you move to "Yes"); the repetition comes from the
+**"one WebSocket session per command"** model: each attempt before the key is saved opens a new
+session and re-triggers the prompt. So the problem is **not pairing and not the TV**.
+
+**Bug (A) — app-launch commands are built wrong.** In `WebosTransport.toSsap()`, the commands
+that work are **parameterless**: `ssap://system/turnOff`, `ssap://audio/volumeUp`,
+`ssap://tv/channelUp`, `ssap://media.controls/play` — that's why they **work**. But
+apps/smart/home/settings are built with a query string:
+`ssap://com.webos.applicationManager/launch?id=...`. **SSAP ignores `?id=`**; the id must be sent
+in a separate JSON `payload` field, not in the URI. And `send()` only sends `uri` **with no
+`payload`** → every launch command fails. ← Fully explains the apps failure.
+- **Fix:** send `{"type":"request","uri":"ssap://system.launcher/launch","payload":{"id":"<appId>"}}`.
+  Common ids: YouTube `youtube.leanback.v4`, Netflix `netflix`; home via the home button not
+  launch; app list via `ssap://com.webos.applicationManager/listLaunchPoints` or open
+  `com.webos.app.discovery`.
+
+**Bug (B) — the pointer socket doesn't deliver (navigation + touchpad).** All `NAV_*`/`OK` keys
+and the **touchpad** go through `sendPointer()` (a second socket after `getPointerInputSocket`),
+not through `runSession`. In `sendPointer`, the moment the second socket opens we send
+`type:button…` then **complete `done` immediately, so both sockets are closed right away**
+(`pointerWs.close()` + `main.close()`) — the frame may be dropped before delivery. Also the
+session-per-press model reopens a WebSocket+register for every drag step (far too slow for a
+touchpad). ← Explains "navigation/touchpad don't work".
+- **Fix:** a **persistent WebSocket connection** (open once, keep the pointer socket open, send
+  through it); delay the close until send is confirmed; and add `type:move` support for the
+  touchpad instead of converting drags into NAV steps.
+
+**Bug (C, secondary) — the general scan misses webOS.** The general scan broadcasts M-SEARCH once
+with an `MX:2` window (`SsdpDiscovery`) and includes ST `urn:lge-com:service:webos-second-screen:1`;
+yet it didn't find the TV while the targeted path did. Likely causes: short/single broadcast,
+a lost UDP reply, or the scan stopping early. ← Needs investigation (see actions).
+
+### Next-release actions
+- [ ] **(A)** Rebuild launch commands via JSON `payload`, not a query string (apps/smart/settings/home).
+- [ ] **(B)** A **persistent** WebSocket connection + keep the pointer socket open + delay close
+      after send; add `type:move` (and maybe `click`) for the touchpad instead of NAV steps.
+- [ ] **A "re-pair / forget key" UI** (delete from `WebosKeyStore`) — currently missing.
+- [ ] **(C)** Improve general webOS discovery: repeat M-SEARCH + longer window; compare to the targeted path.
+- [ ] Expand the list of common app ids (YouTube/Netflix/browser…) + fetch the actually-installed list.
+
+### Screenshots
+![Control screen — LG webOS](../../screenshots/test/02-lg-webos-remote-v1.0.0.png)
+![General scan finds nothing](../../screenshots/test/02-lg-webos-scan-empty-v1.0.0.png)
+![Targeted path finds LG @192.168.1.17](../../screenshots/test/02-lg-webos-targeted-found-v1.0.0.png)
+
+### Related files
+- `core/transport/impl/WebosTransport.kt` — `toSsap()` (bug A), `sendPointer()` (bug B),
+  `runSession()`/`registerPayload()` (pairing).
+- `core/store/WebosKeyStore.kt` — stores `client-key` (no delete UI yet).
+- `core/discovery/SsdpDiscovery.kt` — ST queries (bug C).
+- `feature/remote/RemoteScreen.kt` — `Touchpad` (converts drags into NAV_* steps).
