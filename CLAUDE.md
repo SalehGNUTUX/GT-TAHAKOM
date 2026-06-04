@@ -5,6 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 تطبيق أندرويد للتحكّم في التلفاز والأجهزة الإلكترونية عبر وسائل متعددة (شبكة WiFi + IR
 + جسر WiFi-IR). الكود Kotlin + Jetpack Compose. التوثيق التفصيلي في `docs/` —
 **ابدأ بـ [docs/STATUS.md](docs/STATUS.md)** (المصدر المرجعي للحالة: ما أُنجز/ما تبقّى).
+نتائج الاختبار الميداني على أجهزة حقيقية + التوصيات للإصدار القادم في
+[docs/TEST_NOTES.md](docs/TEST_NOTES.md).
 
 ## أوامر
 ```bash
@@ -17,8 +19,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **لا توجد اختبارات وحدة** في المشروع بعد.
 - Android SDK: `/home/gnutux/Android/Sdk` (في `local.properties`). المنصة المثبّتة محلياً
   **android-36** (لا 35) → `compileSdk=targetSdk=36`، AGP 8.9.2، Gradle 8.11.1، JDK 17، minSdk 26.
-- التوقيع: `signingConfig` يقرأ من `keystore.properties` بالجذر (مُتجاهَل في git). إن غاب
-  يبني release بلا توقيع. الإصدارات تُنشر على GitHub Releases (prerelease) + نسخة في `release/`.
+- التوقيع: `signingConfig` يقرأ من `keystore.properties` بالجذر (مُتجاهَل في git؛ **لا تلتزمه أبداً**).
+  إن غاب يبني release بلا توقيع — وهكذا يبني F-Droid أيضاً (يوقّع بمفتاحه).
+- CI (GitHub Actions، `docs/CI.md`): `build.yml` بناء+lint عند كل دفع/PR؛ `release.yml` عند وسم
+  `v*` يبني وينشر الإصدار ويُرفق APK (توقيع آلي اختياري عبر Secrets؛ prerelease فقط إن حمل الوسم
+  لاحقة). النشر على F-Droid مُجهَّز: `fdroid/com.gnutux.tahakom.yml` + `docs/FDROID.md` (طلب RFP مفتوح).
 - `convert_ir_db.py`/`import_irdb.py` يعيدان توليد `app/src/main/assets/irdb/` (القاعدة
   المدمجة). `tools/build_online_index.py` يولّد `assets/online_index.json` (فهرس البحث
   الشبكي) بتنزيل أرشيف probonopd مرة واحدة.
@@ -67,6 +72,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   الاتجاهات (D-pad) التي تُفرَض LTR لأن المواضع فيزيائية لا لغوية.
 - نظام التصميم في `ui/theme/Tokens.kt` (سمة serene، ألوان OKLCH محوّلة لـ sRGB) عبر
   `LocalTokens`/`tokens`. الأيقونات عبر `ui/icons/TahakomIcons` (Material outlined).
+- **توثيق الاختبار الميداني:** عند ورود نتيجة تجربة على جهاز حقيقي، سجّلها كمدخلة مرقّمة في
+  `docs/TEST_NOTES.md` (+ `docs/en/`): جهاز/وسيلة/ملاحظة/تحليل من الكود/إجراءات الإصدار القادم،
+  واللقطات في `screenshots/test/` (راجع [[field-test-log-convention]]).
 
 ## مزالق معروفة (دروس مكلفة)
 - `AppCompatActivity` (مطلوبة لتبديل اللغة per-app locale) **تتطلّب ثيماً يرث
@@ -75,8 +83,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   تنهار وقت التشغيل. استُبدل بـ Material Icons.
 - اكتشاف IR التلقائي **مستحيل فيزيائياً** (أحادي الاتجاه) → ضبط شبه آلي بمنطق حالة الطاقة
   (مطفأ→Power، مشغّل→Vol/Ch) في `IrSetupViewModel`.
-- محوّل الأكواد يدعم **NEC/RC5/RC6/Sony SIRC/Panasonic/JVC/Mitsubishi/Denon**؛ بقية
-  بروتوكولات probonopd (Aiwa، RCA، Pioneer، RECS80، Dish…) تُتخطّى أو تُعلَّم «غير مدعوم بعد».
+- محوّل الأكواد يدعم **NEC/RC5/RC6/Sony SIRC/Panasonic/JVC/Mitsubishi/Denon/Pioneer/Proton**
+  (2584/3244 طقماً)؛ بقية بروتوكولات probonopd (Aiwa، RCA، RECS80، Dish، MCE…) تُتخطّى أو
+  تُعلَّم «غير مدعوم بعد».
+- **webOS (من اختبار ميداني — يُعالَج في الإصدار القادم، TEST_NOTES #2):** فتح التطبيقات/القائمة
+  الذكية/الإعدادات يجب أن يكون عبر حقل `payload` JSON (`{"id":…}`) لا سلسلة استعلام `?id=` في
+  الـURI (التي يتجاهلها SSAP — لذلك تعمل الأوامر بلا معاملات فقط: طاقة/صوت/قناة/وسائط). والتنقّل
+  /لوحة اللمس عبر pointer socket يحتاج **اتصالاً دائماً** لا جلسة-لكل-ضغطة مع إغلاق فوري.
 - **منطق التحويل مكرّر في موضعين يجب أن يتطابقا بايتاً ببايت:** `tools/import_irdb.py`
   (Python، وقت البناء) و`core/irdb/online/IrCodeConverter.kt` (Kotlin، على الهاتف).
   أي تعديل على NAME_MAP أو دوال nec/rc5/rc6 يجب نسخه للموضعين، وإلا اختلفت أكواد الجهاز
