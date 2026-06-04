@@ -10,18 +10,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
-  /* ===== رموز التصميم (سمة serene، مطابقة للتطبيق) ===== */
+  /* ===== رموز التصميم (سمة serene، مطابقة للتطبيق Tokens.kt) ===== */
   :root[data-theme="dark"]{
     --bg:#0F1318; --bg2:#141A20; --surface:#1B2128; --surface2:#232B33;
     --text:#EDF3F7; --dim:#ABB2B8; --faint:#747C81; --line:#343C42; --lineStrong:#4D575F;
     --accent:#57D4D4; --accentText:#001517; --accentSoft:rgba(87,212,212,.16);
     --wifi:#2AD7D7; --ir:#FA695C; --bridge:#F5A84B;
+    --wifiSoft:rgba(42,215,215,.16); --irSoft:rgba(250,105,92,.16);
   }
   :root[data-theme="light"]{
     --bg:#F3F7FA; --bg2:#EDF3F6; --surface:#FDFFFF; --surface2:#F6FBFE;
     --text:#1A232B; --dim:#525C66; --faint:#808B94; --line:#DDE2E6; --lineStrong:#C1C9CE;
     --accent:#008B94; --accentText:#F9FDFD; --accentSoft:rgba(0,139,148,.10);
     --wifi:#00959C; --ir:#D33B36; --bridge:#C67712;
+    --wifiSoft:rgba(0,149,156,.12); --irSoft:rgba(211,59,54,.12);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -29,31 +31,56 @@
     background:var(--bg); color:var(--text);
     font-family:'IBM Plex Sans Arabic','IBM Plex Sans',system-ui,sans-serif;
     -webkit-font-smoothing:antialiased; line-height:1.6;
-    transition:background .3s,color .3s;
+    transition:background .35s,color .35s;
   }
   a{color:inherit;text-decoration:none;}
   .wrap{max-width:1080px;margin:0 auto;padding:0 22px;}
+  svg{width:1em;height:1em;display:block;fill:currentColor;}
+
+  /* ===== تأثير ماتيريال: التموّج (ripple) ===== */
+  .ripple{position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;}
+  .ripple>.rp{position:absolute;border-radius:50%;transform:scale(0);background:currentColor;
+    opacity:.22;pointer-events:none;animation:rp .6s cubic-bezier(.2,.6,.3,1) forwards;}
+  @keyframes rp{to{transform:scale(2.6);opacity:0;}}
+
+  /* ===== ظهور تدريجي عند التمرير ===== */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.3,1);}
+  .reveal.in{opacity:1;transform:none;}
 
   /* شريط علوي */
-  header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 85%,transparent);
-    backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
-  .nav{display:flex;align-items:center;gap:14px;height:62px;}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;}
-  .brand img{width:34px;height:34px;border-radius:9px;}
+  header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 82%,transparent);
+    backdrop-filter:blur(14px);border-bottom:1px solid var(--line);}
+  .nav{display:flex;align-items:center;gap:14px;height:66px;}
+  /* الشعار بأسلوب بطاقة هوية الإعدادات: أيقونة + اسم + عبارة تحته */
+  .brand{display:flex;align-items:center;gap:11px;cursor:pointer;border-radius:14px;padding:5px 8px;
+    transition:transform .25s ease,background .25s;}
+  .brand img{width:42px;height:42px;border-radius:12px;transition:transform .45s cubic-bezier(.2,.7,.3,1),box-shadow .3s;}
+  .brand-text{display:flex;flex-direction:column;line-height:1.18;}
+  .brand-text b{font-size:15.5px;font-weight:800;letter-spacing:-.2px;}
+  .brand-text small{font-size:11px;color:var(--faint);font-weight:600;}
+  .brand:hover{transform:translateY(-1px);background:var(--surface);}
+  .brand:hover img{transform:rotate(-7deg) scale(1.06);box-shadow:0 8px 22px -8px var(--wifi);}
+  .brand.tapped img{animation:spinpop .6s ease;}
+  @keyframes spinpop{0%{transform:scale(1)}45%{transform:rotate(180deg) scale(.82)}100%{transform:rotate(360deg) scale(1)}}
   .spacer{flex:1;}
   .toggle{display:inline-flex;align-items:center;gap:6px;background:var(--surface);
-    border:1px solid var(--line);border-radius:999px;padding:7px 13px;cursor:pointer;
+    border:1px solid var(--line);border-radius:999px;padding:8px 13px;cursor:pointer;
     color:var(--text);font:inherit;font-size:13px;font-weight:600;transition:.2s;}
-  .toggle:hover{border-color:var(--lineStrong);}
-  .btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:12px 22px;
-    font-weight:700;cursor:pointer;border:none;font:inherit;font-size:15px;transition:transform .15s,background .2s;}
+  .toggle:hover{border-color:var(--lineStrong);transform:translateY(-1px);}
+  .toggle svg{font-size:16px;}
+  .btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:13px 24px;
+    font-weight:700;cursor:pointer;border:none;font:inherit;font-size:15px;
+    transition:transform .15s,box-shadow .25s,background .2s;}
+  .btn:hover{transform:translateY(-2px);}
   .btn:active{transform:scale(.97);}
-  .btn-solid{background:var(--accent);color:var(--accentText);}
+  .btn-solid{background:var(--accent);color:var(--accentText);box-shadow:0 10px 26px -12px var(--wifi);}
   .btn-ghost{background:transparent;color:var(--text);border:1.5px solid var(--lineStrong);}
 
   /* البطل */
-  .hero{padding:74px 0 30px;text-align:center;}
-  .hero img.logo{width:120px;height:120px;border-radius:30px;box-shadow:0 18px 50px -16px var(--wifi);}
+  .hero{padding:76px 0 26px;text-align:center;}
+  .hero img.logo{width:118px;height:118px;border-radius:30px;box-shadow:0 20px 56px -18px var(--wifi);
+    animation:float 5s ease-in-out infinite;}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
   .hero h1{font-size:clamp(34px,6vw,58px);font-weight:800;margin:22px 0 6px;letter-spacing:-.5px;}
   .hero .sub{font-size:clamp(16px,2.4vw,21px);color:var(--dim);max-width:620px;margin:0 auto 26px;}
   .badges{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-bottom:26px;}
@@ -64,38 +91,90 @@
   /* الوسائل الثلاث */
   .paths{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:40px 0;}
   .path{display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line);
-    border-radius:14px;padding:11px 16px;font-weight:700;}
+    border-radius:14px;padding:11px 16px;font-weight:700;transition:transform .2s,border-color .2s;}
+  .path:hover{transform:translateY(-2px);border-color:var(--lineStrong);}
   .dot{width:11px;height:11px;border-radius:50%;}
 
   /* أقسام */
-  section{padding:46px 0;}
+  section{padding:48px 0;}
   h2{font-size:clamp(24px,4vw,34px);font-weight:800;text-align:center;margin:0 0 8px;}
   .lead{text-align:center;color:var(--dim);max-width:640px;margin:0 auto 36px;}
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:22px;}
-  .card .ic{width:46px;height:46px;border-radius:13px;background:var(--accentSoft);
-    display:flex;align-items:center;justify-content:center;font-size:23px;margin-bottom:13px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:22px;
+    transition:transform .25s,box-shadow .25s,border-color .25s;}
+  .card:hover{transform:translateY(-4px);box-shadow:0 22px 50px -28px rgba(0,0,0,.55);border-color:var(--lineStrong);}
+  .card .ic{width:48px;height:48px;border-radius:14px;background:var(--accentSoft);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:13px;}
   .card h3{margin:0 0 6px;font-size:18px;font-weight:700;}
   .card p{margin:0;color:var(--dim);font-size:14.5px;}
 
-  /* النموذج الحي */
-  .demo-wrap{display:flex;flex-direction:column;align-items:center;gap:18px;}
-  .demo-frame{width:100%;max-width:430px;aspect-ratio:402/858;border:none;border-radius:30px;
-    background:var(--bg2);box-shadow:0 30px 80px -30px rgba(0,0,0,.5);}
+  /* ===== النموذج الحي: محاكاة شاشة الريموت الفعلية ===== */
+  .demo-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;}
+  .phone{width:100%;max-width:360px;background:var(--bg);border:1px solid var(--line);
+    border-radius:38px;padding:14px;box-shadow:0 40px 90px -40px rgba(0,0,0,.65), 0 0 0 8px var(--surface);
+    position:relative;overflow:hidden;}
+  .statusbar{display:flex;align-items:center;justify-content:space-between;
+    font-size:11px;color:var(--faint);padding:2px 12px 8px;font-weight:600;}
+  .rscreen{padding:0 4px 8px;}
+  .rhead{display:flex;align-items:center;gap:8px;padding:6px 2px 8px;}
+  .rhead .title{flex:1;text-align:center;}
+  .rhead .title b{display:block;font-size:15px;font-weight:800;}
+  .rhead .title small{font-size:11.5px;color:var(--faint);}
+  .ghost{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    color:var(--text);background:transparent;border:none;cursor:pointer;font-size:20px;}
+  .tpill{display:flex;align-items:center;gap:11px;background:var(--wifiSoft);color:var(--wifi);
+    border-radius:16px;padding:10px 13px;margin:2px 0 12px;}
+  .tpill .tp-ic{font-size:21px;}
+  .tpill small{display:block;font-size:10.5px;font-weight:700;opacity:.85;}
+  .tpill b{font-size:13.5px;font-weight:800;}
+  .rrow{display:flex;justify-content:space-evenly;margin:6px 0;}
+  .rbtn{width:52px;height:52px;border-radius:50%;background:var(--surface);border:1px solid var(--line);
+    color:var(--text);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;
+    transition:transform .12s,border-color .2s;}
+  .rbtn:hover{border-color:var(--lineStrong);}
+  .rbtn:active{transform:scale(.9);}
+  .rbtn.accent{background:var(--accent);color:var(--accentText);border:none;box-shadow:0 8px 20px -10px var(--wifi);}
+  .rbtn.soft{background:var(--surface2);}
+  /* لوحة الاتجاهات — تُجبر LTR لأن المواضع فيزيائية */
+  .dpad{direction:ltr;display:flex;flex-direction:column;align-items:center;gap:9px;margin:14px 0;}
+  .dpad .mid{display:flex;align-items:center;gap:9px;}
+  .ok{width:72px;height:72px;border-radius:50%;background:var(--accent);color:var(--accentText);
+    border:none;font-weight:900;font-size:18px;cursor:pointer;box-shadow:0 10px 26px -12px var(--wifi);
+    transition:transform .12s;}
+  .ok:active{transform:scale(.92);}
+  .rockers{display:flex;gap:11px;margin:12px 0;}
+  .rocker{flex:1;display:flex;align-items:center;background:var(--surface);border:1px solid var(--line);
+    border-radius:22px;overflow:hidden;}
+  .rocker .seg{flex:1;display:flex;align-items:center;justify-content:center;padding:13px 0;cursor:pointer;
+    font-size:21px;color:var(--text);}
+  .rocker .lbl{font-size:11px;color:var(--faint);font-weight:800;min-width:34px;text-align:center;}
+  .rocker .mute{color:var(--dim);font-size:19px;}
+  .media{display:flex;justify-content:center;gap:14px;margin:12px 0;}
+  .morebtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+    background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:12px;
+    color:var(--text);cursor:pointer;font:inherit;font-weight:700;font-size:14px;}
+  .toast{position:absolute;left:50%;bottom:18px;transform:translateX(-50%) translateY(20px);
+    background:var(--accent);color:var(--accentText);padding:9px 18px;border-radius:999px;
+    font-weight:800;font-size:13.5px;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;
+    box-shadow:0 12px 30px -12px var(--wifi);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .demo-hint{color:var(--faint);font-size:13.5px;text-align:center;}
 
-  footer{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:var(--faint);font-size:14px;margin-top:30px;}
+  footer{border-top:1px solid var(--line);padding:32px 0;text-align:center;color:var(--faint);font-size:14px;margin-top:30px;}
   footer a{color:var(--accent);font-weight:600;}
   [hidden]{display:none!important;}
 </style>
 </head>
 <body>
 <header><div class="wrap nav">
-  <div class="brand"><img src="website/assets/icon.png" alt="GT-TAHAKOM"/><span>GT-TAHAKOM</span></div>
+  <a class="brand" id="brand" href="." title="GT-TAHAKOM" onclick="brandTap(event)">
+    <img src="website/assets/icon.png" alt=""/>
+    <span class="brand-text"><b>GT-TAHAKOM</b><small data-i18n="brand_tagline">مركز تحكّم موحّد</small></span>
+  </a>
   <div class="spacer"></div>
-  <button class="toggle" id="langBtn" onclick="toggleLang()">EN</button>
-  <button class="toggle" id="themeBtn" onclick="toggleTheme()">☀︎</button>
-  <a class="toggle" href="https://github.com/SalehGNUTUX/GT-TAHAKOM" target="_blank" rel="noopener">GitHub</a>
+  <button class="toggle ripple" id="langBtn" onclick="toggleLang()">EN</button>
+  <button class="toggle ripple" id="themeBtn" onclick="toggleTheme()"></button>
+  <a class="toggle ripple" href="https://github.com/SalehGNUTUX/GT-TAHAKOM" target="_blank" rel="noopener">GitHub</a>
 </div></header>
 
 <main class="wrap">
@@ -112,8 +191,8 @@
       <span class="badge" id="verBadge">v1.0.0</span>
     </div>
     <div class="cta">
-      <a class="btn btn-solid" id="dlBtn" href="https://github.com/SalehGNUTUX/GT-TAHAKOM/releases/latest" target="_blank" rel="noopener" data-i18n="download">تحميل APK</a>
-      <a class="btn btn-ghost" href="#demo" data-i18n="trydemo">جرّب النموذج الحي</a>
+      <a class="btn btn-solid ripple" id="dlBtn" href="https://github.com/SalehGNUTUX/GT-TAHAKOM/releases/latest" target="_blank" rel="noopener" data-i18n="download">تحميل APK</a>
+      <a class="btn btn-ghost ripple" href="#demo" data-i18n="trydemo">جرّب النموذج الحي</a>
     </div>
     <div class="paths">
       <div class="path"><span class="dot" style="background:var(--wifi)"></span><span data-i18n="p_wifi">شبكة WiFi</span></div>
@@ -124,18 +203,67 @@
 
   <!-- المزايا -->
   <section id="features">
-    <h2 data-i18n="f_title">لماذا GT-TAHAKOM؟</h2>
-    <p class="lead" data-i18n="f_lead">مركز تحكّم موحّد يختار الوسيلة المناسبة لكل جهاز تلقائياً.</p>
+    <h2 class="reveal" data-i18n="f_title">لماذا GT-TAHAKOM؟</h2>
+    <p class="lead reveal" data-i18n="f_lead">مركز تحكّم موحّد يختار الوسيلة المناسبة لكل جهاز تلقائياً.</p>
     <div class="grid" id="featGrid"></div>
   </section>
 
-  <!-- النموذج الحي -->
+  <!-- النموذج الحي: شاشة الريموت الفعلية -->
   <section id="demo">
-    <h2 data-i18n="d_title">النموذج الحي</h2>
-    <p class="lead" data-i18n="d_lead">تنقّل داخل التطبيق مباشرةً من متصفّحك — بدّل اللغة والسمة من داخل النموذج كما في التطبيق.</p>
-    <div class="demo-wrap">
-      <iframe class="demo-frame" id="demoFrame" src="website/demo/index.html" title="GT-TAHAKOM live demo" loading="lazy"></iframe>
-      <p class="demo-hint" data-i18n="d_hint">قد يستغرق النموذج لحظات للتحميل (يعمل بـ React في المتصفّح).</p>
+    <h2 class="reveal" data-i18n="d_title">النموذج الحي</h2>
+    <p class="lead reveal" data-i18n="d_lead">شاشة جهاز التحكّم كما في التطبيق فعلاً — جرّب الأزرار، وبدّل اللغة والسمة من الأعلى.</p>
+    <div class="demo-wrap reveal">
+      <div class="phone" id="phone" aria-label="GT-TAHAKOM remote demo">
+        <div class="statusbar"><span id="sbTime">21:36</span><span>📶 ▮▮▮ 🔋</span></div>
+        <div class="rscreen">
+          <div class="rhead">
+            <button class="ghost ripple" data-key="Back" id="hBack"></button>
+            <div class="title"><b id="dDevice">تلفازي</b><small>Samsung</small></div>
+            <button class="ghost ripple" data-key="More"></button>
+          </div>
+          <div class="tpill">
+            <span class="tp-ic" id="tpIc"></span>
+            <span><small id="tpLabel">وسيلة الإرسال النشطة</small><b id="tpNet">شبكة WiFi</b></span>
+          </div>
+          <div class="rrow">
+            <button class="rbtn accent ripple" data-key="Power" id="bPower"></button>
+            <button class="rbtn ripple" data-key="Home" id="bHome"></button>
+            <button class="rbtn ripple" data-key="Menu" id="bMenu"></button>
+            <button class="rbtn ripple" data-key="BackBtn" id="bBack"></button>
+          </div>
+          <div class="dpad">
+            <button class="rbtn ripple" data-key="Up" id="bUp"></button>
+            <div class="mid">
+              <button class="rbtn ripple" data-key="Left" id="bLeft"></button>
+              <button class="ok ripple" data-key="OK">OK</button>
+              <button class="rbtn ripple" data-key="Right" id="bRight"></button>
+            </div>
+            <button class="rbtn ripple" data-key="Down" id="bDown"></button>
+          </div>
+          <div class="rockers">
+            <div class="rocker">
+              <span class="seg ripple" data-key="VolDown" id="rVd"></span>
+              <span class="lbl" id="rVol">الصوت</span>
+              <span class="seg ripple mute" data-key="Mute" id="rMute"></span>
+              <span class="seg ripple" data-key="VolUp" id="rVu"></span>
+            </div>
+            <div class="rocker">
+              <span class="seg ripple" data-key="ChDown" id="rCd"></span>
+              <span class="lbl" id="rCh">القناة</span>
+              <span class="seg ripple" data-key="ChUp" id="rCu"></span>
+            </div>
+          </div>
+          <div class="media">
+            <button class="rbtn ripple" data-key="Rewind" id="bRw"></button>
+            <button class="rbtn soft ripple" data-key="Play" id="bPlay"></button>
+            <button class="rbtn soft ripple" data-key="Pause" id="bPause"></button>
+            <button class="rbtn ripple" data-key="Ffwd" id="bFf"></button>
+          </div>
+          <button class="morebtn ripple" data-key="More"><span id="bMoreIc"></span><span id="dMore">أزرار إضافية</span></button>
+        </div>
+        <div class="toast" id="toast"></div>
+      </div>
+      <p class="demo-hint" data-i18n="d_hint">محاكاة حيّة لواجهة التطبيق — تتبع لغتك وسمتك أعلاه.</p>
     </div>
   </section>
 </main>
@@ -145,62 +273,159 @@
 </footer>
 
 <script>
+  // ===== أيقونات Material (مسارات SVG رسمية) =====
+  const P = {
+    power:"M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z",
+    home:"M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z",
+    menu:"M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z",
+    back:"M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z",
+    up:"M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z",
+    down:"M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z",
+    left:"M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z",
+    right:"M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z",
+    volUp:"M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z",
+    volDown:"M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM5 9v6h4l5 5V4L9 9H5z",
+    mute:"M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z",
+    play:"M8 5v14l11-7z",
+    pause:"M6 19h4V5H6v14zm8-14v14h4V5h-4z",
+    rewind:"M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z",
+    ffwd:"M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z",
+    more:"M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z",
+    wifi:"M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C16.14 9.14 7.87 9.14 5 13z",
+    search:"M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
+    sun:"M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z",
+    moon:"M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"
+  };
+  const ic = (n)=>`<svg viewBox="0 0 24 24"><path d="${P[n]||''}"/></svg>`;
+
   const I18N = {
-    ar:{title:"تَحَكُّمْ",sub:"جهاز تحكّم واحد لكل أجهزتك — التلفاز الذكي والعادي وأجهزة الاستقبال — عبر الشبكة والأشعة تحت الحمراء وجسر WiFi-IR. حرّ ومفتوح المصدر، ويعمل بلا إنترنت.",
+    ar:{title:"تَحَكُّمْ",brand_tagline:"مركز تحكّم موحّد",
+      sub:"جهاز تحكّم واحد لكل أجهزتك — التلفاز الذكي والعادي وأجهزة الاستقبال — عبر الشبكة والأشعة تحت الحمراء وجسر WiFi-IR. حرّ ومفتوح المصدر، ويعمل بلا إنترنت.",
       b_offline:"يعمل أوفلاين",download:"تحميل APK",trydemo:"جرّب النموذج الحي",
       p_wifi:"شبكة WiFi",p_ir:"أشعة تحت الحمراء",p_bridge:"جسر WiFi-IR",
       f_title:"لماذا GT-TAHAKOM؟",f_lead:"مركز تحكّم موحّد يختار الوسيلة المناسبة لكل جهاز تلقائياً.",
-      d_title:"النموذج الحي",d_lead:"تنقّل داخل التطبيق مباشرةً من متصفّحك — بدّل اللغة والسمة من داخل النموذج كما في التطبيق.",
-      d_hint:"قد يستغرق النموذج لحظات للتحميل (يعمل بـ React في المتصفّح).",
+      d_title:"النموذج الحي",d_lead:"شاشة جهاز التحكّم كما في التطبيق فعلاً — جرّب الأزرار، وبدّل اللغة والسمة من الأعلى.",
+      d_hint:"محاكاة حيّة لواجهة التطبيق — تتبع لغتك وسمتك أعلاه.",
       foot:"برنامج حر مفتوح المصدر — تطوير",
+      demo:{device:"تلفازي",path:"وسيلة الإرسال النشطة",net:"شبكة WiFi",vol:"الصوت",ch:"القناة",more:"أزرار إضافية",sent:"أُرسل"},
+      keys:{Power:"الطاقة",Home:"الرئيسية",Menu:"القائمة",Back:"رجوع",BackBtn:"رجوع",Source:"المصدر",More:"المزيد",
+        Up:"فوق",Down:"تحت",Left:"يسار",Right:"يمين",OK:"موافق",VolUp:"رفع الصوت",VolDown:"خفض الصوت",
+        Mute:"كتم",ChUp:"القناة +",ChDown:"القناة −",Play:"تشغيل",Pause:"إيقاف مؤقت",Rewind:"ترجيع",Ffwd:"تقديم"},
       feats:[
         ["🌐","تحكّم شبكي ذكي","اكتشاف تلقائي للتلفازات الذكية (LG webOS، Samsung، Roku، Android TV) والتحكّم بها عبر WiFi."],
-        ["🔴","قاعدة أشعة محلية","عشرات الأجهزة (تلفاز/استقبال/صوت) مدمجة تعمل بلا إنترنت عبر باعث IR في الهاتف."],
+        ["🔴","قاعدة أشعة محلية","عشرات الأجهزة (تلفاز/استقبال/صوت) مدمجة تعمل بلا إنترنت، وبحث شبكي في قاعدة probonopd."],
         ["🧠","ضبط ذكي","يسأل: هل الجهاز مشغّل؟ ويختار إشارة الاختبار المناسبة — أو تعلّم يدوي للأجهزة غير المدرجة."],
         ["📤","مشاركة وحِزم","شارك إعداد جهاز عبر ملف ‎.tahakom‎ يفتح مباشرةً لدى المستلِم."],
         ["🌍","عربي وإنجليزي","واجهة كاملة بالعربية والإنجليزية مع RTL، وسمة فاتحة وداكنة."],
         ["🆓","حرّ ومفتوح","GPLv3، بلا إعلانات ولا تتبّع، يعمل أوفلاين بالكامل للوظائف الأساسية."]
       ]},
-    en:{title:"TAHAKOM",sub:"One remote for all your devices — smart & legacy TVs and set-top boxes — over network, infrared, and a WiFi-IR bridge. Free, open-source, works offline.",
+    en:{title:"TAHAKOM",brand_tagline:"One control hub",
+      sub:"One remote for all your devices — smart & legacy TVs and set-top boxes — over network, infrared, and a WiFi-IR bridge. Free, open-source, works offline.",
       b_offline:"Works offline",download:"Download APK",trydemo:"Try the live demo",
       p_wifi:"WiFi network",p_ir:"Infrared",p_bridge:"WiFi-IR bridge",
       f_title:"Why GT-TAHAKOM?",f_lead:"A unified control hub that auto-picks the right path for each device.",
-      d_title:"Live demo",d_lead:"Navigate the app right in your browser — switch language and theme inside the demo, just like the app.",
-      d_hint:"The demo may take a moment to load (runs React in-browser).",
+      d_title:"Live demo",d_lead:"The remote screen exactly as in the app — try the buttons, switch language and theme from the top.",
+      d_hint:"A live mock of the app UI — it follows your language and theme above.",
       foot:"Free & open source — built by",
+      demo:{device:"My TV",path:"Active path",net:"WiFi network",vol:"VOL",ch:"CH",more:"More buttons",sent:"Sent"},
+      keys:{Power:"Power",Home:"Home",Menu:"Menu",Back:"Back",BackBtn:"Back",Source:"Source",More:"More",
+        Up:"Up",Down:"Down",Left:"Left",Right:"Right",OK:"OK",VolUp:"Volume +",VolDown:"Volume −",
+        Mute:"Mute",ChUp:"Channel +",ChDown:"Channel −",Play:"Play",Pause:"Pause",Rewind:"Rewind",Ffwd:"Forward"},
       feats:[
         ["🌐","Smart network control","Auto-discovers smart TVs (LG webOS, Samsung, Roku, Android TV) and controls them over WiFi."],
-        ["🔴","Local IR database","Dozens of devices (TVs/receivers/audio) bundled, working offline via the phone's IR blaster."],
+        ["🔴","Local IR database","Dozens of devices bundled offline, plus online search of the probonopd catalog."],
         ["🧠","Smart setup","Asks: is the device on? and picks the right test signal — or learn codes manually for unlisted devices."],
         ["📤","Sharing & packs","Share a device setup as a ‎.tahakom‎ file that opens directly for the recipient."],
         ["🌍","Arabic & English","Full Arabic/English UI with RTL, plus light and dark themes."],
         ["🆓","Free & open","GPLv3, no ads or tracking, fully offline for core features."]
       ]}
   };
+
   let lang = localStorage.getItem('gt_lang') || 'ar';
   let theme = localStorage.getItem('gt_theme') || 'dark';
+
+  function setDemoIcons(){
+    const map={hBack:'back',bPower:'power',bHome:'home',bMenu:'menu',bBack:'back',bUp:'up',bDown:'down',
+      bLeft:'left',bRight:'right',rVu:'volUp',rVd:'volDown',rMute:'mute',rCu:'up',rCd:'down',
+      bRw:'rewind',bPlay:'play',bPause:'pause',bFf:'ffwd',bMoreIc:'more',tpIc:'wifi'};
+    for(const id in map){const el=document.getElementById(id); if(el) el.innerHTML=ic(map[id]);}
+    // أزرار «المزيد» في الترويسة وزر «أزرار إضافية»
+    document.querySelectorAll('[data-key="More"]').forEach(e=>{if(!e.id) e.innerHTML=ic('more');});
+  }
 
   function render(){
     const t = I18N[lang];
     document.documentElement.lang = lang;
     document.documentElement.dir = lang==='ar'?'rtl':'ltr';
     document.documentElement.setAttribute('data-theme',theme);
-    document.querySelectorAll('[data-i18n]').forEach(el=>{
-      const k=el.getAttribute('data-i18n'); if(t[k]) el.textContent=t[k];
-    });
+    document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n'); if(t[k]) el.textContent=t[k];});
     // المزايا
     const g=document.getElementById('featGrid'); g.innerHTML='';
-    t.feats.forEach(([ic,h,p])=>{
-      const d=document.createElement('div'); d.className='card';
-      d.innerHTML=`<div class="ic">${ic}</div><h3></h3><p></p>`;
+    t.feats.forEach(([emo,h,p],i)=>{
+      const d=document.createElement('div'); d.className='card reveal'; d.style.transitionDelay=(i*60)+'ms';
+      d.innerHTML=`<div class="ic">${emo}</div><h3></h3><p></p>`;
       d.querySelector('h3').textContent=h; d.querySelector('p').textContent=p; g.appendChild(d);
     });
+    // النموذج
+    document.getElementById('dDevice').textContent=t.demo.device;
+    document.getElementById('tpLabel').textContent=t.demo.path;
+    document.getElementById('tpNet').textContent=t.demo.net;
+    document.getElementById('rVol').textContent=t.demo.vol;
+    document.getElementById('rCh').textContent=t.demo.ch;
+    document.getElementById('dMore').textContent=t.demo.more;
+    // الأزرار
     document.getElementById('langBtn').textContent = lang==='ar'?'EN':'ع';
-    document.getElementById('themeBtn').textContent = theme==='dark'?'☀︎':'☾';
+    document.getElementById('themeBtn').innerHTML = theme==='dark'?ic('sun'):ic('moon');
+    observeReveal();
   }
   function toggleLang(){ lang=lang==='ar'?'en':'ar'; localStorage.setItem('gt_lang',lang); render(); }
   function toggleTheme(){ theme=theme==='dark'?'light':'dark'; localStorage.setItem('gt_theme',theme); render(); }
+
+  // الشعار: تأثير عند النقر ثم إنعاش الصفحة
+  function brandTap(e){
+    e.preventDefault();
+    const b=document.getElementById('brand'); b.classList.add('tapped');
+    setTimeout(()=>location.reload(), 480);
+  }
+
+  // تموّج ماتيريال
+  function attachRipple(el){
+    el.addEventListener('pointerdown',ev=>{
+      const r=el.getBoundingClientRect(), s=Math.max(r.width,r.height);
+      const sp=document.createElement('span'); sp.className='rp';
+      sp.style.width=sp.style.height=s+'px';
+      sp.style.left=(ev.clientX-r.left-s/2)+'px'; sp.style.top=(ev.clientY-r.top-s/2)+'px';
+      el.appendChild(sp); setTimeout(()=>sp.remove(),600);
+    });
+  }
+  // إشعار الزر المضغوط في النموذج
+  let toastTimer;
+  function showToast(key){
+    const t=I18N[lang]; const name=t.keys[key]||key;
+    const el=document.getElementById('toast'); el.textContent=`${t.demo.sent}: ${name}`;
+    el.classList.add('show'); clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>el.classList.remove('show'),1100);
+  }
+
+  // ظهور تدريجي
+  let io;
+  function observeReveal(){
+    if(io) io.disconnect();
+    io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target);}}),{threshold:.12});
+    document.querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));
+  }
+
+  // التهيئة
+  setDemoIcons();
   render();
+  document.querySelectorAll('.ripple').forEach(attachRipple);
+  document.querySelectorAll('#phone [data-key]').forEach(el=>{
+    el.addEventListener('click',()=>showToast(el.getAttribute('data-key')));
+  });
+  // شارة الإصدار تتحدّث تلقائياً من آخر إصدار منشور (مع تجاهل أي فشل).
+  fetch('https://api.github.com/repos/SalehGNUTUX/GT-TAHAKOM/releases/latest')
+    .then(r=>r.ok?r.json():null).then(d=>{ if(d&&d.tag_name) document.getElementById('verBadge').textContent=d.tag_name; })
+    .catch(()=>{});
 </script>
 </body>
 </html>
