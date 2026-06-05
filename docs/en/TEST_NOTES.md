@@ -16,6 +16,7 @@ Each entry: device + transport + what happened + analysis + next-release actions
 | 1 | SENIC (Android receiver) | AndroidTvTransport (experimental) | 1.0.0 | Code-entry field appeared, but no code shown on the TV | Under analysis |
 | 2 | LG (webOS) @192.168.1.17 | WebosTransport (SSAP) | 1.0.0 | Basic control works; apps/smart-menu and navigation/touchpad don't; general scan misses it | Diagnosed (two app bugs) |
 | 3 | General (UX test) | Add-from-scan + list ordering | 1.0.0 | Add-from-scan didn't open the remote; newest not shown on top | ✅ Fixed |
+| 4 | Samsung (Tizen) — friend | SamsungTizenTransport (WebSocket) | 1.0.0 | Pairing is accepted on the TV, but no button responds afterward | Diagnosed (session-per-command bug) |
 
 ---
 
@@ -175,3 +176,50 @@ a lost UDP reply, or the scan stopping early. ← Needs investigation (see actio
 - `MainActivity.kt` — `adopt()` and the `ScanScreen.onAdopt` wiring.
 - `core/store/SavedDevicesRepository.kt` — `add()` (head instead of tail).
 - `feature/devices/ScanScreen.kt` — `onAdopt` is invoked on card/"+" tap.
+
+---
+
+## #4 — Samsung (Tizen) · SamsungTizenTransport (WebSocket) · v1.0.0
+
+**Date:** 2026-06-04
+**Tester:** a friend (Samsung smart TV; the on-screen messages are in Spanish).
+**Transport:** WiFi → `SamsungTizenTransport` (secure WebSocket wss on port 8002).
+
+> Classification note: the TV runs Samsung's **Tizen** (not Android) — the accept dialog in the
+> screenshot is a Tizen permission prompt: "Permitir / Denegar / Cerrar". Handled by `SamsungTizenTransport`.
+
+### Observation
+The app connects and the TV shows a permission prompt named **GT-TAHAKOM** which is accepted
+("Permitir"), **but after accepting no button responds** on the remote (not even power).
+
+### Analysis (from reading the code) — the bug is in the app
+
+**Pairing succeeded** — the prompt showing our name and being accepted means the TV accepted the
+connection on 8002 and sent a `token` in the `ms.channel.connect` event (saved in
+`SimpleTokenStore`). So the problem is **not pairing and not the TV**, but what happens after.
+
+**Bug — one WebSocket session per command with an immediate close after send (same family as
+webOS bug "B").** In `runSession`, as soon as `ms.channel.connect` arrives we send the key
+(`afterConnect`) then **complete `done` immediately, so the socket is closed right away**
+(`ws.close(1000)`). Every press opens a fresh wss + TLS + re-authorization from scratch and then
+closes it instantly — a fragile, slow cycle; and Tizen TVs usually need the **control channel kept
+open** for a moment after `ms.channel.connect` before they accept keys. Result: keys don't fire.
+
+**Points to verify in the fix:**
+- Is the `token` actually saved and reused? (log it) — if not, the prompt would re-appear every press.
+- Do the keys even reach the TV, or are they dropped by the early close?
+
+### Proposed fix (next release) — shared with webOS
+- A **persistent WebSocket connection** for both Tizen and webOS: open once on connect/first
+  command, keep it open, send keys over it, close only on `disconnect`/leaving the screen. (If not
+  feasible immediately: delay the close until send is confirmed instead of closing at send time.)
+- Unify the "persistent connection" logic across the network transports (Tizen/webOS) to avoid
+  repeating the bug.
+
+### Screenshots
+![Control screen — Samsung Tizen](../../screenshots/test/04-samsung-tizen-remote-v1.0.0.jpg)
+![Permission prompt on the TV (Spanish)](../../screenshots/test/04-samsung-tizen-tv-prompt-v1.0.0.jpg)
+
+### Related files
+- `core/transport/impl/SamsungTizenTransport.kt` — `runSession()` (immediate close), `send()`, `toTizenKey()`.
+- `core/store/SimpleTokenStore.kt` — stores the Samsung token.

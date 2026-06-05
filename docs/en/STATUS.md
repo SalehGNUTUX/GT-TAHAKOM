@@ -39,6 +39,8 @@ architectural core is an **abstract `Transport` layer** that picks the right pat
   (`WebosKeyStore`). Navigation (arrows/OK/back) via the pointer input socket — complete.
   ⚠️ A field test (LG @192.168.1.17) revealed two bugs to fix next release — see
   [TEST_NOTES.md](TEST_NOTES.md#2): app launch (payload not query) and navigation/touchpad (persistent connection).
+- ⚠️ `SamsungTizenTransport` field test (a friend): pairing is accepted but keys don't fire — see
+  [TEST_NOTES.md](TEST_NOTES.md#4): session-per-command/immediate-close bug; fix is a persistent connection (shared with webOS).
 - `SamsungTizenTransport` (Samsung Tizen / WebSocket wss :8002) — KEY_* keys, token saved after
   user acceptance, lenient local TLS.
 - Full settings: light/dark/system theme (DataStore) + language + transport info + about.
