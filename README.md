@@ -11,9 +11,9 @@
   الشبكة (WiFi) والأشعة تحت الحمراء (IR) وجسر WiFi-IR.
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/github/v/release/SalehGNUTUX/GT-TAHAKOM?include_prereleases&label=الإصدار&color=21E6C1&style=for-the-badge" alt="Version"/>
-  <img src="https://img.shields.io/badge/الترخيص-GPLv3-FF7A1A?style=for-the-badge" alt="License"/>
+<p align="center" dir="ltr">
+  <img src="https://img.shields.io/github/v/release/SalehGNUTUX/GT-TAHAKOM?include_prereleases&label=release&color=21E6C1&style=for-the-badge" alt="Version"/>
+  <img src="https://img.shields.io/badge/License-GPLv3-FF7A1A?style=for-the-badge" alt="License"/>
   <img src="https://img.shields.io/badge/Kotlin-Compose-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin"/>
   <img src="https://img.shields.io/badge/Android-8.0%2B-3ddc84?style=for-the-badge&logo=android&logoColor=white" alt="Android"/>
 </p>
