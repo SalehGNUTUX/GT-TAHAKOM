@@ -9,6 +9,10 @@ already in the repo; the one remaining action only the project owner can do is
 > ✅ **Submission status:** RFP opened on 2026-06-04 — track it at
 > **https://gitlab.com/fdroid/rfp/-/work_items/3972** (#3972). Now awaiting F-Droid volunteers.
 
+> 📘 **For other projects:** this file is GT-TAHAKOM–specific; the **reusable, project-agnostic**
+> guide (placeholders + a machine-actionable section) lives in
+> [guides/en/FDROID_PLAYBOOK.md](guides/en/FDROID_PLAYBOOK.md).
+
 ## Why the app qualifies (verified)
 - **Free license:** GPLv3 (`LICENSE`).
 - **No proprietary deps or trackers:** no Google Play Services, no Firebase, no non-free
